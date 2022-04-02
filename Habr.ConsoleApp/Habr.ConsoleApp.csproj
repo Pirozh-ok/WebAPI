@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Habr.DataAccess\Habr.DataAccess.csproj" />
+  </ItemGroup>
+
 </Project>
