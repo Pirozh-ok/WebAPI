@@ -23,10 +23,12 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.Property("Text")
                 .IsRequired()
+                .HasMaxLength(5000)
                 .HasDefaultValue("");
 
             builder.Property("Created")
-                .IsRequired();           
+                .IsRequired()
+                .HasDefaultValueSql(DateTime.Now.ToString());
         }
     }
 }

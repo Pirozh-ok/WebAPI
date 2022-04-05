@@ -12,4 +12,3 @@ C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\refint\Habr.Da
 C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.pdb
 C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.genruntimeconfig.cache
 C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\ref\Habr.DataAccess.dll
-C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\appsettings.json
