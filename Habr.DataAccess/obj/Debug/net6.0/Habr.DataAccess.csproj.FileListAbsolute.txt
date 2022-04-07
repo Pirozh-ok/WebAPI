@@ -1,0 +1,15 @@
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\appsettings.json
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\Habr.DataAccess.deps.json
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\Habr.DataAccess.runtimeconfig.json
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\Habr.DataAccess.dll
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\Habr.DataAccess.pdb
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.csproj.AssemblyReference.cache
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.AssemblyInfoInputs.cache
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.AssemblyInfo.cs
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.dll
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\refint\Habr.DataAccess.dll
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.pdb
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\Habr.DataAccess.genruntimeconfig.cache
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\obj\Debug\net6.0\ref\Habr.DataAccess.dll
