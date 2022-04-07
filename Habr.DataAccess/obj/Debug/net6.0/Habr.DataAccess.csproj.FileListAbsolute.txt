@@ -1,3 +1,4 @@
+C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\appsettings.json
 C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\Habr.DataAccess.deps.json
 C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\Habr.DataAccess.runtimeconfig.json
 C:\Users\ivan-\source\repos\Habr\Habr.DataAccess\bin\Debug\net6.0\Habr.DataAccess.dll

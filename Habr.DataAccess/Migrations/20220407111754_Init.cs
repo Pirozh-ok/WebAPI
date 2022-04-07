@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Habr.DataAccess.Migrations
 {
-    public partial class Initial : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -16,8 +16,8 @@ namespace Habr.DataAccess.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false, defaultValue: ""),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: ""),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Text = table.Column<string>(type: "nvarchar(max)", maxLength: 5000, nullable: false, defaultValue: ""),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "getdate()")
                 },
                 constraints: table =>
                 {

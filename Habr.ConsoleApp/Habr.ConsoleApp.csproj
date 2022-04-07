@@ -10,10 +10,4 @@
     <ProjectReference Include="..\Habr.DataAccess\Habr.DataAccess.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

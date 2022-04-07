@@ -31,11 +31,14 @@ namespace Habr.DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(5000)
                         .HasColumnType("nvarchar(max)")
                         .HasDefaultValue("");
 

@@ -1,5 +1,4 @@
-﻿
-using Habr.DataAccess;
+﻿using Habr.DataAccess;
 
 using (var context = new DataContext())
 {

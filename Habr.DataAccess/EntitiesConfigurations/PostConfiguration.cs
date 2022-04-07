@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Habr.DataAccess.EntitiesConfigurations
@@ -28,7 +23,7 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.Property("Created")
                 .IsRequired()
-                .HasDefaultValueSql(DateTime.Now.ToString());
+                .HasDefaultValueSql("getdate()");
         }
     }
 }
