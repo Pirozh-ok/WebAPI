@@ -19,7 +19,7 @@ namespace Habr.DataAccess.Entities
         public DateTime RegistrDate { get; set; }
 
         //User - Post
-        public ICollection<Post> Posts { get; set; }
+        public ICollection<Post> Posts{ get; set; }
 
         // User - Comment
         public ICollection<Comment> Comments { get; set; }

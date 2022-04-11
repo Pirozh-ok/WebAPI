@@ -10,16 +10,16 @@ namespace Habr.DataAccess.Entities
     {
         public Comment()
         {
-            Comments = new HashSet<Comment>();
+            SubComments = new HashSet<Comment>();
         }
         public int Id { get; set; }
         public string Text { get; set; }
         public DateTime CreateDate { get; set; }
 
         //Comment - Comment
-        public int ParentId { get; set; }
-        public Comment ParentComment { get; set; }
-        public ICollection<Comment> Comments { get; set; }
+        public int? ParentId { get; set; }
+        public Comment Parent { get; set; }
+        public ICollection<Comment> SubComments { get; set; }
 
         //Comment - Post
         public int PostId { get; set; }

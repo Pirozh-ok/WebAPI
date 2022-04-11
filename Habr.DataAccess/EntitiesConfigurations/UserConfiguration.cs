@@ -8,18 +8,23 @@ namespace Habr.DataAccess.EntitiesConfigurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
+            //one-to-many relationship between User and Post
             builder
-                .HasMany(x => x.Posts)
-                .WithOne(x => x.User)
-                .HasForeignKey(x => x.UserId)
+                .HasMany(u => u.Posts)
+                .WithOne(p => p.User)
+                .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //one-to-many relationship between User and Comment
             builder
-                .HasMany(x => x.Comments)
-                .WithOne(x => x.User)
-                .HasForeignKey(x => x.UserId)
+                .HasMany(u => u.Comments)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasKey(u => u.Id);
+
+            //Property configuration
             builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
