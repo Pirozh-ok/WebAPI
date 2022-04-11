@@ -12,15 +12,13 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasMany(x => x.Posts)
                 .WithOne(x => x.User)
                 .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired();
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder
                 .HasMany(x => x.Comments)
                 .WithOne(x => x.User)
                 .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired();
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property("Id")
                 .IsRequired()
@@ -33,7 +31,7 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.Property("Email")
                 .IsRequired()
-                .HasMaxLength(200)
+                .HasMaxLength(100)
                 .HasDefaultValue("");
 
             builder.Property("RegistrDate")

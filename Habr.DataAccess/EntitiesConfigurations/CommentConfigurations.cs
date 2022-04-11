@@ -8,6 +8,12 @@ namespace Habr.DataAccess.EntitiesConfigurations
     {
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
+            builder
+                .HasMany(x => x.Comments)
+                .WithOne(x => x.ParentComment)
+                .HasForeignKey(x => x.ParentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
