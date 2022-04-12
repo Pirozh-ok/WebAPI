@@ -59,7 +59,7 @@ namespace Habr.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Habr.DataAccess.Entities.User", b =>
@@ -84,14 +84,14 @@ namespace Habr.DataAccess.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasDefaultValue("");
 
-                    b.Property<DateTime>("RegistrDate")
+                    b.Property<DateTime>("RegistrationDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getdate()");
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Habr.DataAccess.Post", b =>

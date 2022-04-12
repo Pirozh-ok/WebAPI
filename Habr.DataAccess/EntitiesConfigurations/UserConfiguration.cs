@@ -39,7 +39,7 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasMaxLength(100)
                 .HasDefaultValue("");
 
-            builder.Property("RegistrDate")
+            builder.Property("RegistrationDate")
                 .IsRequired()
                 .HasDefaultValueSql("getdate()");
         }

@@ -3,12 +3,16 @@
 using Habr.DataAccess.EntitiesConfigurations;
 using System.Configuration;
 using Microsoft.Extensions.Configuration;
+using Habr.DataAccess.Entities;
 
 namespace Habr.DataAccess
 {
     public class DataContext : DbContext
     {
         public DbSet<Post> Posts { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+
         private string _connectionString;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
