@@ -16,7 +16,7 @@ namespace Habr.DataAccess.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
-        public DateTime RegistrDate { get; set; }
+        public DateTime RegistrationDate { get; set; }
 
         //User - Post
         public ICollection<Post> Posts{ get; set; }
