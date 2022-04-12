@@ -1,5 +1,5 @@
-C:\Users\ivan-\source\repos\Habr\Habr.ConsoleApp\bin\Debug\net6.0\Habr.ConsoleApp.exe
 C:\Users\ivan-\source\repos\Habr\Habr.ConsoleApp\bin\Debug\net6.0\appsettings.json
+C:\Users\ivan-\source\repos\Habr\Habr.ConsoleApp\bin\Debug\net6.0\Habr.ConsoleApp.exe
 C:\Users\ivan-\source\repos\Habr\Habr.ConsoleApp\bin\Debug\net6.0\Habr.ConsoleApp.deps.json
 C:\Users\ivan-\source\repos\Habr\Habr.ConsoleApp\bin\Debug\net6.0\Habr.ConsoleApp.runtimeconfig.json
 C:\Users\ivan-\source\repos\Habr\Habr.ConsoleApp\bin\Debug\net6.0\Habr.ConsoleApp.dll
