@@ -24,6 +24,9 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.HasKey(u => u.Id);
 
+            //Set index email
+            builder.HasIndex(u => u.Email).IsUnique();
+
             //Property configuration
             builder.Property("Id")
                 .IsRequired()
@@ -42,6 +45,11 @@ namespace Habr.DataAccess.EntitiesConfigurations
             builder.Property("RegistrationDate")
                 .IsRequired()
                 .HasDefaultValueSql("getdate()");
+
+            builder.Property("Password")
+                .IsRequired()
+                .HasDefaultValue("")
+                .HasMaxLength(50);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-//using System.Data.Entity;
 using Habr.DataAccess.EntitiesConfigurations;
 using System.Configuration;
 using Microsoft.Extensions.Configuration;
