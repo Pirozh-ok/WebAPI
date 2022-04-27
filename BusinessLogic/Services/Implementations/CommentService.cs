@@ -1,8 +1,9 @@
-﻿using Habr.DataAccess.Entities;
-using Habr.DataAccess.Services.Interfaces;
+﻿using Habr.BusinessLogic.Services.Interfaces;
+using Habr.DataAccess;
+using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Habr.DataAccess.Services
+namespace Habr.BusinessLogic.Services.Implementations
 {
     public class CommentService : ICommentService
     {

@@ -1,7 +1,7 @@
-﻿using Habr.DataAccess;
+﻿using Habr.BusinessLogic.Services.Implementations;
+using Habr.BusinessLogic.Services.Interfaces;
+using Habr.DataAccess;
 using Habr.DataAccess.Entities;
-using Habr.DataAccess.Services.Interfaces;
-using Habr.DataAccess.Services;
 
 IUserService userService = new UserService();
 IPostService postService = new PostService();

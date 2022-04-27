@@ -1,6 +1,6 @@
 ﻿using Habr.DataAccess.Entities;
 
-namespace Habr.DataAccess.Services.Interfaces
+namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IUserService
     {

@@ -1,4 +1,6 @@
-﻿namespace Habr.DataAccess.Services.Interfaces
+﻿using Habr.DataAccess;
+
+namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IPostService
     {
