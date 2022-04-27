@@ -26,7 +26,7 @@ namespace Habr.DataAccess.Entities
         public Post Post { get; set; }
 
         //Comment - User
-        public int UserId { get;set; }
-        public User User { get; set; } 
+        public int UserId { get; set; }
+        public User User { get; set; }
     }
 }

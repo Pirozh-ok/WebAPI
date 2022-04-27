@@ -11,7 +11,7 @@ namespace Habr.DataAccess.Entities
         public User()
         {
             Posts = new HashSet<Post>();
-            Comments = new HashSet<Comment>(); 
+            Comments = new HashSet<Comment>();
         }
         public int Id { get; set; }
         public string Name { get; set; }
@@ -20,7 +20,7 @@ namespace Habr.DataAccess.Entities
         public DateTime RegistrationDate { get; set; }
 
         //User - Post
-        public ICollection<Post> Posts{ get; set; }
+        public ICollection<Post> Posts { get; set; }
 
         // User - Comment
         public ICollection<Comment> Comments { get; set; }

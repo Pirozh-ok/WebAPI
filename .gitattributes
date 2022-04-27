@@ -1,0 +1,5 @@
+# If a file is text, git will enforce LF line endings
+regardless of OS or git configurations.
+* text=auto eol=lf
+# Isolate binary files just in case
+*.{png,jpg,jpeg,gif,webp,woff,woff2} binary
