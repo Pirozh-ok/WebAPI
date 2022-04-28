@@ -12,6 +12,8 @@ namespace Habr.DataAccess
         public string Title { get; set; }
         public string Text { get; set; }
         public DateTime Created { get; set; }
+        public DateTime Updated { get; set; }
+        public bool IsPublished { get; set; }
 
         //Post - User
         public int UserId { get; set; }

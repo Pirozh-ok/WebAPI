@@ -11,9 +11,13 @@ namespace Habr.BusinessLogic.Services.Implementations
             using var context = new DataContext();
             var user = context.Users.SingleOrDefault( u => u.Email == email );
 
-            if (user == null || BCrypt.Net.BCrypt.Verify( password, user.Password ))
+            if (user == null)
             {
-                throw new Exception( "Неверный логин или пароль!" );
+                throw new Exception( "Неверный адрес электронной почты!" );
+            }
+            else if(!BCrypt.Net.BCrypt.Verify( password, user.Password ))
+            {
+                throw new Exception( "Неверный пароль!" );
             }
 
             return user;
@@ -25,14 +29,16 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (context.Users.SingleOrDefault( u => u.Email == email ) != null)
             {
-                throw new Exception( "Пользователь с таким адрессом электронной почты уже существует!" );
+                throw new Exception( "Пользователь с таким адресом электронной почты уже существует!" );
             }
+
+            var password1 = BCrypt.Net.BCrypt.HashPassword( password );
 
             context.Users.Add( new User
             {
                 Email = email,
                 Name = name,
-                Password = BCrypt.Net.BCrypt.HashPassword( password )
+                Password = password1
             } );
 
             context.SaveChanges();

@@ -26,12 +26,20 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.Property( "Text" )
                 .IsRequired()
-                .HasMaxLength( 5000 )
+                .HasMaxLength( 2000 )
                 .HasDefaultValue( "" );
 
             builder.Property( "Created" )
                 .IsRequired()
                 .HasDefaultValueSql( "getdate()" );
+
+            builder.Property( "Updated" )
+                .IsRequired()
+                .HasDefaultValueSql( "getdate()" );
+
+            builder.Property( "IsPublished" )
+                .IsRequired()
+                .HasDefaultValue( false );
         }
     }
 }

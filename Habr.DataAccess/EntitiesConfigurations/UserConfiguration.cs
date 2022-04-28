@@ -49,7 +49,7 @@ namespace Habr.DataAccess.EntitiesConfigurations
             builder.Property( "Password" )
                 .IsRequired()
                 .HasDefaultValue( "" )
-                .HasMaxLength( 50 );
+                .HasMaxLength( 150 );
         }
     }
 }
