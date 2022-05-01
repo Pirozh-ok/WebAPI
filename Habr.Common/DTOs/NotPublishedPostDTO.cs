@@ -2,8 +2,8 @@
 {
     public class NotPublishedPostDTO
     {
-        string Title;
-        DateTime Created;
-        DateTime Updated;
+        public string Title { get; set; }
+        public DateTime Created { get; set; }
+        public DateTime Updated { get; set; }
     }
 }

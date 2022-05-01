@@ -7,22 +7,51 @@ namespace Habr.BusinessLogic.Services.Implementations
 {
     public class CommentService : ICommentService
     {
-        public void CreateComment(int userId, int postId, string text)
+        private User GetUserById(int userId)
         {
             using var context = new DataContext();
-            var user = context.Users.SingleOrDefault(u => u.Id == userId);
+            var user = context.Users
+                .SingleOrDefault(u => u.Id == userId);
 
             if (user == null)
             {
-                throw new Exception("Пользователь, написавший комментарий, не найден!");
+                throw new Exception("Пользователь  с таким id не найден!");
             }
 
-            var post = context.Posts.SingleOrDefault(p => p.Id == postId);
+            return user;
+        }
+        private Post GetPostById(int postId)
+        {
+            using var context = new DataContext();
+            var post = context.Posts
+                .SingleOrDefault(u => u.Id == postId);
 
             if (post == null)
             {
-                throw new Exception("Пост, к которому написан комментарий, не найден!");
+                throw new Exception("Пост с таким id не найден!");
             }
+
+            return post;
+        }
+
+        public Comment GetCommentById(int commentId)
+        {
+            var context = new DataContext();
+            var comment = context.Comments
+                .SingleOrDefault(c => c.Id == commentId);
+
+            if (comment == null)
+            {
+                throw new Exception("Комментарий не найден!");
+            }
+
+            return comment;
+        }
+        public void CreateComment(int userId, int postId, string text)
+        {
+            using var context = new DataContext();
+            var user = GetUserById(userId);
+            var post = GetPostById(postId);
 
             context.Comments.Add(new Comment { UserId = userId, PostId = postId, Text = text });
             context.SaveChanges();
@@ -32,21 +61,11 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
 
             using var context = new DataContext();
-            var user = context.Users.SingleOrDefault(u => u.Id == userId);
+            var user = GetUserById(userId);
+            var post = GetPostById(postId);
 
-            if (user == null)
-            {
-                throw new Exception("Пользователь, написавший комментарий, не найден!");
-            }
-
-            var post = context.Posts.SingleOrDefault(p => p.Id == postId);
-
-            if (post == null)
-            {
-                throw new Exception("Пост, к которому написан комментарий, не найден!");
-            }
-
-            var parent = context.Comments.SingleOrDefault(c => c.Id == parentId);
+            var parent = context.Comments
+                .SingleOrDefault(c => c.Id == parentId);
 
             if (parent == null)
             {
@@ -67,14 +86,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public void DeleteComment(int commentId)
         {
             using var context = new DataContext();
-            var deleteComment = context.Comments.SingleOrDefault(c => c.Id == commentId);
+            var comment = GetCommentById(commentId);
 
-            if (deleteComment == null)
-            {
-                throw new Exception("Комментарий для удаления не найден!");
-            }
-
-            context.Comments.Remove(deleteComment);
+            context.Comments.Remove(comment);
             context.SaveChanges();
         }
 

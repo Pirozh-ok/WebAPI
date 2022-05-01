@@ -19,10 +19,10 @@ namespace Habr.DataAccess.Entities
         public string Password { get; set; }
         public DateTime RegistrationDate { get; set; }
 
-        //User - Post
+        // Post
         public ICollection<Post> Posts { get; set; }
 
-        // User - Comment
+        // Comment
         public ICollection<Comment> Comments { get; set; }
     }
 }

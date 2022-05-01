@@ -8,14 +8,12 @@ namespace Habr.DataAccess.EntitiesConfigurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            //one-to-many relationship between User and Post
             builder
                 .HasMany(u => u.Posts)
                 .WithOne(p => p.User)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //one-to-many relationship between User and Comment
             builder
                 .HasMany(u => u.Comments)
                 .WithOne(c => c.User)
@@ -24,10 +22,8 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.HasKey(u => u.Id);
 
-            //Set index email
             builder.HasIndex(u => u.Email).IsUnique();
 
-            //Property configuration
             builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();

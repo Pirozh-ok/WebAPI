@@ -2,13 +2,14 @@
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.DataAccess;
+using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Habr.BusinessLogic.Services.Implementations
 {
     public class PostService : IPostService
     {
-        public void CreatePost(string title, string text, int userId, bool isPublished)
+        private void GuardAgainstInvalidPost(string title, string text)
         {
             if (string.IsNullOrEmpty(title))
             {
@@ -29,48 +30,64 @@ namespace Habr.BusinessLogic.Services.Implementations
             {
                 throw new Exception("Текст поста не может превышать 2000 символов!");
             }
+        }
 
+        private User GetUserById(int userId)
+        {
             using var context = new DataContext();
-            var user = context.Users.SingleOrDefault(u => u.Id == userId);
+            var user = context.Users
+                .SingleOrDefault(u => u.Id == userId);
 
             if (user == null)
             {
                 throw new Exception("Пользователь  с таким id не найден!");
             }
 
-            context.Posts.Add(new Post() { Title = title, Text = text, User = user, IsPublished = isPublished });
+            return user;
+        }
+
+        public void CreatePost(string title, string text, int userId, bool isPublished)
+        {
+            GuardAgainstInvalidPost(title, text);
+
+            using var context = new DataContext();
+            var user = GetUserById(userId);
+
+            context.Posts.Add(
+                new Post()
+                {
+                    Title = title,
+                    Text = text,
+                    User = user,
+                    IsPublished = isPublished
+                });
             context.SaveChanges();
         }
 
         public void DeletePost(int postId)
         {
             using var context = new DataContext();
-            var deletePost = GetPostById(postId);
+            var post = GetPostById(postId);
 
-            context.Entry(deletePost)
+            context.Entry(post)
                 .Collection(c => c.Comments)
                 .Load();
 
-            context.Posts.Remove(deletePost);
+            context.Posts.Remove(post);
             context.SaveChanges();
         }
 
         public IEnumerable<Post> GetNotPublishedPostsByUser(int userId)
         {
             using var context = new DataContext();
-            var user = context.Users.SingleOrDefault(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new Exception("Пользователь не найден!");
-            }
-
+            var user = GetUserById(userId);
             return context.Posts.Where(p => p.UserId == userId && !p.IsPublished).ToList();
         }
 
         public IEnumerable<NotPublishedPostDTO> GetNotPublishedPostsDTO(int userId)
         {
-            var posts = GetNotPublishedPostsByUser(userId).OrderByDescending(p => p.Updated);
+            var posts = GetNotPublishedPostsByUser(userId)
+                .OrderByDescending(p => p.Updated);
 
             var config = new MapperConfiguration(x => x.CreateMap<Post, NotPublishedPostDTO>()
            .ForMember("Title", c => c.MapFrom(x => x.Title))
@@ -84,7 +101,8 @@ namespace Habr.BusinessLogic.Services.Implementations
         public Post GetPostById(int postId)
         {
             using var context = new DataContext();
-            var post = context.Posts.SingleOrDefault(p => p.Id == postId);
+            var post = context.Posts
+                .SingleOrDefault(p => p.Id == postId);
 
             if (post == null)
             {
@@ -152,13 +170,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public IEnumerable<Post> GetPublishedPostsByUser(int userId)
         {
             using var context = new DataContext();
-            var user = context.Users.SingleOrDefault(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new Exception("Пользователь  с таким id не найден!");
-            }
-
+            var user = GetUserById(userId);
             return context.Posts.Where(p => p.UserId == userId && p.IsPublished).ToList();
         }
 
@@ -172,13 +184,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new Exception("Пост уже опубликован!");
             }
 
-            post.User = context.Users.SingleOrDefault(u => u.Id == post.UserId);
-
-            if (post.User == null)
-            {
-                throw new Exception("Пользователь, создавший пост, не найден!");
-            }
-
+            post.User = GetUserById(post.UserId);
             post.IsPublished = true;
             context.Entry(post).State = EntityState.Modified;
             context.SaveChanges();
@@ -187,7 +193,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public void SendPostToDrafts(int postId)
         {
             using var context = new DataContext();
-            var post = context.Posts.Include(p => p.Comments).SingleOrDefault(p => p.Id == postId);
+            var post = context.Posts
+                .Include(p => p.Comments)
+                .SingleOrDefault(p => p.Id == postId);
 
             if (post == null)
             {
@@ -213,7 +221,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new Exception("Опубликованный пост нельзя редактировать!");
             }
 
-            updatePost.User = context.Users.SingleOrDefault(u => u.Id == post.UserId);
+            updatePost.User = context.Users
+                .SingleOrDefault(u => u.Id == post.UserId);
 
             if (updatePost.User == null)
             {
