@@ -8,38 +8,38 @@ namespace Habr.DataAccess.EntitiesConfigurations
         public void Configure(EntityTypeBuilder<Post> builder)
         {
             //one-to-many relationship between Post and Comment
-            builder.HasMany( p => p.Comments )
-                .WithOne( c => c.Post )
-                .HasForeignKey( c => c.PostId )
-                .OnDelete( DeleteBehavior.ClientCascade )
+            builder.HasMany(p => p.Comments)
+                .WithOne(c => c.Post)
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.ClientCascade)
                 .IsRequired();
 
             //Property configuration
-            builder.Property( "Id" )
+            builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property( "Title" )
+            builder.Property("Title")
                 .IsRequired()
-                .HasMaxLength( 200 )
-                .HasDefaultValue( "" );
+                .HasMaxLength(200)
+                .HasDefaultValue("");
 
-            builder.Property( "Text" )
+            builder.Property("Text")
                 .IsRequired()
-                .HasMaxLength( 2000 )
-                .HasDefaultValue( "" );
+                .HasMaxLength(2000)
+                .HasDefaultValue("");
 
-            builder.Property( "Created" )
+            builder.Property("Created")
                 .IsRequired()
-                .HasDefaultValueSql( "getdate()" );
+                .HasDefaultValueSql("getdate()");
 
-            builder.Property( "Updated" )
+            builder.Property("Updated")
                 .IsRequired()
-                .HasDefaultValueSql( "getdate()" );
+                .HasDefaultValueSql("getdate()");
 
-            builder.Property( "IsPublished" )
+            builder.Property("IsPublished")
                 .IsRequired()
-                .HasDefaultValue( false );
+                .HasDefaultValue(false);
         }
     }
 }

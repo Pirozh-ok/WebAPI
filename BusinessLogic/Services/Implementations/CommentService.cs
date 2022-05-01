@@ -10,21 +10,21 @@ namespace Habr.BusinessLogic.Services.Implementations
         public void CreateComment(int userId, int postId, string text)
         {
             using var context = new DataContext();
-            var user = context.Users.SingleOrDefault( u => u.Id == userId );
+            var user = context.Users.SingleOrDefault(u => u.Id == userId);
 
             if (user == null)
             {
-                throw new Exception( "Пользователь, написавший комментарий, не найден!" );
+                throw new Exception("Пользователь, написавший комментарий, не найден!");
             }
 
-            var post = context.Posts.SingleOrDefault( p => p.Id == postId );
+            var post = context.Posts.SingleOrDefault(p => p.Id == postId);
 
             if (post == null)
             {
-                throw new Exception( "Пост, к которому написан комментарий, не найден!" );
+                throw new Exception("Пост, к которому написан комментарий, не найден!");
             }
 
-            context.Comments.Add( new Comment { UserId = userId, PostId = postId, Text = text } );
+            context.Comments.Add(new Comment { UserId = userId, PostId = postId, Text = text });
             context.SaveChanges();
         }
 
@@ -32,34 +32,34 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
 
             using var context = new DataContext();
-            var user = context.Users.SingleOrDefault( u => u.Id == userId );
+            var user = context.Users.SingleOrDefault(u => u.Id == userId);
 
             if (user == null)
             {
-                throw new Exception( "Пользователь, написавший комментарий, не найден!" );
+                throw new Exception("Пользователь, написавший комментарий, не найден!");
             }
 
-            var post = context.Posts.SingleOrDefault( p => p.Id == postId );
+            var post = context.Posts.SingleOrDefault(p => p.Id == postId);
 
             if (post == null)
             {
-                throw new Exception( "Пост, к которому написан комментарий, не найден!" );
+                throw new Exception("Пост, к которому написан комментарий, не найден!");
             }
 
-            var parent = context.Comments.SingleOrDefault( c => c.Id == parentId );
+            var parent = context.Comments.SingleOrDefault(c => c.Id == parentId);
 
             if (parent == null)
             {
-                throw new Exception( "Комментарий, к которому написан ответ, не найден!" );
+                throw new Exception("Комментарий, к которому написан ответ, не найден!");
             }
 
-            context.Comments.Add( new Comment
+            context.Comments.Add(new Comment
             {
                 User = user,
                 Text = text,
                 Parent = parent,
                 Post = post
-            } );
+            });
 
             context.SaveChanges();
         }
@@ -67,14 +67,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         public void DeleteComment(int commentId)
         {
             using var context = new DataContext();
-            var deleteComment = context.Comments.SingleOrDefault( c => c.Id == commentId );
+            var deleteComment = context.Comments.SingleOrDefault(c => c.Id == commentId);
 
             if (deleteComment == null)
             {
-                throw new Exception( "Комментарий для удаления не найден!" );
+                throw new Exception("Комментарий для удаления не найден!");
             }
 
-            context.Comments.Remove( deleteComment );
+            context.Comments.Remove(deleteComment);
             context.SaveChanges();
         }
 
@@ -90,9 +90,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             using var context = new DataContext();
             return context.Comments
-                .Where( c => c.PostId == postId )
-                .Include( c => c.User )
-                .Include( c => c.SubComments )
+                .Where(c => c.PostId == postId)
+                .Include(c => c.User)
+                .Include(c => c.SubComments)
                 .AsNoTracking()
                 .ToList();
         }
@@ -101,8 +101,8 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             using var context = new DataContext();
             return context.Comments
-                .Where( c => c.UserId == userId )
-                .Include( c => c.SubComments )
+                .Where(c => c.UserId == userId)
+                .Include(c => c.SubComments)
                 .AsNoTracking()
                 .ToList();
         }

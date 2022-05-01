@@ -10,46 +10,46 @@ namespace Habr.DataAccess.EntitiesConfigurations
         {
             //one-to-many relationship between User and Post
             builder
-                .HasMany( u => u.Posts )
-                .WithOne( p => p.User )
-                .HasForeignKey( p => p.UserId )
-                .OnDelete( DeleteBehavior.Cascade );
+                .HasMany(u => u.Posts)
+                .WithOne(p => p.User)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             //one-to-many relationship between User and Comment
             builder
-                .HasMany( u => u.Comments )
-                .WithOne( c => c.User )
-                .HasForeignKey( c => c.UserId )
-                .OnDelete( DeleteBehavior.Cascade );
+                .HasMany(u => u.Comments)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasKey( u => u.Id );
+            builder.HasKey(u => u.Id);
 
             //Set index email
-            builder.HasIndex( u => u.Email ).IsUnique();
+            builder.HasIndex(u => u.Email).IsUnique();
 
             //Property configuration
-            builder.Property( "Id" )
+            builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property( "Name" )
+            builder.Property("Name")
                 .IsRequired()
-                .HasMaxLength( 200 )
-                .HasDefaultValue( "" );
+                .HasMaxLength(200)
+                .HasDefaultValue("");
 
-            builder.Property( "Email" )
+            builder.Property("Email")
                 .IsRequired()
-                .HasMaxLength( 100 )
-                .HasDefaultValue( "" );
+                .HasMaxLength(100)
+                .HasDefaultValue("");
 
-            builder.Property( "RegistrationDate" )
+            builder.Property("RegistrationDate")
                 .IsRequired()
-                .HasDefaultValueSql( "getdate()" );
+                .HasDefaultValueSql("getdate()");
 
-            builder.Property( "Password" )
+            builder.Property("Password")
                 .IsRequired()
-                .HasDefaultValue( "" )
-                .HasMaxLength( 150 );
+                .HasDefaultValue("")
+                .HasMaxLength(150);
         }
     }
 }

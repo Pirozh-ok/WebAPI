@@ -13,278 +13,278 @@ void ReadPostAllUser()
 
     if (posts == null || posts.Count() == 0)
     {
-        Console.WriteLine( "Нет опубликованных постов на сервисе!" );
+        Console.WriteLine("Нет опубликованных постов на сервисе!");
         return;
     }
 
     foreach (var post in posts)
     {
-        Console.WriteLine( $"Автор поста: {post.User.Name}" );
-        Console.WriteLine( $"Название поста: {post.Title}" );
-        Console.WriteLine( $"Дата создания: {post.Created}" );
-        Console.WriteLine( $"Текст: {post.Text}\n" );
+        Console.WriteLine($"Автор поста: {post.User.Name}");
+        Console.WriteLine($"Название поста: {post.Title}");
+        Console.WriteLine($"Дата создания: {post.Created}");
+        Console.WriteLine($"Текст: {post.Text}\n");
     }
 }
 
 void ReadAllOwnPosts(User user)
 {
-    var publishedPosts = postService.GetPublishedPostsByUser( user.Id );
-    var notPublishedPosts = postService.GetNotPublishedPostsByUser( user.Id );
+    var publishedPosts = postService.GetPublishedPostsByUser(user.Id);
+    var notPublishedPosts = postService.GetNotPublishedPostsByUser(user.Id);
 
     if (publishedPosts == null || publishedPosts.Count() == 0)
     {
-        Console.WriteLine( "У вас ещё нет опубликованных постов" );
+        Console.WriteLine("У вас ещё нет опубликованных постов");
     }
     else
     {
-        Console.WriteLine( "Опубликованные посты: " );
+        Console.WriteLine("Опубликованные посты: ");
         foreach (var post in publishedPosts)
         {
-            Console.WriteLine( $"Название поста: {post.Title}" );
-            Console.WriteLine( $"Дата создания: {post.Created}" );
-            Console.WriteLine( $"Текст: {post.Text}\n" );
+            Console.WriteLine($"Название поста: {post.Title}");
+            Console.WriteLine($"Дата создания: {post.Created}");
+            Console.WriteLine($"Текст: {post.Text}\n");
         }
     }
 
     if (notPublishedPosts == null || notPublishedPosts.Count() == 0)
     {
-        Console.WriteLine( "У вас нет постов в черновиках" );
+        Console.WriteLine("У вас нет постов в черновиках");
     }
     else
     {
-        Console.WriteLine( "Посты в черновиках: " );
+        Console.WriteLine("Посты в черновиках: ");
         foreach (var post in notPublishedPosts)
         {
-            Console.WriteLine( $"Название поста: {post.Title}" );
-            Console.WriteLine( $"Дата создания: {post.Created}" );
-            Console.WriteLine( $"Текст: {post.Text}\n" );
+            Console.WriteLine($"Название поста: {post.Title}");
+            Console.WriteLine($"Дата создания: {post.Created}");
+            Console.WriteLine($"Текст: {post.Text}\n");
         }
     }
 }
 
 void CreateNewPost(User user)
 {
-    Console.Write( "Введите название поста: " );
+    Console.Write("Введите название поста: ");
     var title = Console.ReadLine();
-    Console.Write( "Введите текст поста: " );
+    Console.Write("Введите текст поста: ");
     var text = Console.ReadLine();
-    Console.Write( "Опубликовать пост? (да/нет): " );
+    Console.Write("Опубликовать пост? (да/нет): ");
     bool isPublished = Console.ReadLine() == "да";
     try
     {
-        postService.CreatePost( title, text, user.Id, isPublished);
+        postService.CreatePost(title, text, user.Id, isPublished);
 
-        if(isPublished)
+        if (isPublished)
         {
-            Console.WriteLine( "Пост успешно опубликован!" );
+            Console.WriteLine("Пост успешно опубликован!");
         }
         else
         {
-            Console.WriteLine( "Пост сохранён в черновиках!" );
+            Console.WriteLine("Пост сохранён в черновиках!");
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message );
-        Console.WriteLine( "Не удалось опубликовать пост!" );
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("Не удалось опубликовать пост!");
     }
 }
 
 void CreateCommentPost(User user)
 {
-    Console.WriteLine( "Выберете пост для комментирования: " );
+    Console.WriteLine("Выберете пост для комментирования: ");
     var posts = postService.GetPublishedPosts();
 
     if (posts == null || posts.Count() == 0)
     {
-        Console.WriteLine( "Нет постов для комментирования" );
+        Console.WriteLine("Нет постов для комментирования");
         return;
     }
 
     for (int i = 0; i < posts.Count(); i++)
     {
-        Console.WriteLine( $"{i + 1} - {posts.ElementAt( i ).Title}" );
+        Console.WriteLine($"{i + 1} - {posts.ElementAt(i).Title}");
     }
 
-    Console.Write( "Введите номер поста для комментирования: " );
+    Console.Write("Введите номер поста для комментирования: ");
 
     try
     {
-        var numberPost = int.Parse( Console.ReadLine() ) - 1;
+        var numberPost = int.Parse(Console.ReadLine()) - 1;
 
         if (numberPost < 0 || numberPost > posts.Count())
         {
             throw new Exception();
         }
 
-        var post = posts.ElementAt( numberPost );
-        var commentsPost = commentService.GetCommentsByPost( post.Id );
+        var post = posts.ElementAt(numberPost);
+        var commentsPost = commentService.GetCommentsByPost(post.Id);
 
         foreach (var comment in commentsPost)
         {
-            Console.WriteLine( $"{comment.User.Name}: {comment.Text}" );
+            Console.WriteLine($"{comment.User.Name}: {comment.Text}");
             foreach (var subcomment in comment.SubComments)
-                Console.WriteLine( $"\t{subcomment.User.Name}: {subcomment.Text}" );
+                Console.WriteLine($"\t{subcomment.User.Name}: {subcomment.Text}");
         }
 
-        Console.Write( "Введите текст комментария: " );
+        Console.Write("Введите текст комментария: ");
         var commentText = Console.ReadLine();
 
-        commentService.CreateComment( user.Id, post.Id, commentText );
-        Console.WriteLine( "Комментарий к посту добавлен!" );
+        commentService.CreateComment(user.Id, post.Id, commentText);
+        Console.WriteLine("Комментарий к посту добавлен!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message );
-        Console.WriteLine( "Поста с таким номером не существует!" );
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("Поста с таким номером не существует!");
         return;
     }
 }
 
 void DeleteComment(User user)
 {
-    Console.WriteLine( "Выберете комментарий для удаления: " );
-    var comments = commentService.GetCommentsByUser( user.Id );
+    Console.WriteLine("Выберете комментарий для удаления: ");
+    var comments = commentService.GetCommentsByUser(user.Id);
 
     if (comments == null || comments.Count() == 0)
     {
-        Console.WriteLine( "Нет комментариев для удаления" );
+        Console.WriteLine("Нет комментариев для удаления");
         return;
     }
 
     for (int i = 0; i < comments.Count(); i++)
     {
-        Console.WriteLine( $"{i + 1} - {comments.ElementAt( i ).Text}" );
+        Console.WriteLine($"{i + 1} - {comments.ElementAt(i).Text}");
     }
 
-    Console.Write( "Введите номер поста для комментирования: " );
+    Console.Write("Введите номер поста для комментирования: ");
     try
     {
-        var numberComment = int.Parse( Console.ReadLine() ) - 1;
+        var numberComment = int.Parse(Console.ReadLine()) - 1;
 
         if (numberComment < 0 || numberComment > comments.Count())
         {
             throw new Exception();
         }
 
-        commentService.DeleteComment( comments.ElementAt( numberComment ).Id );
+        commentService.DeleteComment(comments.ElementAt(numberComment).Id);
     }
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message );
-        Console.WriteLine( "Комментария с таким номером не существует!" );
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("Комментария с таким номером не существует!");
         return;
     }
 }
 
 void AnswerComment(User user)
 {
-    Console.WriteLine( "Выберете комментарий для ответа: " );
+    Console.WriteLine("Выберете комментарий для ответа: ");
     var comments = commentService.GetComments();
 
     if (comments == null || comments.Count() == 0)
     {
-        Console.WriteLine( "Нет комментариев для ответа" );
+        Console.WriteLine("Нет комментариев для ответа");
         return;
     }
 
     for (int i = 0; i < comments.Count(); i++)
     {
-        Console.WriteLine( $"{i + 1} - {comments.ElementAt( i ).Text}" );
+        Console.WriteLine($"{i + 1} - {comments.ElementAt(i).Text}");
     }
 
-    Console.Write( "Введите номер комментария для ответа: " );
+    Console.Write("Введите номер комментария для ответа: ");
 
     try
     {
-        var numberComment = int.Parse( Console.ReadLine() ) - 1;
+        var numberComment = int.Parse(Console.ReadLine()) - 1;
 
         if (numberComment < 0 || numberComment > comments.Count())
         {
             throw new Exception();
         }
 
-        Console.Write( "Введите текст комментария: " );
+        Console.Write("Введите текст комментария: ");
         var textComment = Console.ReadLine();
-        commentService.CreateCommentAnswer( user.Id, textComment, comments.ElementAt( numberComment ).Id, comments.ElementAt( numberComment ).PostId );
+        commentService.CreateCommentAnswer(user.Id, textComment, comments.ElementAt(numberComment).Id, comments.ElementAt(numberComment).PostId);
     }
 
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message );
-        Console.WriteLine( "Комментария с таким номером не существует!" );
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("Комментария с таким номером не существует!");
         return;
     }
 }
 
 void PublishPost(User user)
 {
-    Console.WriteLine( "Выберете пост для публикации: " );
-    var posts = postService.GetNotPublishedPostsByUser( user.Id );
+    Console.WriteLine("Выберете пост для публикации: ");
+    var posts = postService.GetNotPublishedPostsByUser(user.Id);
 
     if (posts == null || posts.Count() == 0)
     {
-        Console.WriteLine( "В черновиках нет постов для публикации" );
+        Console.WriteLine("В черновиках нет постов для публикации");
         return;
     }
 
     for (int i = 0; i < posts.Count(); i++)
     {
-        Console.WriteLine( $"{i + 1} - {posts.ElementAt( i ).Title}" );
+        Console.WriteLine($"{i + 1} - {posts.ElementAt(i).Title}");
     }
 
-    Console.Write( "Введите номер поста для публикации: " );
+    Console.Write("Введите номер поста для публикации: ");
     try
     {
-        var numberPost = int.Parse( Console.ReadLine() ) - 1;
+        var numberPost = int.Parse(Console.ReadLine()) - 1;
 
         if (numberPost < 0 || numberPost > posts.Count())
         {
-            throw new Exception( "Поста с таким номером не существует!" );
+            throw new Exception("Поста с таким номером не существует!");
         }
 
-       postService.PublishPost(posts.ElementAt( numberPost).Id );
-       Console.WriteLine("Пост опубликован!");
+        postService.PublishPost(posts.ElementAt(numberPost).Id);
+        Console.WriteLine("Пост опубликован!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message );
+        Console.WriteLine(ex.Message);
         return;
     }
 }
 
 void SendPostToDrafts(User user)
 {
-    Console.WriteLine( "Выберете пост для переноса в черновик: " );
-    var posts = postService.GetPublishedPostsByUser( user.Id );
+    Console.WriteLine("Выберете пост для переноса в черновик: ");
+    var posts = postService.GetPublishedPostsByUser(user.Id);
 
     if (posts == null || posts.Count() == 0)
     {
-        Console.WriteLine( "У вас нет опубликованных постов!" );
+        Console.WriteLine("У вас нет опубликованных постов!");
         return;
     }
 
     for (int i = 0; i < posts.Count(); i++)
     {
-        Console.WriteLine( $"{i + 1} - {posts.ElementAt( i ).Title}" );
+        Console.WriteLine($"{i + 1} - {posts.ElementAt(i).Title}");
     }
 
-    Console.Write( "Введите номер поста для перемещения в черновики: " );
+    Console.Write("Введите номер поста для перемещения в черновики: ");
     try
     {
-        var numberPost = int.Parse( Console.ReadLine() ) - 1;
+        var numberPost = int.Parse(Console.ReadLine()) - 1;
 
         if (numberPost < 0 || numberPost > posts.Count())
         {
-            throw new Exception( "Поста с таким номером не существует!" );
+            throw new Exception("Поста с таким номером не существует!");
         }
 
-        postService.SendPostToDrafts( posts.ElementAt( numberPost ).Id );
-        Console.WriteLine( "Пост перенесён в черновик!" );
+        postService.SendPostToDrafts(posts.ElementAt(numberPost).Id);
+        Console.WriteLine("Пост перенесён в черновик!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message );
+        Console.WriteLine(ex.Message);
         return;
     }
 }
@@ -293,7 +293,7 @@ void ChoiseActionInAccount(User user)
 {
     while (true)
     {
-        Console.WriteLine( 
+        Console.WriteLine(
             "Просмотреть свои посты - 1, " +
             "создать пост - 2, " +
             "удалить пост - 3, " +
@@ -304,46 +304,46 @@ void ChoiseActionInAccount(User user)
             "ответить на комментарий - 8, " +
             "опубликовать пост из черновиков - 9, " +
             "отправить опубликованный пост в черновики - 10, " +
-            "выход - 11" 
+            "выход - 11"
             );
 
         switch (Console.ReadLine())
         {
             case "1":
-                ReadAllOwnPosts( user );
+                ReadAllOwnPosts(user);
                 break;
             case "2":
-                CreateNewPost( user );
+                CreateNewPost(user);
                 break;
             case "3":
-                DeletePost( user );
+                DeletePost(user);
                 break;
             case "4":
-                UpdatePost( user );
+                UpdatePost(user);
                 break;
             case "5":
                 ReadPostAllUser();
                 break;
             case "6":
-                CreateCommentPost( user );
+                CreateCommentPost(user);
                 break;
             case "7":
-                DeleteComment( user );
+                DeleteComment(user);
                 break;
             case "8":
-                AnswerComment( user );
+                AnswerComment(user);
                 break;
             case "9":
-                PublishPost( user );
+                PublishPost(user);
                 break;
             case "10":
-                SendPostToDrafts( user );
+                SendPostToDrafts(user);
                 break;
             case "11":
-                Environment.Exit( 0 );
+                Environment.Exit(0);
                 break;
             default:
-                Console.WriteLine( "Неверный номер операции..." );
+                Console.WriteLine("Неверный номер операции...");
                 break;
         }
     }
@@ -351,53 +351,53 @@ void ChoiseActionInAccount(User user)
 
 Post PrintAllOwnPostForChoice(User user, string message)
 {
-    var posts = postService.GetPostsByUser( user.Id );
+    var posts = postService.GetPostsByUser(user.Id);
     if (posts == null || posts.Count() == 0)
     {
-        Console.WriteLine( "У вас ещё нет опубликованных постов" );
+        Console.WriteLine("У вас ещё нет опубликованных постов");
         return null;
     }
 
     for (int i = 0; i < posts.Count(); i++)
-        Console.WriteLine( $"{i + 1} - {posts.ElementAt( i ).Title}" );
+        Console.WriteLine($"{i + 1} - {posts.ElementAt(i).Title}");
 
-    Console.Write( message );
+    Console.Write(message);
     try
     {
-        int numberPost = int.Parse( Console.ReadLine() ) - 1;
+        int numberPost = int.Parse(Console.ReadLine()) - 1;
         if (numberPost < 0 || numberPost > posts.Count())
-            throw new Exception( "Поста с таким номером не существует!" );
+            throw new Exception("Поста с таким номером не существует!");
 
-        return posts.ElementAt( numberPost );
+        return posts.ElementAt(numberPost);
     }
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message);
+        Console.WriteLine(ex.Message);
         return null;
     }
 }
 
 void DeletePost(User user)
 {
-    var deletePost = PrintAllOwnPostForChoice( user, "\nВведите номер поста, который хотите удалить: " );
+    var deletePost = PrintAllOwnPostForChoice(user, "\nВведите номер поста, который хотите удалить: ");
 
     if (deletePost == null) return;
 
     try
     {
-        postService.DeletePost( deletePost.Id );
-        Console.WriteLine( "Пост успешно удалён!" );
+        postService.DeletePost(deletePost.Id);
+        Console.WriteLine("Пост успешно удалён!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message );
-        Console.WriteLine( "Не удалось удалить выбраный пост!" );
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("Не удалось удалить выбраный пост!");
     }
 }
 
 void UpdatePost(User user)
 {
-    var updatePost = PrintAllOwnPostForChoice( user, "\nВведите номер поста, который хотите редактировать: " );
+    var updatePost = PrintAllOwnPostForChoice(user, "\nВведите номер поста, который хотите редактировать: ");
 
     if (updatePost == null)
     {
@@ -408,18 +408,18 @@ void UpdatePost(User user)
 
     while (isNotExit)
     {
-        Console.WriteLine( "Изменить название поста - 1, изменить текст поста - 2, выйти из режима редактирования - 3" );
+        Console.WriteLine("Изменить название поста - 1, изменить текст поста - 2, выйти из режима редактирования - 3");
         switch (Console.ReadLine())
         {
             case "1":
                 {
-                    Console.Write( "Введите новое название поста: " );
+                    Console.Write("Введите новое название поста: ");
                     updatePost.Title = Console.ReadLine();
                     break;
                 }
             case "2":
                 {
-                    Console.Write( "Введите новый текст поста: " );
+                    Console.Write("Введите новый текст поста: ");
                     updatePost.Text = Console.ReadLine();
                     break;
                 }
@@ -429,14 +429,14 @@ void UpdatePost(User user)
                     return;
                 }
             default:
-                Console.WriteLine( "Неверный номер операции!" );
+                Console.WriteLine("Неверный номер операции!");
                 break;
         }
 
         try
         {
-            postService.UpdatePost( updatePost );
-            Console.WriteLine( "Изменения в посте сохранены!" );
+            postService.UpdatePost(updatePost);
+            Console.WriteLine("Изменения в посте сохранены!");
         }
         catch (Exception ex)
         {
@@ -447,31 +447,31 @@ void UpdatePost(User user)
 
 void LogIn()
 {
-    Console.WriteLine( "Регистрация..." );
-    Console.Write( "Введите имя: " );
+    Console.WriteLine("Регистрация...");
+    Console.Write("Введите имя: ");
     var name = Console.ReadLine();
 
-    Console.Write( "Введите адрес электронной почты: " );
+    Console.Write("Введите адрес электронной почты: ");
     var email = Console.ReadLine();
 
-    Console.Write( "Введите пароль: " );
+    Console.Write("Введите пароль: ");
     var password = Console.ReadLine();
 
     try
     {
-        userService.Register( name, email, password );
-        Console.WriteLine( "Регистрация прошла успешно!" );
+        userService.Register(name, email, password);
+        Console.WriteLine("Регистрация прошла успешно!");
         SignIn();
     }
     catch (Exception ex)
     {
-        Console.WriteLine( ex.Message );
+        Console.WriteLine(ex.Message);
     }
 }
 
 void SignIn()
 {
-    Console.WriteLine( "Вход..." );
+    Console.WriteLine("Вход...");
     //Console.Write( "Введите адрес электронной почты: " );
     var email = "qwerty@mail.ru";//Console.ReadLine();
 
@@ -480,11 +480,11 @@ void SignIn()
 
     try
     {
-        var currentUser = userService.Login( email, password );
-        Console.WriteLine( "Вход выполнен: " );
-        ChoiseActionInAccount( currentUser );
+        var currentUser = userService.Login(email, password);
+        Console.WriteLine("Вход выполнен: ");
+        ChoiseActionInAccount(currentUser);
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
         Console.WriteLine(ex.Message);
     }
@@ -492,7 +492,7 @@ void SignIn()
 
 while (true)
 {
-    Console.WriteLine( "Войти - 1, зарегистрироваться - 2" );
+    Console.WriteLine("Войти - 1, зарегистрироваться - 2");
     switch (Console.ReadLine())
     {
         case "1":
@@ -502,7 +502,7 @@ while (true)
             LogIn();
             break;
         default:
-            Console.WriteLine( "Неверный номер операции..." );
+            Console.WriteLine("Неверный номер операции...");
             break;
     }
 }

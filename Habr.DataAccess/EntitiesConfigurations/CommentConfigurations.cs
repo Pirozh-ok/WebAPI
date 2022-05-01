@@ -9,25 +9,25 @@ namespace Habr.DataAccess.EntitiesConfigurations
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
             //one-to-many relationship between Comment and Comment
-            builder.HasOne( pc => pc.Parent )
-                .WithMany( sc => sc.SubComments )
-                .HasForeignKey( sc => sc.ParentId )
-                .OnDelete( DeleteBehavior.ClientCascade )
-                .IsRequired( false );
+            builder.HasOne(pc => pc.Parent)
+                .WithMany(sc => sc.SubComments)
+                .HasForeignKey(sc => sc.ParentId)
+                .OnDelete(DeleteBehavior.ClientCascade)
+                .IsRequired(false);
 
             //Property configuration
-            builder.Property( "Id" )
+            builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property( "Text" )
+            builder.Property("Text")
                 .IsRequired()
-                .HasMaxLength( 500 )
-                .HasDefaultValue( "" );
+                .HasMaxLength(500)
+                .HasDefaultValue("");
 
-            builder.Property( "CreateDate" )
+            builder.Property("CreateDate")
                 .IsRequired()
-                .HasDefaultValueSql( "getdate()" );
+                .HasDefaultValueSql("getdate()");
         }
     }
 }
