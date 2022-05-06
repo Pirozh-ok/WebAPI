@@ -6,17 +6,6 @@ namespace Habr.BusinessLogic.Services.Implementations
 {
     public class UserService : IUserService
     {
-        private void GuardAgainstInvalidUser(User user, string password)
-        {
-            if (user == null)
-            {
-                throw new Exception("Неверный адрес электронной почты!");
-            }
-            else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
-            {
-                throw new Exception("Неверный пароль!");
-            }
-        }
         public User LogIn(string email, string password)
         {
             using var context = new DataContext();
@@ -45,6 +34,18 @@ namespace Habr.BusinessLogic.Services.Implementations
                 });
 
             context.SaveChanges();
+        }
+
+        private void GuardAgainstInvalidUser(User user, string password)
+        {
+            if (user == null)
+            {
+                throw new Exception("Неверный адрес электронной почты!");
+            }
+            else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
+            {
+                throw new Exception("Неверный пароль!");
+            }
         }
     }
 }

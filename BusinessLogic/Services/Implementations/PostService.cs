@@ -9,43 +9,6 @@ namespace Habr.BusinessLogic.Services.Implementations
 {
     public class PostService : IPostService
     {
-        private void GuardAgainstInvalidPost(string title, string text)
-        {
-            if (string.IsNullOrEmpty(title))
-            {
-                throw new Exception("Заголовок поста является обязательным!");
-            }
-
-            if (title.Length > 200)
-            {
-                throw new Exception("Заголовок поста не может превышать 200 символов!");
-            }
-
-            if (string.IsNullOrEmpty(text))
-            {
-                throw new Exception("Текст поста является обязательным!");
-            }
-
-            if (title.Length > 2000)
-            {
-                throw new Exception("Текст поста не может превышать 2000 символов!");
-            }
-        }
-
-        private User GetUserById(int userId)
-        {
-            using var context = new DataContext();
-            var user = context.Users
-                .SingleOrDefault(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new Exception("Пользователь  с таким id не найден!");
-            }
-
-            return user;
-        }
-
         public void CreatePost(string title, string text, int userId, bool isPublished)
         {
             GuardAgainstInvalidPost(title, text);
@@ -90,9 +53,9 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .OrderByDescending(p => p.Updated);
 
             var config = new MapperConfiguration(x => x.CreateMap<Post, NotPublishedPostDTO>()
-           .ForMember("Title", c => c.MapFrom(x => x.Title))
-           .ForMember("Created", c => c.MapFrom(x => x.Created))
-           .ForMember("Updated", c => c.MapFrom(x => x.User.Email)));
+                .ForMember("Title", c => c.MapFrom(x => x.Title))
+                .ForMember("Created", c => c.MapFrom(x => x.Created))
+                .ForMember("Updated", c => c.MapFrom(x => x.User.Email)));
 
             var mapper = new Mapper(config);
             return mapper.Map<List<NotPublishedPostDTO>>(posts);
@@ -104,11 +67,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var post = context.Posts
                 .SingleOrDefault(p => p.Id == postId);
 
-            if (post == null)
-            {
-                throw new Exception("Пост не найден!");
-            }
-
+            GuardAgainstInvalidPost(post);
             return post;
         }
 
@@ -135,9 +94,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             using var context = new DataContext();
             var config = new MapperConfiguration(x => x.CreateMap<Post, PostDTO>()
-           .ForMember("Title", c => c.MapFrom(x => x.Title))
-           .ForMember("EmailAuthor", c => c.MapFrom(x => x.User.Email))
-           .ForMember("CreateDate", c => c.MapFrom(x => x.Created)));
+                .ForMember("Title", c => c.MapFrom(x => x.Title))
+                .ForMember("EmailAuthor", c => c.MapFrom(x => x.User.Email))
+                .ForMember("CreateDate", c => c.MapFrom(x => x.Created)));
 
             var mapper = new Mapper(config);
             var posts = context.Posts
@@ -186,7 +145,8 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             post.User = GetUserById(post.UserId);
             post.IsPublished = true;
-            context.Entry(post).State = EntityState.Modified;
+            var modifiedPost = context.Entry(post);
+            modifiedPost.State = EntityState.Modified;
             context.SaveChanges();
         }
 
@@ -197,10 +157,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(p => p.Comments)
                 .SingleOrDefault(p => p.Id == postId);
 
-            if (post == null)
-            {
-                throw new Exception("Пост не найден!");
-            }
+            GuardAgainstInvalidPost(post);
 
             if (post.Comments.Count > 0)
             {
@@ -224,14 +181,58 @@ namespace Habr.BusinessLogic.Services.Implementations
             updatePost.User = context.Users
                 .SingleOrDefault(u => u.Id == post.UserId);
 
-            if (updatePost.User == null)
-            {
-                throw new Exception("Пользователь не найден!");
-            }
+            GuardAgainstInvalidUser(updatePost.User);
 
             updatePost.Title = post.Title;
             updatePost.Text = post.Text;
             context.SaveChanges();
+        }
+
+        private void GuardAgainstInvalidPost(Post? post)
+        {
+            if (post == null)
+            {
+                throw new Exception("Пост не найден!");
+            }
+        }
+        private void GuardAgainstInvalidPost(string title, string text)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+                throw new Exception("Заголовок поста является обязательным!");
+            }
+
+            if (title.Length > 200)
+            {
+                throw new Exception("Заголовок поста не может превышать 200 символов!");
+            }
+
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new Exception("Текст поста является обязательным!");
+            }
+
+            if (title.Length > 2000)
+            {
+                throw new Exception("Текст поста не может превышать 2000 символов!");
+            }
+        }
+
+        private void GuardAgainstInvalidUser (User? user)
+        {
+            if (user == null)
+            {
+                throw new Exception("Пользователь не найден!");
+            }
+        }
+        private User GetUserById(int userId)
+        {
+            using var context = new DataContext();
+            var user = context.Users
+                .SingleOrDefault(u => u.Id == userId);
+
+            GuardAgainstInvalidUser(user);
+            return user;
         }
     }
 }

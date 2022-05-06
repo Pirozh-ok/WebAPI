@@ -7,44 +7,13 @@ namespace Habr.BusinessLogic.Services.Implementations
 {
     public class CommentService : ICommentService
     {
-        private User GetUserById(int userId)
-        {
-            using var context = new DataContext();
-            var user = context.Users
-                .SingleOrDefault(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new Exception("Пользователь  с таким id не найден!");
-            }
-
-            return user;
-        }
-        private Post GetPostById(int postId)
-        {
-            using var context = new DataContext();
-            var post = context.Posts
-                .SingleOrDefault(u => u.Id == postId);
-
-            if (post == null)
-            {
-                throw new Exception("Пост с таким id не найден!");
-            }
-
-            return post;
-        }
-
         public Comment GetCommentById(int commentId)
         {
             var context = new DataContext();
             var comment = context.Comments
                 .SingleOrDefault(c => c.Id == commentId);
 
-            if (comment == null)
-            {
-                throw new Exception("Комментарий не найден!");
-            }
-
+            GuardAgainstInvalidComment(comment);
             return comment;
         }
         public void CreateComment(int userId, int postId, string text)
@@ -53,7 +22,14 @@ namespace Habr.BusinessLogic.Services.Implementations
             var user = GetUserById(userId);
             var post = GetPostById(postId);
 
-            context.Comments.Add(new Comment { UserId = userId, PostId = postId, Text = text });
+            context.Comments.Add(
+                new Comment 
+                { 
+                    UserId = userId, 
+                    PostId = postId,
+                    Text = text 
+                });
+
             context.SaveChanges();
         }
 
@@ -67,10 +43,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var parent = context.Comments
                 .SingleOrDefault(c => c.Id == parentId);
 
-            if (parent == null)
-            {
-                throw new Exception("Комментарий, к которому написан ответ, не найден!");
-            }
+            GuardAgainstInvalidComment(parent);
 
             context.Comments.Add(new Comment
             {
@@ -87,7 +60,6 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             using var context = new DataContext();
             var comment = GetCommentById(commentId);
-
             context.Comments.Remove(comment);
             context.SaveChanges();
         }
@@ -119,6 +91,46 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(c => c.SubComments)
                 .AsNoTracking()
                 .ToList();
+        }
+
+        private User GetUserById(int userId)
+        {
+            using var context = new DataContext();
+            var user = context.Users
+                .SingleOrDefault(u => u.Id == userId);
+
+            GuardAgainstInvalidUser(user);
+            return user;
+        }
+
+        private Post GetPostById(int postId)
+        {
+            using var context = new DataContext();
+            var post = context.Posts
+                .SingleOrDefault(u => u.Id == postId);
+
+            if (post == null)
+            {
+                throw new Exception("Пост с таким id не найден!");
+            }
+
+            return post;
+        }
+
+        private void GuardAgainstInvalidUser(User? user)
+        {
+            if (user == null)
+            {
+                throw new Exception("Пользователь не найден!");
+            }
+        }
+
+        private void GuardAgainstInvalidComment(Comment comment)
+        {
+            if (comment == null)
+            {
+                throw new Exception("Комментарий не найден!");
+            }
         }
     }
 }
