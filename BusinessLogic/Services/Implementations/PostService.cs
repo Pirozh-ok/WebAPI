@@ -9,14 +9,17 @@ namespace Habr.BusinessLogic.Services.Implementations
 {
     public class PostService : IPostService
     {
+        private readonly DataContext _context;
+        public PostService(DataContext context)
+        {
+            _context = context;
+        }
         public void CreatePost(string title, string text, int userId, bool isPublished)
         {
             GuardAgainstInvalidPost(title, text);
-
-            using var context = new DataContext();
             var user = GetUserById(userId);
 
-            context.Posts.Add(
+            _context.Posts.Add(
                 new Post()
                 {
                     Title = title,
@@ -24,27 +27,25 @@ namespace Habr.BusinessLogic.Services.Implementations
                     User = user,
                     IsPublished = isPublished
                 });
-            context.SaveChanges();
+            _context.SaveChanges();
         }
 
         public void DeletePost(int postId)
         {
-            using var context = new DataContext();
             var post = GetPostById(postId);
 
-            context.Entry(post)
+            _context.Entry(post)
                 .Collection(c => c.Comments)
                 .Load();
 
-            context.Posts.Remove(post);
-            context.SaveChanges();
+            _context.Posts.Remove(post);
+            _context.SaveChanges();
         }
 
         public IEnumerable<Post> GetNotPublishedPostsByUser(int userId)
         {
-            using var context = new DataContext();
             var user = GetUserById(userId);
-            return context.Posts.Where(p => p.UserId == userId && !p.IsPublished).ToList();
+            return _context.Posts.Where(p => p.UserId == userId && !p.IsPublished).ToList();
         }
 
         public IEnumerable<NotPublishedPostDTO> GetNotPublishedPostsDTO(int userId)
@@ -63,8 +64,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public Post GetPostById(int postId)
         {
-            using var context = new DataContext();
-            var post = context.Posts
+            var post = _context.Posts
                 .SingleOrDefault(p => p.Id == postId);
 
             GuardAgainstInvalidPost(post);
@@ -73,8 +73,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public IEnumerable<Post> GetPosts()
         {
-            using var context = new DataContext();
-            return context.Posts
+            return _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
                 .ToList();
@@ -82,8 +81,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public IEnumerable<Post> GetPostsByUser(int userId)
         {
-            using var context = new DataContext();
-            return context.Posts
+            return _context.Posts
                 .Where(p => p.UserId == userId)
                 .Include(u => u.User)
                 .AsNoTracking()
@@ -92,14 +90,13 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public IEnumerable<PostDTO> GetPostsDTO()
         {
-            using var context = new DataContext();
             var config = new MapperConfiguration(x => x.CreateMap<Post, PostDTO>()
                 .ForMember("Title", c => c.MapFrom(x => x.Title))
                 .ForMember("EmailAuthor", c => c.MapFrom(x => x.User.Email))
                 .ForMember("CreateDate", c => c.MapFrom(x => x.Created)));
 
             var mapper = new Mapper(config);
-            var posts = context.Posts
+            var posts = _context.Posts
                 .Include(p => p.User)
                 .OrderByDescending(p => p.Created);
 
@@ -108,8 +105,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public IEnumerable<Post> GetPostsWithComment()
         {
-            using var context = new DataContext();
-            return context.Posts
+            return _context.Posts
                 .Include(p => p.Comments)
                 .ThenInclude(c => c.SubComments)
                 .AsNoTracking()
@@ -118,8 +114,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public IEnumerable<Post> GetPublishedPosts()
         {
-            using var context = new DataContext();
-            return context.Posts
+            return _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
                 .Where(p => p.IsPublished)
@@ -128,14 +123,12 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public IEnumerable<Post> GetPublishedPostsByUser(int userId)
         {
-            using var context = new DataContext();
             var user = GetUserById(userId);
-            return context.Posts.Where(p => p.UserId == userId && p.IsPublished).ToList();
+            return _context.Posts.Where(p => p.UserId == userId && p.IsPublished).ToList();
         }
 
         public void PublishPost(int postId)
         {
-            using var context = new DataContext();
             var post = GetPostById(postId);
 
             if (post.IsPublished)
@@ -145,15 +138,14 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             post.User = GetUserById(post.UserId);
             post.IsPublished = true;
-            var modifiedPost = context.Entry(post);
+            var modifiedPost = _context.Entry(post);
             modifiedPost.State = EntityState.Modified;
-            context.SaveChanges();
+            _context.SaveChanges();
         }
 
         public void SendPostToDrafts(int postId)
-        {
-            using var context = new DataContext();
-            var post = context.Posts
+        { 
+            var post = _context.Posts
                 .Include(p => p.Comments)
                 .SingleOrDefault(p => p.Id == postId);
 
@@ -165,12 +157,11 @@ namespace Habr.BusinessLogic.Services.Implementations
             }
 
             post.IsPublished = false;
-            context.SaveChanges();
+            _context.SaveChanges();
         }
 
         public void UpdatePost(Post post)
         {
-            using var context = new DataContext();
             var updatePost = GetPostById(post.Id);
 
             if (updatePost.IsPublished)
@@ -178,14 +169,14 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new Exception("Опубликованный пост нельзя редактировать!");
             }
 
-            updatePost.User = context.Users
+            updatePost.User = _context.Users
                 .SingleOrDefault(u => u.Id == post.UserId);
 
             GuardAgainstInvalidUser(updatePost.User);
 
             updatePost.Title = post.Title;
             updatePost.Text = post.Text;
-            context.SaveChanges();
+            _context.SaveChanges();
         }
 
         private void GuardAgainstInvalidPost(Post? post)
@@ -227,8 +218,8 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         private User GetUserById(int userId)
         {
-            using var context = new DataContext();
-            var user = context.Users
+            
+            var user = _context.Users
                 .SingleOrDefault(u => u.Id == userId);
 
             GuardAgainstInvalidUser(user);

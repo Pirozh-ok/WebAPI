@@ -7,10 +7,15 @@ namespace Habr.BusinessLogic.Services.Implementations
 {
     public class CommentService : ICommentService
     {
+        private readonly DataContext _context;
+        public CommentService(DataContext context)
+        {
+            _context = context;
+        }
+
         public Comment GetCommentById(int commentId)
         {
-            var context = new DataContext();
-            var comment = context.Comments
+            var comment = _context.Comments
                 .SingleOrDefault(c => c.Id == commentId);
 
             GuardAgainstInvalidComment(comment);
@@ -18,34 +23,31 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public void CreateComment(int userId, int postId, string text)
         {
-            using var context = new DataContext();
             var user = GetUserById(userId);
             var post = GetPostById(postId);
 
-            context.Comments.Add(
-                new Comment 
-                { 
-                    UserId = userId, 
+            _context.Comments.Add(
+                new Comment
+                {
+                    UserId = userId,
                     PostId = postId,
-                    Text = text 
+                    Text = text
                 });
 
-            context.SaveChanges();
+            _context.SaveChanges();
         }
 
         public void CreateCommentAnswer(int userId, string text, int parentId, int postId)
         {
-
-            using var context = new DataContext();
             var user = GetUserById(userId);
             var post = GetPostById(postId);
 
-            var parent = context.Comments
+            var parent = _context.Comments
                 .SingleOrDefault(c => c.Id == parentId);
 
             GuardAgainstInvalidComment(parent);
 
-            context.Comments.Add(new Comment
+            _context.Comments.Add(new Comment
             {
                 User = user,
                 Text = text,
@@ -53,29 +55,26 @@ namespace Habr.BusinessLogic.Services.Implementations
                 Post = post
             });
 
-            context.SaveChanges();
+            _context.SaveChanges();
         }
 
         public void DeleteComment(int commentId)
         {
-            using var context = new DataContext();
             var comment = GetCommentById(commentId);
-            context.Comments.Remove(comment);
-            context.SaveChanges();
+            _context.Comments.Remove(comment);
+            _context.SaveChanges();
         }
 
         public IEnumerable<Comment> GetComments()
         {
-            using var context = new DataContext();
-            return context.Comments
+            return _context.Comments
                 .AsNoTracking()
                 .ToList();
         }
 
         public IEnumerable<Comment> GetCommentsByPost(int postId)
         {
-            using var context = new DataContext();
-            return context.Comments
+            return _context.Comments
                 .Where(c => c.PostId == postId)
                 .Include(c => c.User)
                 .Include(c => c.SubComments)
@@ -85,8 +84,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public IEnumerable<Comment> GetCommentsByUser(int userId)
         {
-            using var context = new DataContext();
-            return context.Comments
+            return _context.Comments
                 .Where(c => c.UserId == userId)
                 .Include(c => c.SubComments)
                 .AsNoTracking()
@@ -95,8 +93,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         private User GetUserById(int userId)
         {
-            using var context = new DataContext();
-            var user = context.Users
+            var user = _context.Users
                 .SingleOrDefault(u => u.Id == userId);
 
             GuardAgainstInvalidUser(user);
@@ -105,8 +102,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         private Post GetPostById(int postId)
         {
-            using var context = new DataContext();
-            var post = context.Posts
+            var post = _context.Posts
                 .SingleOrDefault(u => u.Id == postId);
 
             if (post == null)
