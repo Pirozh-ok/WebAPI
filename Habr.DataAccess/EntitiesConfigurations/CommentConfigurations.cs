@@ -8,28 +8,12 @@ namespace Habr.DataAccess.EntitiesConfigurations
     {
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
-            /*//many-to-one relationship between Comment and User
-            builder
-                .HasOne(c => c.User)
-                .WithMany(u => u.Comments)
-                .HasForeignKey(u => u.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired();*/
-
-            /*//many-to-one relationship between Comment and Post
-            builder.HasOne(c => c.Post)
-                .WithMany(p => p.Comments)
-                .HasForeignKey(p => p.PostId)
-                .OnDelete(DeleteBehavior.Cascade);*/
-
-            //one-to-many relationship between Comment and Comment
             builder.HasOne(pc => pc.Parent)
                 .WithMany(sc => sc.SubComments)
                 .HasForeignKey(sc => sc.ParentId)
                 .OnDelete(DeleteBehavior.ClientCascade)
                 .IsRequired(false);
 
-            //Property configuration
             builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();

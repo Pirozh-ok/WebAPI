@@ -3,9 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.ConsoleApp", "Habr.ConsoleApp\Habr.ConsoleApp.csproj", "{21589288-24D7-4AD7-A4AA-2C89454B4B2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.Presentation", "Habr.ConsoleApp\Habr.Presentation.csproj", "{21589288-24D7-4AD7-A4AA-2C89454B4B2A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.DataAccess", "Habr.DataAccess\Habr.DataAccess.csproj", "{5E7A89BE-4A35-4A99-84C5-3FF402C1D430}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{27EF571A-E76B-4EF3-9B80-6309E172B27A}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habr.BusinessLogic", "BusinessLogic\Habr.BusinessLogic.csproj", "{3963CF38-70A2-425F-8C67-2FDB3EA3A886}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habr.Common", "Habr.Common\Habr.Common.csproj", "{F0861CB2-CA93-4017-B970-04C9EE5789E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habr.Application", "Habr.Application\Habr.Application.csproj", "{2697A737-C3CD-40F9-A487-F5927324AD5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +32,18 @@ Global
 		{5E7A89BE-4A35-4A99-84C5-3FF402C1D430}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E7A89BE-4A35-4A99-84C5-3FF402C1D430}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E7A89BE-4A35-4A99-84C5-3FF402C1D430}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3963CF38-70A2-425F-8C67-2FDB3EA3A886}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3963CF38-70A2-425F-8C67-2FDB3EA3A886}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3963CF38-70A2-425F-8C67-2FDB3EA3A886}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3963CF38-70A2-425F-8C67-2FDB3EA3A886}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0861CB2-CA93-4017-B970-04C9EE5789E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0861CB2-CA93-4017-B970-04C9EE5789E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0861CB2-CA93-4017-B970-04C9EE5789E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0861CB2-CA93-4017-B970-04C9EE5789E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2697A737-C3CD-40F9-A487-F5927324AD5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2697A737-C3CD-40F9-A487-F5927324AD5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2697A737-C3CD-40F9-A487-F5927324AD5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2697A737-C3CD-40F9-A487-F5927324AD5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

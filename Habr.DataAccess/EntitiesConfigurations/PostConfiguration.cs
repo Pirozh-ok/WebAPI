@@ -7,21 +7,12 @@ namespace Habr.DataAccess.EntitiesConfigurations
     {
         public void Configure(EntityTypeBuilder<Post> builder)
         {
-/*            //many-to-one relationship between Post and User
-            builder.HasOne(p => p.User)
-                .WithMany(u => u.Posts)
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired();*/
-
-            //one-to-many relationship between Post and Comment
             builder.HasMany(p => p.Comments)
                 .WithOne(c => c.Post)
                 .HasForeignKey(c => c.PostId)
                 .OnDelete(DeleteBehavior.ClientCascade)
                 .IsRequired();
 
-            //Property configuration
             builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
@@ -33,12 +24,20 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.Property("Text")
                 .IsRequired()
-                .HasMaxLength(5000)
+                .HasMaxLength(2000)
                 .HasDefaultValue("");
 
             builder.Property("Created")
                 .IsRequired()
                 .HasDefaultValueSql("getdate()");
+
+            builder.Property("Updated")
+                .IsRequired()
+                .HasDefaultValueSql("getdate()");
+
+            builder.Property("IsPublished")
+                .IsRequired()
+                .HasDefaultValue(false);
         }
     }
 }
