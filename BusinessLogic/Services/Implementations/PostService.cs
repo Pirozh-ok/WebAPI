@@ -61,6 +61,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public Post GetPostById(int postId)
         {
             var post = _context.Posts
+                .Include(p => p.User)
                 .SingleOrDefault(p => p.Id == postId);
 
             GuardAgainstInvalidPost(post);
