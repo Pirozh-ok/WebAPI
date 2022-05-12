@@ -10,9 +10,11 @@ namespace Habr.BusinessLogic.Services.Implementations
     public class PostService : IPostService
     {
         private readonly DataContext _context;
-        public PostService(DataContext context)
+        private readonly IMapper _mapper;
+        public PostService(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
         public void CreatePost(string title, string text, int userId, bool isPublished)
         {
@@ -53,13 +55,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var posts = GetNotPublishedPostsByUser(userId)
                 .OrderByDescending(p => p.Updated);
 
-            var config = new MapperConfiguration(x => x.CreateMap<Post, NotPublishedPostDTO>()
-                .ForMember("Title", c => c.MapFrom(x => x.Title))
-                .ForMember("Created", c => c.MapFrom(x => x.Created))
-                .ForMember("Updated", c => c.MapFrom(x => x.User.Email)));
-
-            var mapper = new Mapper(config);
-            return mapper.Map<List<NotPublishedPostDTO>>(posts);
+            return _mapper.Map<List<NotPublishedPostDTO>>(posts);
         }
 
         public Post GetPostById(int postId)
@@ -90,17 +86,11 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public IEnumerable<PostDTO> GetPostsDTO()
         {
-            var config = new MapperConfiguration(x => x.CreateMap<Post, PostDTO>()
-                .ForMember("Title", c => c.MapFrom(x => x.Title))
-                .ForMember("EmailAuthor", c => c.MapFrom(x => x.User.Email))
-                .ForMember("CreateDate", c => c.MapFrom(x => x.Created)));
-
-            var mapper = new Mapper(config);
             var posts = _context.Posts
                 .Include(p => p.User)
                 .OrderByDescending(p => p.Created);
 
-            return mapper.Map<List<PostDTO>>(posts);
+            return _mapper.Map<List<PostDTO>>(posts);
         }
 
         public IEnumerable<Post> GetPostsWithComment()
@@ -119,6 +109,25 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .Where(p => p.IsPublished)
                 .ToList();
+        }
+
+        public PublishedPostDTO GetPublishedPostDTO(int postId)
+        {
+            var post = GetPostById(postId);
+
+            if (!post.IsPublished)
+            {
+                throw new Exception("Пост не опубликован");
+            }
+
+            return new PublishedPostDTO
+            {
+                Title = post.Title,
+                Text = post.Text,
+                AuthorEmail = post.User.Email,
+                PublicationDate = post.Updated,
+                Comments = GetCommentsByPost(post.Id).ToList()
+            };
         }
 
         public IEnumerable<Post> GetPublishedPostsByUser(int userId)
@@ -179,6 +188,59 @@ namespace Habr.BusinessLogic.Services.Implementations
             _context.SaveChanges();
         }
 
+        private IEnumerable<CommentDTO> GetCommentsByPost(int postId)
+        {
+            var postComments = _context.Comments
+                .Where(p => p.PostId == postId && p.ParentId == null)
+                .Include(p => p.User)
+                .AsNoTracking()
+                .ToList();
+
+            var commentsDTO = new List<CommentDTO>();
+
+            foreach (var comment in postComments)
+            {
+                commentsDTO.Add(
+                    new CommentDTO
+                    {
+                        Text = comment.Text,
+                        AuthorName = comment.User.Name,
+                        Comments = GetCommentsByParentId(comment.Id)
+                    });
+            }
+
+            return commentsDTO;
+        }
+
+        private IEnumerable<CommentDTO> GetCommentsByParentId(int parentId)
+        {
+            var subComments = _context.Comments
+                .Include(c => c.SubComments)
+                .Where(c => c.ParentId == parentId)
+                .Include(c => c.User)
+                .AsNoTracking()
+                .ToList();
+
+            if (subComments is null || subComments.Count == 0)
+            {
+                return new List<CommentDTO>();
+            }    
+
+            var subCommentDTOs = new List<CommentDTO>();
+
+            foreach (var subComment in subComments)
+            {
+                subCommentDTOs.Add(
+                        new CommentDTO
+                        {
+                            Text = subComment.Text,
+                            AuthorName = subComment.User.Name,
+                            Comments = GetCommentsByParentId(subComment.Id)
+                        });
+            }
+
+            return subCommentDTOs;
+        }
         private void GuardAgainstInvalidPost(Post? post)
         {
             if (post == null)

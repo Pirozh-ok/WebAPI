@@ -1,5 +1,6 @@
 ﻿using Habr.Common.DTOs;
 using Habr.DataAccess;
+using Habr.DataAccess.Entities;
 
 namespace Habr.BusinessLogic.Services.Interfaces
 {
@@ -9,6 +10,7 @@ namespace Habr.BusinessLogic.Services.Interfaces
         IEnumerable<PostDTO> GetPostsDTO();
         IEnumerable<NotPublishedPostDTO> GetNotPublishedPostsDTO(int userId);
         IEnumerable<Post> GetPublishedPosts();
+        PublishedPostDTO GetPublishedPostDTO(int postId);
         IEnumerable<Post> GetPostsByUser(int userId);
         IEnumerable<Post> GetPostsWithComment();
         Post GetPostById(int id);
