@@ -14,11 +14,11 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetPostById(int id)
+        public async Task<IActionResult> GetPostByIdAsync(int id)
         {
             try
             {
-                return Ok(_postService.GetPublishedPostDTOAsync(id));
+                return Ok(await _postService.GetPublishedPostDTOAsync(id));
             }
             catch(Exception ex)
             {
