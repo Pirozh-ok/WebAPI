@@ -4,7 +4,7 @@ namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IUserService
     {
-        public User LogIn(string email, string password);
-        public void Register(string name, string email, string password);
+        public Task<User> LogInAsync(string email, string password);
+        public void RegisterAsync(string name, string email, string password);
     }
 }

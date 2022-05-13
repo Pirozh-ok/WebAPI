@@ -1,31 +1,34 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Habr.BusinessLogic.Services.Implementations
 {
     public class UserService : IUserService
     {
-        public User LogIn(string email, string password)
+        private readonly DataContext _context;
+        public UserService(DataContext context)
         {
-            using var context = new DataContext();
-            var user = context.Users
-                .SingleOrDefault(u => u.Email == email);
+            _context = context;
+        }
+        public async Task<User> LogInAsync(string email, string password)
+        {
+            var user = await _context.Users
+                .SingleOrDefaultAsync(u => u.Email == email);
 
             GuardAgainstInvalidUser(user, password);
             return user;
         }
-        public void Register(string name, string email, string password)
+        public async void RegisterAsync(string name, string email, string password)
         {
-            using var context = new DataContext();
-
-            if (context.Users
-                .SingleOrDefault(u => u.Email == email) != null)
+            if (await _context.Users
+                .SingleOrDefaultAsync(u => u.Email == email) != null)
             {
-                throw new Exception("Пользователь с таким адресом электронной почты уже существует!");
+                throw new Exception("A user with this email address already exists!");
             }
 
-            context.Users.Add(
+            await _context.Users.AddAsync(
                 new User
                 {
                     Email = email,
@@ -33,18 +36,17 @@ namespace Habr.BusinessLogic.Services.Implementations
                     Password = BCrypt.Net.BCrypt.HashPassword(password)
                 });
 
-            context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
-
         private void GuardAgainstInvalidUser(User user, string password)
         {
             if (user == null)
             {
-                throw new Exception("Неверный адрес электронной почты!");
+                throw new Exception("Invalid email!");
             }
             else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                throw new Exception("Неверный пароль!");
+                throw new Exception("Incorrect password!");
             }
         }
     }
