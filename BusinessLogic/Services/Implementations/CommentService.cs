@@ -13,20 +13,20 @@ namespace Habr.BusinessLogic.Services.Implementations
             _context = context;
         }
 
-        public Comment GetCommentById(int commentId)
+        public async Task<Comment> GetCommentByIdAsync(int commentId)
         {
-            var comment = _context.Comments
-                .SingleOrDefault(c => c.Id == commentId);
+            var comment = await _context.Comments
+                .SingleOrDefaultAsync(c => c.Id == commentId);
 
             GuardAgainstInvalidComment(comment);
             return comment;
         }
-        public void CreateComment(int userId, int postId, string text)
+        public async void CreateCommentAsync(int userId, int postId, string text)
         {
-            var user = GetUserById(userId);
-            var post = GetPostById(postId);
+            var user = GetUserByIdAsync(userId);
+            var post = GetPostByIdAsync(postId);
 
-            _context.Comments.Add(
+            await _context.Comments.AddAsync(
                 new Comment
                 {
                     UserId = userId,
@@ -34,20 +34,20 @@ namespace Habr.BusinessLogic.Services.Implementations
                     Text = text
                 });
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void CreateCommentAnswer(int userId, string text, int parentId, int postId)
+        public async void CreateCommentAnswerAsync(int userId, string text, int parentId, int postId)
         {
-            var user = GetUserById(userId);
-            var post = GetPostById(postId);
+            var user = await GetUserByIdAsync(userId);
+            var post = await GetPostByIdAsync(postId);
 
-            var parent = _context.Comments
-                .SingleOrDefault(c => c.Id == parentId);
+            var parent = await _context.Comments
+                .SingleOrDefaultAsync(c => c.Id == parentId);
 
             GuardAgainstInvalidComment(parent);
 
-            _context.Comments.Add(new Comment
+            await _context.Comments.AddAsync(new Comment
             {
                 User = user,
                 Text = text,
@@ -55,59 +55,59 @@ namespace Habr.BusinessLogic.Services.Implementations
                 Post = post
             });
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteComment(int commentId)
+        public async void DeleteCommentAsync(int commentId)
         {
-            var comment = GetCommentById(commentId);
+            var comment = await GetCommentByIdAsync(commentId);
             _context.Comments.Remove(comment);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public IEnumerable<Comment> GetComments()
+        public async Task<IEnumerable<Comment>> GetCommentsAsync()
         {
-            return _context.Comments
+            return await _context.Comments
                 .AsNoTracking()
-                .ToList();
+                .ToListAsync();
         }
 
-        public IEnumerable<Comment> GetCommentsByPost(int postId)
+        public async Task<IEnumerable<Comment>> GetCommentsByPostAsync(int postId)
         {
-            return _context.Comments
+            return await _context.Comments
                 .Where(c => c.PostId == postId)
                 .Include(c => c.User)
                 .Include(c => c.SubComments)
                 .AsNoTracking()
-                .ToList();
+                .ToListAsync();
         }
 
-        public IEnumerable<Comment> GetCommentsByUser(int userId)
+        public async Task<IEnumerable<Comment>> GetCommentsByUserAsync(int userId)
         {
-            return _context.Comments
+            return await _context.Comments
                 .Where(c => c.UserId == userId)
                 .Include(c => c.SubComments)
                 .AsNoTracking()
-                .ToList();
+                .ToListAsync();
         }
 
-        private User GetUserById(int userId)
+        private async Task<User> GetUserByIdAsync(int userId)
         {
-            var user = _context.Users
-                .SingleOrDefault(u => u.Id == userId);
+            var user = await _context.Users
+                .SingleOrDefaultAsync(u => u.Id == userId);
 
             GuardAgainstInvalidUser(user);
             return user;
         }
 
-        private Post GetPostById(int postId)
+        private async Task<Post> GetPostByIdAsync(int postId)
         {
-            var post = _context.Posts
-                .SingleOrDefault(u => u.Id == postId);
+            var post = await _context.Posts
+                .SingleOrDefaultAsync(u => u.Id == postId);
 
             if (post == null)
             {
-                throw new Exception("Пост с таким id не найден!");
+                throw new Exception("Post not found");
             }
 
             return post;
@@ -117,7 +117,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (user == null)
             {
-                throw new Exception("Пользователь не найден!");
+                throw new Exception("User is not found!");
             }
         }
 
@@ -125,7 +125,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (comment == null)
             {
-                throw new Exception("Комментарий не найден!");
+                throw new Exception("Comment not found!");
             }
         }
     }

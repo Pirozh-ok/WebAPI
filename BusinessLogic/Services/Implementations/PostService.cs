@@ -16,12 +16,12 @@ namespace Habr.BusinessLogic.Services.Implementations
             _context = context;
             _mapper = mapper;
         }
-        public void CreatePost(string title, string text, int userId, bool isPublished)
+        public async void CreatePostAsync(string title, string text, int userId, bool isPublished)
         {
             GuardAgainstInvalidPost(title, text);
-            var user = GetUserById(userId);
+            var user = await GetUserByIdAsync(userId);
 
-            _context.Posts.Add(
+            await _context.Posts.AddAsync(
                 new Post()
                 {
                     Title = title,
@@ -29,97 +29,103 @@ namespace Habr.BusinessLogic.Services.Implementations
                     User = user,
                     IsPublished = isPublished
                 });
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void DeletePost(int postId)
+        public async void DeletePostAsync(int postId)
         {
-            var post = GetPostById(postId);
+            var post = await GetPostByIdAsync(postId);
 
-            _context.Entry(post)
+            await _context.Entry(post)
                 .Collection(c => c.Comments)
-                .Load();
+                .LoadAsync();
 
             _context.Posts.Remove(post);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public IEnumerable<Post> GetNotPublishedPostsByUser(int userId)
+        public async Task<IEnumerable<Post>> GetNotPublishedPostsByUserAsync(int userId)
         {
-            var user = GetUserById(userId);
-            return _context.Posts.Where(p => p.UserId == userId && !p.IsPublished).ToList();
+            var user = await GetUserByIdAsync(userId);
+            return await _context.Posts
+                .Where(p => p.UserId == userId && !p.IsPublished)
+                .ToListAsync();
         }
 
-        public IEnumerable<NotPublishedPostDTO> GetNotPublishedPostsDTO(int userId)
+        public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsDTOAsync(int userId)
         {
-            var posts = GetNotPublishedPostsByUser(userId)
-                .OrderByDescending(p => p.Updated);
+            var posts = await GetNotPublishedPostsByUserAsync(userId);
 
-            return _mapper.Map<List<NotPublishedPostDTO>>(posts);
+            return _mapper.Map<List<NotPublishedPostDTO>>(posts
+                .OrderByDescending(p => p.Updated)
+                .ToList());
         }
 
-        public Post GetPostById(int postId)
+        public async Task<Post> GetPostByIdAsync(int postId)
         {
-            var post = _context.Posts
+            var post = await _context.Posts
                 .Include(p => p.User)
-                .SingleOrDefault(p => p.Id == postId);
+                .SingleOrDefaultAsync(p => p.Id == postId);
 
             GuardAgainstInvalidPost(post);
             return post;
         }
 
-        public IEnumerable<Post> GetPosts()
+        public async Task<IEnumerable<Post>> GetPostsAsync()
         {
-            return _context.Posts
+            return await _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
-                .ToList();
+                .ToListAsync();
         }
 
-        public IEnumerable<Post> GetPostsByUser(int userId)
+        public async Task<IEnumerable<Post>> GetPostsByUserAsync(int userId)
         {
-            return _context.Posts
+            return await _context.Posts
                 .Where(p => p.UserId == userId)
                 .Include(u => u.User)
                 .AsNoTracking()
-                .ToList();
+                .ToListAsync();
         }
 
-        public IEnumerable<PostDTO> GetPostsDTO()
+        public async Task<IEnumerable<PostDTO>> GetPostsDTOAsync()
         {
-            var posts = _context.Posts
+            var posts = await _context.Posts
                 .Include(p => p.User)
-                .OrderByDescending(p => p.Created);
+                .OrderByDescending(p => p.Created)
+                .ToListAsync();
 
             return _mapper.Map<List<PostDTO>>(posts);
         }
 
-        public IEnumerable<Post> GetPostsWithComment()
+        public async Task<IEnumerable<Post>> GetPostsWithCommentAsync()
         {
-            return _context.Posts
+            return await _context.Posts
                 .Include(p => p.Comments)
                 .ThenInclude(c => c.SubComments)
                 .AsNoTracking()
-                .ToList();
+                .ToListAsync();
         }
 
-        public IEnumerable<Post> GetPublishedPosts()
+        public async Task<IEnumerable<Post>> GetPublishedPostsAsync()
         {
-            return _context.Posts
+            return await _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
                 .Where(p => p.IsPublished)
-                .ToList();
+                .ToListAsync();
         }
 
-        public PublishedPostDTO GetPublishedPostDTO(int postId)
+        public async Task<PublishedPostDTO> GetPublishedPostDTOAsync(int postId)
         {
-            var post = GetPostById(postId);
+            var post = await GetPostByIdAsync(postId);
 
             if (!post.IsPublished)
             {
-                throw new Exception("Пост не опубликован");
+                throw new Exception("Post not published");
             }
+
+            var comments = await GetCommentsByPostAsync(post.Id);
 
             return new PublishedPostDTO
             {
@@ -127,75 +133,78 @@ namespace Habr.BusinessLogic.Services.Implementations
                 Text = post.Text,
                 AuthorEmail = post.User.Email,
                 PublicationDate = post.Updated,
-                Comments = GetCommentsByPost(post.Id).ToList()
+                Comments = comments.ToList()
             };
         }
 
-        public IEnumerable<Post> GetPublishedPostsByUser(int userId)
+        public async Task<IEnumerable<Post>> GetPublishedPostsByUserAsync(int userId)
         {
-            var user = GetUserById(userId);
-            return _context.Posts.Where(p => p.UserId == userId && p.IsPublished).ToList();
+            var user = await GetUserByIdAsync(userId);
+            return await _context
+                .Posts
+                .Where(p => p.UserId == userId && p.IsPublished)
+                .ToListAsync();
         }
 
-        public void PublishPost(int postId)
+        public async void PublishPostAsync(int postId)
         {
-            var post = GetPostById(postId);
+            var post = await GetPostByIdAsync(postId);
 
             if (post.IsPublished)
             {
-                throw new Exception("Пост уже опубликован!");
+                throw new Exception("The post has already been published!");
             }
 
-            post.User = GetUserById(post.UserId);
+            post.User = await GetUserByIdAsync(post.UserId);
             post.IsPublished = true;
             var modifiedPost = _context.Entry(post);
             modifiedPost.State = EntityState.Modified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void SendPostToDrafts(int postId)
+        public async void SendPostToDraftsAsync(int postId)
         { 
-            var post = _context.Posts
+            var post = await _context.Posts
                 .Include(p => p.Comments)
-                .SingleOrDefault(p => p.Id == postId);
+                .SingleOrDefaultAsync(p => p.Id == postId);
 
             GuardAgainstInvalidPost(post);
 
             if (post.Comments.Count > 0)
             {
-                throw new Exception("Пост с комментариями нельзя отправить в черновики!");
+                throw new Exception("A post with comments cannot be sent to drafts!");
             }
 
             post.IsPublished = false;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void UpdatePost(Post post)
+        public async void UpdatePostAsync(Post post)
         {
-            var updatePost = GetPostById(post.Id);
+            var updatePost = await GetPostByIdAsync(post.Id);
 
             if (updatePost.IsPublished)
             {
-                throw new Exception("Опубликованный пост нельзя редактировать!");
+                throw new Exception("Published post cannot be edited!");
             }
 
-            updatePost.User = _context.Users
-                .SingleOrDefault(u => u.Id == post.UserId);
+            updatePost.User = await _context.Users
+                .SingleOrDefaultAsync(u => u.Id == post.UserId);
 
             GuardAgainstInvalidUser(updatePost.User);
 
             updatePost.Title = post.Title;
             updatePost.Text = post.Text;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        private IEnumerable<CommentDTO> GetCommentsByPost(int postId)
+        private async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
         {
-            var postComments = _context.Comments
+            var postComments = await _context.Comments
                 .Where(p => p.PostId == postId && p.ParentId == null)
                 .Include(p => p.User)
                 .AsNoTracking()
-                .ToList();
+                .ToListAsync();
 
             var commentsDTO = new List<CommentDTO>();
 
@@ -206,21 +215,21 @@ namespace Habr.BusinessLogic.Services.Implementations
                     {
                         Text = comment.Text,
                         AuthorName = comment.User.Name,
-                        Comments = GetCommentsByParentId(comment.Id)
+                        Comments = await GetCommentsByParentIdAsync(comment.Id)
                     });
             }
 
             return commentsDTO;
         }
 
-        private IEnumerable<CommentDTO> GetCommentsByParentId(int parentId)
+        private async Task<IEnumerable<CommentDTO>> GetCommentsByParentIdAsync(int parentId)
         {
-            var subComments = _context.Comments
+            var subComments = await _context.Comments
                 .Include(c => c.SubComments)
                 .Where(c => c.ParentId == parentId)
                 .Include(c => c.User)
                 .AsNoTracking()
-                .ToList();
+                .ToListAsync();
 
             if (subComments is null || subComments.Count == 0)
             {
@@ -236,7 +245,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                         {
                             Text = subComment.Text,
                             AuthorName = subComment.User.Name,
-                            Comments = GetCommentsByParentId(subComment.Id)
+                            Comments = await GetCommentsByParentIdAsync(subComment.Id)
                         });
             }
 
@@ -246,29 +255,29 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (post == null)
             {
-                throw new Exception("Пост не найден!");
+                throw new Exception("Post not found!");
             }
         }
         private void GuardAgainstInvalidPost(string title, string text)
         {
             if (string.IsNullOrEmpty(title))
             {
-                throw new Exception("Заголовок поста является обязательным!");
+                throw new Exception("The post title is required!");
             }
 
             if (title.Length > 200)
             {
-                throw new Exception("Заголовок поста не может превышать 200 символов!");
+                throw new Exception("Post title cannot exceed 200 characters!");
             }
 
             if (string.IsNullOrEmpty(text))
             {
-                throw new Exception("Текст поста является обязательным!");
+                throw new Exception("Post text is required!");
             }
 
             if (title.Length > 2000)
             {
-                throw new Exception("Текст поста не может превышать 2000 символов!");
+                throw new Exception("Post text cannot exceed 2000 characters!");
             }
         }
 
@@ -276,14 +285,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (user == null)
             {
-                throw new Exception("Пользователь не найден!");
+                throw new Exception("User is not found!");
             }
         }
-        private User GetUserById(int userId)
+        private async Task<User> GetUserByIdAsync(int userId)
         {
             
-            var user = _context.Users
-                .SingleOrDefault(u => u.Id == userId);
+            var user = await _context.Users
+                .SingleOrDefaultAsync(u => u.Id == userId);
 
             GuardAgainstInvalidUser(user);
             return user;

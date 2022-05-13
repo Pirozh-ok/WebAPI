@@ -6,20 +6,20 @@ namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IPostService
     {
-        IEnumerable<Post> GetPosts();
-        IEnumerable<PostDTO> GetPostsDTO();
-        IEnumerable<NotPublishedPostDTO> GetNotPublishedPostsDTO(int userId);
-        IEnumerable<Post> GetPublishedPosts();
-        PublishedPostDTO GetPublishedPostDTO(int postId);
-        IEnumerable<Post> GetPostsByUser(int userId);
-        IEnumerable<Post> GetPostsWithComment();
-        Post GetPostById(int id);
-        void CreatePost(string title, string text, int userId, bool isPublished);
-        void UpdatePost(Post post);
-        void PublishPost(int postId);
-        void DeletePost(int postId);
-        IEnumerable<Post> GetPublishedPostsByUser(int userId);
-        IEnumerable<Post> GetNotPublishedPostsByUser(int userId);
-        void SendPostToDrafts(int postId);
+        Task<IEnumerable<Post>> GetPostsAsync();
+        Task<IEnumerable<PostDTO>> GetPostsDTOAsync();
+        Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsDTOAsync(int userId);
+        Task<IEnumerable<Post>> GetPublishedPostsAsync();
+        Task<PublishedPostDTO> GetPublishedPostDTOAsync(int postId);
+        Task<IEnumerable<Post>> GetPostsByUserAsync(int userId);
+        Task<IEnumerable<Post>> GetPostsWithCommentAsync();
+        Task<Post> GetPostByIdAsync(int id);
+        void CreatePostAsync(string title, string text, int userId, bool isPublished);
+        void UpdatePostAsync(Post post);
+        void PublishPostAsync(int postId);
+        void DeletePostAsync(int postId);
+        Task<IEnumerable<Post>> GetPublishedPostsByUserAsync(int userId);
+        Task<IEnumerable<Post>> GetNotPublishedPostsByUserAsync(int userId);
+        void SendPostToDraftsAsync(int postId);
     }
 }

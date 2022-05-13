@@ -18,11 +18,11 @@ namespace Habr.Presentation.Controllers
         {
             try
             {
-                return Ok(_postService.GetPublishedPostDTO(id));
+                return Ok(_postService.GetPublishedPostDTOAsync(id));
             }
             catch(Exception ex)
             {
-                return NotFound("Ничего не найдено");
+                return NotFound("Not found");
             }
         }
 
