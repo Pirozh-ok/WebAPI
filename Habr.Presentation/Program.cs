@@ -1,5 +1,6 @@
 ﻿using Habr.BusinessLogic;
 using Habr.Common.AutoMappers;
+using Habr.Common.Mapping;
 using Habr.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddServices();
 builder.Services.ConfigureServices(builder.Configuration);
-builder.Services.AddAutoMapper(typeof(AppMappingProfile));
+builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile));
 
 var app = builder.Build();
 
