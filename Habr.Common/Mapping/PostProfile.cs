@@ -12,7 +12,8 @@ namespace Habr.Common.AutoMappers
                 .ForMember(p => p.Id, c => c.MapFrom(p => p.Id))
                 .ForMember(p => p.Title, c => c.MapFrom(p => p.Title))
                 .ForMember(p => p.EmailAuthor, c => c.MapFrom(p => p.User.Email))
-                .ForMember(p => p.CreateDate, c => c.MapFrom(p => p.Created));
+                .ForMember(p => p.CreateDate, c => c.MapFrom(p => p.Created))
+                .ForMember(p => p.IsPublished, c=> c.MapFrom(p=>p.IsPublished));
 
             CreateMap<Post, PublishedPostDTO>()
                 .ForMember(p => p.Title, c => c.MapFrom(p => p.Title))

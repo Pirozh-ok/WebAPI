@@ -17,7 +17,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             _context = context;
             _mapper = mapper;
         }
-        public async void CreatePostAsync(string title, string text, int userId, bool isPublished)
+        public async Task CreatePostAsync(string title, string text, int userId, bool isPublished)
         {
             GuardAgainstInvalidPost(title, text);
             var user = await GetUserByIdAsync(userId);
@@ -32,10 +32,9 @@ namespace Habr.BusinessLogic.Services.Implementations
                 });
             await _context.SaveChangesAsync();
         }
-
-        public async void DeletePostAsync(int postId)
+        public async Task DeletePostAsync(int postId)
         {
-            var post = await GetPostByIdAsync(postId);
+            var post = await GetFullPostByIdAsync(postId);
 
             await _context.Entry(post)
                 .Collection(c => c.Comments)
@@ -44,39 +43,39 @@ namespace Habr.BusinessLogic.Services.Implementations
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
         }
-
-        public async Task<IEnumerable<Post>> GetNotPublishedPostsByUserAsync(int userId)
+        public async Task<IEnumerable<Post>> GetFullPostsAsync()
         {
-            var user = await GetUserByIdAsync(userId);
             return await _context.Posts
-                .Where(p => p.UserId == userId && !p.IsPublished)
+                .Include(p => p.User)
+                .Include(p => p.Comments)
+                .AsNoTracking()
                 .ToListAsync();
         }
-
-        public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsDTOAsync(int userId)
+        public async Task<Post> GetFullPostByIdAsync(int id)
         {
-            var posts = await GetNotPublishedPostsByUserAsync(userId);
+            var post = await _context.Posts
+                .SingleOrDefaultAsync(p => p.Id == id);
 
-            return _mapper.Map<List<NotPublishedPostDTO>>(posts
-                .OrderByDescending(p => p.Updated)
-                .ToList());
+            GuardAgainstInvalidPost(post);
+
+            return post;
         }
-
-        public async Task<Post> GetPostByIdAsync(int postId)
+        public async Task<IEnumerable<PostDTO>> GetPostsAsync()
+        {
+            return await _context.Posts
+                .Include(u => u.User)
+                .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        public async Task<PostDTO> GetPostByIdAsync(int postId)
         {
             var post = await _context.Posts
                 .Include(p => p.User)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
             GuardAgainstInvalidPost(post);
-            return post;
-        }
-        public async Task<IEnumerable<Post>> GetPostsAsync()
-        {
-            return await _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()            
-                .ToListAsync();
+            return _mapper.Map<PostDTO>(post);
         }
         public async Task<IEnumerable<PostDTO>> GetPostsByUserAsync(int userId)
         {
@@ -87,62 +86,83 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .ToListAsync();
         }
-        public async Task<IEnumerable<PostDTO>> GetPostsDTOAsync()
+        public async Task<NotPublishedPostDTO> GetNotPublishedPostByIdAsync(int id)
         {
-            var posts = await _context.Posts
-                .Include(p => p.User)
-                .OrderByDescending(p => p.Created)
-                .ToListAsync();
+            var post = await GetFullPostByIdAsync(id);
 
-            return _mapper.Map<List<PostDTO>>(posts);
+            if(post.IsPublished)
+            {
+                throw new Exception("Post is published!");
+            }
+
+            return _mapper.Map<NotPublishedPostDTO>(post);
         }
-        public async Task<IEnumerable<Post>> GetPostsWithCommentAsync()
+        public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId)
         {
+            var user = await GetUserByIdAsync(userId);
             return await _context.Posts
-                .Include(p => p.Comments)
-                .ThenInclude(c => c.SubComments)
+                .Where(p => p.UserId == userId && !p.IsPublished)
+                .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
         }
-        public async Task<IEnumerable<Post>> GetPublishedPostsAsync()
+        public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsAsync()
         {
             return await _context.Posts
+                .Where(p => !p.IsPublished)
+                .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .OrderByDescending(p => p.Updated)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsAsync()
+        {
+            var posts = await _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
                 .Where(p => p.IsPublished)
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+
+            foreach(var post in posts)
+            {
+                post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            }
+
+            return posts; 
         }
-        public async Task<PublishedPostDTO> GetPublishedPostDTOAsync(int postId)
+        public async Task<PublishedPostDTO> GetPublishedPostByIdAsync(int postId)
         {
-            var post = await GetPostByIdAsync(postId);
+            var post = await GetFullPostByIdAsync(postId);
 
             if (!post.IsPublished)
             {
                 throw new Exception("Post not published");
             }
 
-            var comments = await GetCommentsByPostAsync(post.Id);
-
-            return new PublishedPostDTO
-            {
-                Title = post.Title,
-                Text = post.Text,
-                AuthorEmail = post.User.Email,
-                PublicationDate = post.Updated,
-                Comments = comments.ToList()
-            };
+            var postDTO = _mapper.Map<PublishedPostDTO>(post);
+            postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            return postDTO;
         }
-        public async Task<IEnumerable<Post>> GetPublishedPostsByUserAsync(int userId)
+        public async Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId)
         {
-            var user = await GetUserByIdAsync(userId);
-            return await _context
-                .Posts
-                .Where(p => p.UserId == userId && p.IsPublished)
+            var posts = await _context.Posts
+                .Include(u => u.User)
+                .AsNoTracking()
+                .Where(p => p.IsPublished && p.UserId == userId)
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+
+            foreach (var post in posts)
+            {
+                post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            }
+
+            return posts;
         }
-        public async void PublishPostAsync(int postId)
+        public async Task PublishPostAsync(int postId)
         {
-            var post = await GetPostByIdAsync(postId);
+            var post = await GetFullPostByIdAsync(postId);
 
             if (post.IsPublished)
             {
@@ -155,7 +175,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             modifiedPost.State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
-        public async void SendPostToDraftsAsync(int postId)
+        public async Task SendPostToDraftsAsync(int postId)
         { 
             var post = await _context.Posts
                 .Include(p => p.Comments)
@@ -171,9 +191,9 @@ namespace Habr.BusinessLogic.Services.Implementations
             post.IsPublished = false;
             await _context.SaveChangesAsync();
         }
-        public async void UpdatePostAsync(Post post)
+        public async Task UpdatePostAsync(Post post)
         {
-            var updatePost = await GetPostByIdAsync(post.Id);
+            var updatePost = await GetFullPostByIdAsync(post.Id);
 
             if (updatePost.IsPublished)
             {
