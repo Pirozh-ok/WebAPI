@@ -1,4 +1,5 @@
-﻿using Habr.DataAccess.Entities;
+﻿using Habr.Common.DTOs;
+using Habr.DataAccess.Entities;
 
 namespace Habr.BusinessLogic.Services.Interfaces
 {
@@ -9,7 +10,7 @@ namespace Habr.BusinessLogic.Services.Interfaces
         void CreateCommentAnswerAsync(int userId, string text, int parentId, int postId);
         Task<Comment> GetCommentByIdAsync(int commentId);
         Task<IEnumerable<Comment>> GetCommentsAsync();
-        Task<IEnumerable<Comment>> GetCommentsByUserAsync(int userId);
+        Task<IEnumerable<CommentDTO>> GetCommentsByUserAsync(int userId);
         Task<IEnumerable<Comment>> GetCommentsByPostAsync(int postId);
     }
 }

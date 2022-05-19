@@ -8,7 +8,7 @@ namespace Habr.Common.Mapping
     {
         public UserProfile()
         {
-            CreateMap<User, UserWithPostsDTO>()
+            CreateMap<User, UserDTO>()
                 .ForMember(u => u.Id, c => c.MapFrom(u => u.Id))
                 .ForMember(u => u.Name, c => c.MapFrom(u => u.Name))
                 .ForMember(u => u.Email, c => c.MapFrom(u => u.Email))

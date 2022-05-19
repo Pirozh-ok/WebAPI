@@ -11,7 +11,7 @@ namespace Habr.BusinessLogic.Services.Interfaces
         Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsDTOAsync(int userId);
         Task<IEnumerable<Post>> GetPublishedPostsAsync();
         Task<PublishedPostDTO> GetPublishedPostDTOAsync(int postId);
-        Task<IEnumerable<Post>> GetPostsByUserAsync(int userId);
+        Task<IEnumerable<PostDTO>> GetPostsByUserAsync(int userId);
         Task<IEnumerable<Post>> GetPostsWithCommentAsync();
         Task<Post> GetPostByIdAsync(int id);
         void CreatePostAsync(string title, string text, int userId, bool isPublished);

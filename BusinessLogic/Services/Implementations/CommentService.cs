@@ -1,4 +1,7 @@
-﻿using Habr.BusinessLogic.Services.Interfaces;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.DTOs;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -8,9 +11,11 @@ namespace Habr.BusinessLogic.Services.Implementations
     public class CommentService : ICommentService
     {
         private readonly DataContext _context;
-        public CommentService(DataContext context)
+        private readonly IMapper _mapper;
+        public CommentService(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<Comment> GetCommentByIdAsync(int commentId)
@@ -82,11 +87,12 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsByUserAsync(int userId)
+        public async Task<IEnumerable<CommentDTO>> GetCommentsByUserAsync(int userId)
         {
             return await _context.Comments
                 .Where(c => c.UserId == userId)
                 .Include(c => c.SubComments)
+                .ProjectTo<CommentDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
         }

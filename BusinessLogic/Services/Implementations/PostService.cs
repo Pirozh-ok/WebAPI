@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.DataAccess;
@@ -70,24 +71,22 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidPost(post);
             return post;
         }
-
         public async Task<IEnumerable<Post>> GetPostsAsync()
         {
             return await _context.Posts
                 .Include(u => u.User)
-                .AsNoTracking()
+                .AsNoTracking()            
                 .ToListAsync();
         }
-
-        public async Task<IEnumerable<Post>> GetPostsByUserAsync(int userId)
+        public async Task<IEnumerable<PostDTO>> GetPostsByUserAsync(int userId)
         {
             return await _context.Posts
                 .Where(p => p.UserId == userId)
                 .Include(u => u.User)
+                .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
         }
-
         public async Task<IEnumerable<PostDTO>> GetPostsDTOAsync()
         {
             var posts = await _context.Posts
@@ -97,7 +96,6 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             return _mapper.Map<List<PostDTO>>(posts);
         }
-
         public async Task<IEnumerable<Post>> GetPostsWithCommentAsync()
         {
             return await _context.Posts
@@ -106,7 +104,6 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .ToListAsync();
         }
-
         public async Task<IEnumerable<Post>> GetPublishedPostsAsync()
         {
             return await _context.Posts
@@ -115,7 +112,6 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Where(p => p.IsPublished)
                 .ToListAsync();
         }
-
         public async Task<PublishedPostDTO> GetPublishedPostDTOAsync(int postId)
         {
             var post = await GetPostByIdAsync(postId);
@@ -136,7 +132,6 @@ namespace Habr.BusinessLogic.Services.Implementations
                 Comments = comments.ToList()
             };
         }
-
         public async Task<IEnumerable<Post>> GetPublishedPostsByUserAsync(int userId)
         {
             var user = await GetUserByIdAsync(userId);
@@ -145,7 +140,6 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Where(p => p.UserId == userId && p.IsPublished)
                 .ToListAsync();
         }
-
         public async void PublishPostAsync(int postId)
         {
             var post = await GetPostByIdAsync(postId);
@@ -161,7 +155,6 @@ namespace Habr.BusinessLogic.Services.Implementations
             modifiedPost.State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
-
         public async void SendPostToDraftsAsync(int postId)
         { 
             var post = await _context.Posts
@@ -178,7 +171,6 @@ namespace Habr.BusinessLogic.Services.Implementations
             post.IsPublished = false;
             await _context.SaveChangesAsync();
         }
-
         public async void UpdatePostAsync(Post post)
         {
             var updatePost = await GetPostByIdAsync(post.Id);
@@ -197,7 +189,6 @@ namespace Habr.BusinessLogic.Services.Implementations
             updatePost.Text = post.Text;
             await _context.SaveChangesAsync();
         }
-
         private async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
         {
             var postComments = await _context.Comments
@@ -221,7 +212,6 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             return commentsDTO;
         }
-
         private async Task<IEnumerable<CommentDTO>> GetCommentsByParentIdAsync(int parentId)
         {
             var subComments = await _context.Comments
@@ -280,7 +270,6 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new Exception("Post text cannot exceed 2000 characters!");
             }
         }
-
         private void GuardAgainstInvalidUser (User? user)
         {
             if (user == null)
