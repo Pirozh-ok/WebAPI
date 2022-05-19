@@ -43,8 +43,8 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task CreateCommentAsync(int userId, int postId, string text)
         {
-            var user = GetUserByIdAsync(userId);
-            var post = GetPostByIdAsync(postId);
+            var user = await GetUserByIdAsync(userId);
+            var post = await GetPostByIdAsync(postId);
 
             await _context.Comments.AddAsync(
                 new Comment
