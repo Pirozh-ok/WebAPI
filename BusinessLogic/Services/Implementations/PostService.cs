@@ -54,6 +54,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<Post> GetFullPostByIdAsync(int id)
         {
             var post = await _context.Posts
+                .Include(p => p.User)
                 .SingleOrDefaultAsync(p => p.Id == id);
 
             GuardAgainstInvalidPost(post);
