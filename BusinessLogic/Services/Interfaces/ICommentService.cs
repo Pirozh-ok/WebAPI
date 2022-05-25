@@ -1,15 +1,18 @@
-﻿using Habr.DataAccess.Entities;
+﻿using Habr.Common.DTOs;
+using Habr.DataAccess.Entities;
 
 namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface ICommentService
     {
-        void CreateCommentAsync(int userId, int postId, string text);
-        void DeleteCommentAsync(int commentId);
-        void CreateCommentAnswerAsync(int userId, string text, int parentId, int postId);
-        Task<Comment> GetCommentByIdAsync(int commentId);
-        Task<IEnumerable<Comment>> GetCommentsAsync();
-        Task<IEnumerable<Comment>> GetCommentsByUserAsync(int userId);
-        Task<IEnumerable<Comment>> GetCommentsByPostAsync(int postId);
+        Task CreateCommentAsync(int userId, int postId, string text);
+        Task DeleteCommentAsync(int commentId);
+        Task CreateCommentAnswerAsync(int userId, string text, int parentId, int postId);
+        Task<CommentDTO> GetCommentByIdAsync(int commentId);
+        Task<IEnumerable<CommentDTO>> GetCommentsAsync();
+        Task<IEnumerable<Comment>> GetFullCommentsAsync();
+        Task<Comment> GetFullCommentByIdAsync(int id);
+        Task<IEnumerable<CommentDTO>> GetCommentsByUserAsync(int userId);
+        Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId);
     }
 }

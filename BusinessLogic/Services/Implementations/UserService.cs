@@ -1,4 +1,7 @@
-﻿using Habr.BusinessLogic.Services.Interfaces;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.DTOs.UserDTOs;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -8,19 +11,60 @@ namespace Habr.BusinessLogic.Services.Implementations
     public class UserService : IUserService
     {
         private readonly DataContext _context;
-        public UserService(DataContext context)
+        private readonly IMapper _mapper;
+        public UserService(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-        public async Task<User> LogInAsync(string email, string password)
+        public async Task DeleteAsync(int id)
+        {
+            var user = await _context.Users
+                .SingleOrDefaultAsync(u => u.Id == id);
+
+            GuardAgainstInvalidUser(user);
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+        }
+        public async Task<UserDTO> GetUserById(int id)
+        {
+            var user = await _context.Users
+                .SingleOrDefaultAsync(u => u.Id == id);
+
+            GuardAgainstInvalidUser(user);
+            return _mapper.Map<UserDTO>(user);
+        }
+        public async Task<IEnumerable<UserDTO>> GetUsersAsync()
+        {
+            return await _context.Users
+                .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<UserWithCommentsDTO>> GetUsersWithCommentsAsync()
+        {
+            return await _context.Users
+                .ProjectTo<UserWithCommentsDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<UserWithPostsDTO>> GetUsersWithPostsAsync()
+        {
+            return await _context.Users
+                .ProjectTo<UserWithPostsDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        public async Task<UserDTO> LogInAsync(string email, string password)
         {
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email);
 
             GuardAgainstInvalidUser(user, password);
-            return user;
+            return _mapper.Map<UserDTO>(user);
         }
-        public async void RegisterAsync(string name, string email, string password)
+        public async Task RegisterAsync(string name, string email, string password)
         {
             if (await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email) != null)
@@ -38,6 +82,22 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             await _context.SaveChangesAsync();
         }
+        public async Task UpdateAsync(User user)
+        {
+            var userToUpdate = await _context.Users
+                .SingleOrDefaultAsync(u => u.Id == user.Id);
+
+            GuardAgainstInvalidUser(userToUpdate);
+
+            userToUpdate.Name = user.Name;
+            userToUpdate.Password = BCrypt.Net.BCrypt.HashPassword(userToUpdate.Password);
+            userToUpdate.Email = user.Email;
+            userToUpdate.Posts = user.Posts;
+            userToUpdate.Comments = user.Comments;
+
+            _context.Users.Update(userToUpdate);
+            await _context.SaveChangesAsync();
+        }
         private void GuardAgainstInvalidUser(User user, string password)
         {
             if (user == null)
@@ -47,6 +107,13 @@ namespace Habr.BusinessLogic.Services.Implementations
             else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
                 throw new Exception("Incorrect password!");
+            }
+        }
+        private void GuardAgainstInvalidUser(User user)
+        {
+            if(user is null)
+            {
+                throw new Exception("User is not found!");
             }
         }
     }
