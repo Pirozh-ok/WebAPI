@@ -93,7 +93,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if(post.IsPublished)
             {
-                throw new Exception("Post is published!");
+                throw new Exception(Common.Resources.PostExceptionMessageResource.PostAlreadyPublished);
             }
 
             return _mapper.Map<NotPublishedPostDTO>(post);
@@ -138,7 +138,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (!post.IsPublished)
             {
-                throw new Exception("Post not published");
+                throw new Exception(Common.Resources.PostExceptionMessageResource.PostNotPublished);
             }
 
             var postDTO = _mapper.Map<PublishedPostDTO>(post);
@@ -198,7 +198,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (updatePost.IsPublished)
             {
-                throw new Exception("Published post cannot be edited!");
+                throw new Exception(Common.Resources.PostExceptionMessageResource.PostCannotBeEdited);
             }
 
             updatePost.User = await _context.Users
@@ -266,36 +266,36 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (post == null)
             {
-                throw new Exception("Post not found!");
+                throw new Exception(Common.Resources.PostExceptionMessageResource.PostNotFound);
             }
         }
         private void GuardAgainstInvalidPost(string title, string text)
         {
             if (string.IsNullOrEmpty(title))
             {
-                throw new Exception("The post title is required!");
+                throw new Exception(Common.Resources.PostExceptionMessageResource.PostTitleRequired);
             }
 
             if (title.Length > 200)
             {
-                throw new Exception("Post title cannot exceed 200 characters!");
+                throw new Exception(Common.Resources.PostExceptionMessageResource.MaxLengthTitlePostExceeded);
             }
 
             if (string.IsNullOrEmpty(text))
             {
-                throw new Exception("Post text is required!");
+                throw new Exception(Common.Resources.PostExceptionMessageResource.EmptyPostText);
             }
 
             if (title.Length > 2000)
             {
-                throw new Exception("Post text cannot exceed 2000 characters!");
+                throw new Exception(Common.Resources.PostExceptionMessageResource.MaxLengthTextPostExceeded);
             }
         }
         private void GuardAgainstInvalidUser (User? user)
         {
             if (user == null)
             {
-                throw new Exception("User is not found!");
+                throw new Exception(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
         private async Task<User> GetUserByIdAsync(int userId)

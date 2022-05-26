@@ -121,25 +121,29 @@ namespace Habr.BusinessLogic.Services.Implementations
             var post = await _context.Posts
                 .SingleOrDefaultAsync(u => u.Id == postId);
 
-            if (post == null)
-            {
-                throw new Exception("Post not found");
-            }
-
+            GuardAgainstInvalidPost(post);
             return post;
         }
-        private void GuardAgainstInvalidUser(User? user)
+
+        private void GuardAgainstInvalidPost(Post post)
+        {
+            if (post == null)
+            {
+                throw new Exception(Common.Resources.PostExceptionMessageResource.PostNotFound);
+            }
+        }
+        private void GuardAgainstInvalidUser(User user)
         {
             if (user == null)
             {
-                throw new Exception("User is not found!");
+                throw new Exception(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
         private void GuardAgainstInvalidComment(Comment comment)
         {
             if (comment == null)
             {
-                throw new Exception("Comment not found!");
+                throw new Exception(Common.Resources.CommentExceptionMessageResource.CommentNotFound);
             }
         }
     }

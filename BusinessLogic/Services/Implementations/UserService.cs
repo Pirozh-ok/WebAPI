@@ -4,6 +4,7 @@ using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Habr.BusinessLogic.Services.Implementations
@@ -69,7 +70,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             if (await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email) != null)
             {
-                throw new Exception("A user with this email address already exists!");
+                throw new Exception(Common.Resources.UserExceptionMessageResource.EmailExists);
             }
 
             await _context.Users.AddAsync(
@@ -102,18 +103,18 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (user == null)
             {
-                throw new Exception("Invalid email!");
+                throw new Exception(Common.Resources.UserExceptionMessageResource.InvalidEmail);
             }
             else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                throw new Exception("Incorrect password!");
+                throw new Exception(Common.Resources.UserExceptionMessageResource.IncorrectPassword);
             }
         }
         private void GuardAgainstInvalidUser(User user)
         {
             if(user is null)
             {
-                throw new Exception("User is not found!");
+                throw new Exception(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
     }
