@@ -1,5 +1,6 @@
 ﻿using Habr.BusinessLogic;
 using Habr.Common.AutoMappers;
+using Habr.Common.Exceptions;
 using Habr.Common.Logging;
 using Habr.Common.Mapping;
 using Habr.DataAccess;
@@ -25,6 +26,10 @@ builder.Services.AddSwaggerDocument(config =>
         document.Info.Version = "v1";
         document.Info.Title = "Habr API";
     };
+});
+builder.Services.AddMvc(options =>
+{
+    options.Filters.Add(new ExceptionFilter(new LoggerManager()));
 });
 
 var app = builder.Build();

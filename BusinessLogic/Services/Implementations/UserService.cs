@@ -41,24 +41,33 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<UserDTO>> GetUsersAsync()
         {
-            return await _context.Users
+            var users = await _context.Users
                 .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgaunstInvalidListUsers(users);
+            return users;
         }
         public async Task<IEnumerable<UserWithCommentsDTO>> GetUsersWithCommentsAsync()
         {
-            return await _context.Users
+            var users =  await _context.Users
                 .ProjectTo<UserWithCommentsDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgaunstInvalidListUsers(users);
+            return users;
         }
         public async Task<IEnumerable<UserWithPostsDTO>> GetUsersWithPostsAsync()
         {
-            return await _context.Users
+            var users = await _context.Users
                 .ProjectTo<UserWithPostsDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgaunstInvalidListUsers(users);
+            return users;
         }
         public async Task<UserDTO> LogInAsync(string email, string password)
         {
@@ -118,6 +127,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         private void GuardAgainstInvalidUser(User user)
         {
             if(user is null)
+            {
+                throw new NotFoundException(Common.Resources.UserExceptionMessageResource.UserNotFound);
+            }
+        }
+
+        private void GuardAgaunstInvalidListUsers<T>(IEnumerable<T> users)
+        {
+            if(users is null || users.Count() == 0)
             {
                 throw new NotFoundException(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }

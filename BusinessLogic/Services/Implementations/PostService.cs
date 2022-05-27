@@ -54,11 +54,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<Post>> GetFullPostsAsync()
         {
-            return await _context.Posts
+            var posts = await _context.Posts
                 .Include(p => p.User)
                 .Include(p => p.Comments)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<Post> GetFullPostByIdAsync(int id)
         {
@@ -72,11 +75,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<PostDTO>> GetPostsAsync()
         {
-            return await _context.Posts
+            var posts =  await _context.Posts
                 .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<PostDTO> GetPostByIdAsync(int postId)
         {
@@ -89,12 +95,15 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<PostDTO>> GetPostsByUserAsync(int userId)
         {
-            return await _context.Posts
+            var posts =  await _context.Posts
                 .Where(p => p.UserId == userId)
                 .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<NotPublishedPostDTO> GetNotPublishedPostByIdAsync(int id)
         {
@@ -110,20 +119,26 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId)
         {
             var user = await GetUserByIdAsync(userId);
-            return await _context.Posts
+            var posts = await _context.Posts
                 .Where(p => p.UserId == userId && !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsAsync()
         {
-            return await _context.Posts
+            var posts = await _context.Posts
                 .Where(p => !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .OrderByDescending(p => p.Updated)
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsAsync()
         {
@@ -133,6 +148,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Where(p => p.IsPublished)
                 .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
 
             foreach(var post in posts)
             {
@@ -162,6 +179,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Where(p => p.IsPublished && p.UserId == userId)
                 .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
 
             foreach (var post in posts)
             {
@@ -299,6 +318,14 @@ namespace Habr.BusinessLogic.Services.Implementations
             if (title.Length > 2000)
             {
                 throw new ValidationException(Common.Resources.PostExceptionMessageResource.MaxLengthTextPostExceeded);
+            }
+        }
+
+        private void GuardAgainstInvalidListPosts<T>(IEnumerable<T> posts)
+        {
+            if(posts is null || posts.Count() == null)
+            {
+                throw new NotFoundException(Common.Resources.PostExceptionMessageResource.PostNotFound);
             }
         }
         private void GuardAgainstInvalidUser (User? user)
