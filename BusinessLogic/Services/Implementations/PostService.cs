@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
+using Habr.Common.Exceptions;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -93,7 +94,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if(post.IsPublished)
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.PostAlreadyPublished);
+                throw new BusinessException(Common.Resources.PostExceptionMessageResource.PostAlreadyPublished);
             }
 
             return _mapper.Map<NotPublishedPostDTO>(post);
@@ -138,7 +139,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (!post.IsPublished)
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.PostNotPublished);
+                throw new BusinessException(Common.Resources.PostExceptionMessageResource.PostNotPublished);
             }
 
             var postDTO = _mapper.Map<PublishedPostDTO>(post);
@@ -167,7 +168,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (post.IsPublished)
             {
-                throw new Exception("The post has already been published!");
+                throw new BusinessException("The post has already been published!");
             }
 
             post.User = await GetUserByIdAsync(post.UserId);
@@ -186,7 +187,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (post.Comments.Count > 0)
             {
-                throw new Exception("A post with comments cannot be sent to drafts!");
+                throw new BusinessException("A post with comments cannot be sent to drafts!");
             }
 
             post.IsPublished = false;
@@ -198,7 +199,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (updatePost.IsPublished)
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.PostCannotBeEdited);
+                throw new BusinessException(Common.Resources.PostExceptionMessageResource.PostCannotBeEdited);
             }
 
             updatePost.User = await _context.Users
@@ -266,36 +267,36 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (post == null)
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.PostNotFound);
+                throw new NotFoundException(Common.Resources.PostExceptionMessageResource.PostNotFound);
             }
         }
         private void GuardAgainstInvalidPost(string title, string text)
         {
             if (string.IsNullOrEmpty(title))
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.PostTitleRequired);
+                throw new ValidationException(Common.Resources.PostExceptionMessageResource.PostTitleRequired);
             }
 
             if (title.Length > 200)
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.MaxLengthTitlePostExceeded);
+                throw new ValidationException(Common.Resources.PostExceptionMessageResource.MaxLengthTitlePostExceeded);
             }
 
             if (string.IsNullOrEmpty(text))
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.EmptyPostText);
+                throw new ValidationException(Common.Resources.PostExceptionMessageResource.EmptyPostText);
             }
 
             if (title.Length > 2000)
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.MaxLengthTextPostExceeded);
+                throw new ValidationException(Common.Resources.PostExceptionMessageResource.MaxLengthTextPostExceeded);
             }
         }
         private void GuardAgainstInvalidUser (User? user)
         {
             if (user == null)
             {
-                throw new Exception(Common.Resources.UserExceptionMessageResource.UserNotFound);
+                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
         private async Task<User> GetUserByIdAsync(int userId)

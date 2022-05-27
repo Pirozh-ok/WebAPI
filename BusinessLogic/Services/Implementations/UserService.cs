@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs.UserDTOs;
+using Habr.Common.Exceptions;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.AspNetCore.Http;
@@ -70,7 +71,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             if (await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email) != null)
             {
-                throw new Exception(Common.Resources.UserExceptionMessageResource.EmailExists);
+                throw new ValidationException(Common.Resources.UserExceptionMessageResource.EmailExists);
             }
 
             await _context.Users.AddAsync(
@@ -103,18 +104,18 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (user == null)
             {
-                throw new Exception(Common.Resources.UserExceptionMessageResource.InvalidEmail);
+                throw new AuthenticationException(Common.Resources.UserExceptionMessageResource.InvalidEmail);
             }
             else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                throw new Exception(Common.Resources.UserExceptionMessageResource.IncorrectPassword);
+                throw new AuthenticationException(Common.Resources.UserExceptionMessageResource.IncorrectPassword);
             }
         }
         private void GuardAgainstInvalidUser(User user)
         {
             if(user is null)
             {
-                throw new Exception(Common.Resources.UserExceptionMessageResource.UserNotFound);
+                throw new NotFoundException(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
     }

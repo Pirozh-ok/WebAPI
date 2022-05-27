@@ -1,8 +1,8 @@
 ﻿namespace Habr.Common.Exceptions
 {
-    public class NotFoundException : Exception
+    public class BusinessException : Exception
     {
-        public NotFoundException(string message)
+        public BusinessException(string message)
             : base(message)
         {
         }

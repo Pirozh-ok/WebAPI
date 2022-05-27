@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
+using Habr.Common.Exceptions;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -129,21 +130,21 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (post == null)
             {
-                throw new Exception(Common.Resources.PostExceptionMessageResource.PostNotFound);
+                throw new BadRequestException(Common.Resources.PostExceptionMessageResource.PostNotFound);
             }
         }
         private void GuardAgainstInvalidUser(User user)
         {
             if (user == null)
             {
-                throw new Exception(Common.Resources.UserExceptionMessageResource.UserNotFound);
+                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
         private void GuardAgainstInvalidComment(Comment comment)
         {
             if (comment == null)
             {
-                throw new Exception(Common.Resources.CommentExceptionMessageResource.CommentNotFound);
+                throw new NotFoundException(Common.Resources.CommentExceptionMessageResource.CommentNotFound);
             }
         }
     }
