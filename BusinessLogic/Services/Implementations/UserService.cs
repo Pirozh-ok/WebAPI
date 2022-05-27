@@ -3,9 +3,9 @@ using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Exceptions;
+using Habr.Common.Logging;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Habr.BusinessLogic.Services.Implementations
@@ -14,10 +14,12 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        public UserService(DataContext context, IMapper mapper)
+        private readonly ILoggerManager _logger; 
+        public UserService(DataContext context, IMapper mapper, ILoggerManager logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
         public async Task DeleteAsync(int id)
         {
@@ -64,6 +66,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .SingleOrDefaultAsync(u => u.Email == email);
 
             GuardAgainstInvalidUser(user, password);
+            _logger.LogInfo($"User \"{user.Name}\" is signed in.");
             return _mapper.Map<UserDTO>(user);
         }
         public async Task RegisterAsync(string name, string email, string password)
@@ -83,6 +86,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 });
 
             await _context.SaveChangesAsync();
+            _logger.LogInfo($"User \"{name}\" is registered.");
         }
         public async Task UpdateAsync(User user)
         {

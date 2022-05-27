@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.Common.Exceptions;
+using Habr.Common.Logging;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        public PostService(DataContext context, IMapper mapper)
+        private readonly ILoggerManager _logger;
+        public PostService(DataContext context, IMapper mapper, ILoggerManager logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
         public async Task CreatePostAsync(string title, string text, int userId, bool isPublished)
         {
@@ -32,6 +35,11 @@ namespace Habr.BusinessLogic.Services.Implementations
                     IsPublished = isPublished
                 });
             await _context.SaveChangesAsync();
+            
+            if(isPublished)
+            {
+                _logger.LogInfo($"A post titled \"{title}\" has been published.");
+            }
         }
         public async Task DeletePostAsync(int postId)
         {
@@ -176,6 +184,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var modifiedPost = _context.Entry(post);
             modifiedPost.State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            _logger.LogInfo($"A post titled \"{post.Title}\" has been published.");
         }
         public async Task SendPostToDraftsAsync(int postId)
         { 

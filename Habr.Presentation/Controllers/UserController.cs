@@ -1,6 +1,5 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.DataAccess.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
