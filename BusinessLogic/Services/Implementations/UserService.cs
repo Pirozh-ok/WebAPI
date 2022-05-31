@@ -76,7 +76,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .SingleOrDefaultAsync(u => u.Email == email);
 
             GuardAgainstInvalidUser(user, password);
-            _logger.LogInformation($"\"{user.Name}\"" + LogResources.UserLogIn);
+            _logger.LogInformation($"\"{user.Name}\" {LogResources.UserLogIn}");
             return _mapper.Map<UserDTO>(user);
         }
         public async Task RegisterAsync(string name, string email, string password)
@@ -96,7 +96,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 });
 
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"\"{name}\"" + LogResources.UserRegistered);
+            _logger.LogInformation($"\"{name}\" {LogResources.UserRegistered}");
         }
         public async Task UpdateAsync(User user)
         {

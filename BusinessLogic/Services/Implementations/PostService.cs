@@ -39,7 +39,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             
             if(isPublished)
             {
-                _logger.LogInformation($"\"{title}\"" + LogResources.PublishPost);
+                _logger.LogInformation($"\"{title}\" {LogResources.PublishPost}");
             }
         }
         public async Task DeletePostAsync(int postId)
@@ -204,7 +204,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var modifiedPost = _context.Entry(post);
             modifiedPost.State = EntityState.Modified;
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"\"{post.Title}\"" + LogResources.PublishPost);
+            _logger.LogInformation($"\"{post.Title}\" {LogResources.PublishPost}");
         }
         public async Task SendPostToDraftsAsync(int postId)
         { 

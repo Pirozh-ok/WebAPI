@@ -42,8 +42,8 @@ namespace Habr.Presentation.Controllers
             return Ok(await _commentsService.GetCommentsByUserAsync(id));
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateUser([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
+        [HttpPost("/log-in")]
+        public async Task<IActionResult> LogIn([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
             await _userService.RegisterAsync(name, email, password);
             return StatusCode(201);
@@ -63,8 +63,8 @@ namespace Habr.Presentation.Controllers
             return StatusCode(204);
         }
 
-        [HttpGet("/log_in")]
-        public async Task<IActionResult> LogIn([FromQuery] string email, [FromQuery] string password)
+        [HttpGet("/sign-in")]
+        public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
         {
             var user = await _userService.LogInAsync(email, password);
             return Ok(user);
