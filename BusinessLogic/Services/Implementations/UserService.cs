@@ -3,10 +3,11 @@ using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Exceptions;
-using Habr.Common.Logging;
+using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Habr.BusinessLogic.Services.Implementations
 {
@@ -14,8 +15,8 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILoggerManager _logger; 
-        public UserService(DataContext context, IMapper mapper, ILoggerManager logger)
+        private readonly ILogger _logger; 
+        public UserService(DataContext context, IMapper mapper, ILogger<UserService> logger)
         {
             _context = context;
             _mapper = mapper;
@@ -75,7 +76,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .SingleOrDefaultAsync(u => u.Email == email);
 
             GuardAgainstInvalidUser(user, password);
-            _logger.LogInfo($"User \"{user.Name}\" is signed in.");
+            _logger.LogInformation($"\"{user.Name}\"" + LogResources.UserLogIn);
             return _mapper.Map<UserDTO>(user);
         }
         public async Task RegisterAsync(string name, string email, string password)
@@ -83,7 +84,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             if (await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email) != null)
             {
-                throw new ValidationException(Common.Resources.UserExceptionMessageResource.EmailExists);
+                throw new BusinessException(UserExceptionMessageResource.EmailExists);
             }
 
             await _context.Users.AddAsync(
@@ -95,7 +96,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 });
 
             await _context.SaveChangesAsync();
-            _logger.LogInfo($"User \"{name}\" is registered.");
+            _logger.LogInformation($"\"{name}\"" + LogResources.UserRegistered);
         }
         public async Task UpdateAsync(User user)
         {
@@ -117,18 +118,18 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (user == null)
             {
-                throw new AuthenticationException(Common.Resources.UserExceptionMessageResource.InvalidEmail);
+                throw new AuthenticationException(UserExceptionMessageResource.InvalidEmail);
             }
             else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                throw new AuthenticationException(Common.Resources.UserExceptionMessageResource.IncorrectPassword);
+                throw new AuthenticationException(UserExceptionMessageResource.IncorrectPassword);
             }
         }
         private void GuardAgainstInvalidUser(User user)
         {
             if(user is null)
             {
-                throw new NotFoundException(Common.Resources.UserExceptionMessageResource.UserNotFound);
+                throw new NotFoundException(UserExceptionMessageResource.UserNotFound);
             }
         }
 
@@ -136,7 +137,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if(users is null || users.Count() == 0)
             {
-                throw new NotFoundException(Common.Resources.UserExceptionMessageResource.UserNotFound);
+                throw new NotFoundException(UserExceptionMessageResource.UserNotFound);
             }
         }
     }

@@ -117,31 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CannotSendDrafts" xml:space="preserve">
-    <value>A post with comments cannot be sent to drafts!</value>
+  <data name="PublishPost" xml:space="preserve">
+    <value>post titled  has been published</value>
   </data>
-  <data name="EmptyPostText" xml:space="preserve">
-    <value>Post text is required!</value>
+  <data name="UserLogIn" xml:space="preserve">
+    <value>user is logged in.</value>
   </data>
-  <data name="MaxLengthTextPostExceeded" xml:space="preserve">
-    <value>Post text cannot exceed 2000 characters!</value>
-  </data>
-  <data name="MaxLengthTitlePostExceeded" xml:space="preserve">
-    <value>Post title cannot exceed 200 characters!</value>
-  </data>
-  <data name="PostAlreadyPublished" xml:space="preserve">
-    <value>Post is published!</value>
-  </data>
-  <data name="PostCannotBeEdited" xml:space="preserve">
-    <value>Published post cannot be edited!</value>
-  </data>
-  <data name="PostNotFound" xml:space="preserve">
-    <value>Post not found!</value>
-  </data>
-  <data name="PostNotPublished" xml:space="preserve">
-    <value>Post not published!</value>
-  </data>
-  <data name="PostTitleRequired" xml:space="preserve">
-    <value>The post title is required!</value>
+  <data name="UserRegistered" xml:space="preserve">
+    <value>user is registered.</value>
   </data>
 </root>

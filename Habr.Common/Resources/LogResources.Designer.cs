@@ -22,14 +22,14 @@ namespace Habr.Common.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class PostExceptionMessageResource {
+    public class LogResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        public PostExceptionMessageResource() {
+        public LogResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Habr.Common.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Habr.Common.Resources.PostExceptionMessageResource", typeof(PostExceptionMessageResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Habr.Common.Resources.LogResources", typeof(LogResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,83 +61,29 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на A post with comments cannot be sent to drafts!.
+        ///   Ищет локализованную строку, похожую на post titled  has been published.
         /// </summary>
-        public static string CannotSendDrafts {
+        public static string PublishPost {
             get {
-                return ResourceManager.GetString("CannotSendDrafts", resourceCulture);
+                return ResourceManager.GetString("PublishPost", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Post text is required!.
+        ///   Ищет локализованную строку, похожую на user is logged in..
         /// </summary>
-        public static string EmptyPostText {
+        public static string UserLogIn {
             get {
-                return ResourceManager.GetString("EmptyPostText", resourceCulture);
+                return ResourceManager.GetString("UserLogIn", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Post text cannot exceed 2000 characters!.
+        ///   Ищет локализованную строку, похожую на user is registered..
         /// </summary>
-        public static string MaxLengthTextPostExceeded {
+        public static string UserRegistered {
             get {
-                return ResourceManager.GetString("MaxLengthTextPostExceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Post title cannot exceed 200 characters!.
-        /// </summary>
-        public static string MaxLengthTitlePostExceeded {
-            get {
-                return ResourceManager.GetString("MaxLengthTitlePostExceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Post is published!.
-        /// </summary>
-        public static string PostAlreadyPublished {
-            get {
-                return ResourceManager.GetString("PostAlreadyPublished", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Published post cannot be edited!.
-        /// </summary>
-        public static string PostCannotBeEdited {
-            get {
-                return ResourceManager.GetString("PostCannotBeEdited", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Post not found!.
-        /// </summary>
-        public static string PostNotFound {
-            get {
-                return ResourceManager.GetString("PostNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Post not published!.
-        /// </summary>
-        public static string PostNotPublished {
-            get {
-                return ResourceManager.GetString("PostNotPublished", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на The post title is required!.
-        /// </summary>
-        public static string PostTitleRequired {
-            get {
-                return ResourceManager.GetString("PostTitleRequired", resourceCulture);
+                return ResourceManager.GetString("UserRegistered", resourceCulture);
             }
         }
     }

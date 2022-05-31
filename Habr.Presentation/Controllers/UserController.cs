@@ -62,5 +62,12 @@ namespace Habr.Presentation.Controllers
             await _userService.UpdateAsync(user);
             return StatusCode(204);
         }
+
+        [HttpGet("/log_in")]
+        public async Task<IActionResult> LogIn([FromQuery] string email, [FromQuery] string password)
+        {
+            var user = await _userService.LogInAsync(email, password);
+            return Ok(user);
+        }
     }
 }

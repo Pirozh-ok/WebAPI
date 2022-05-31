@@ -30,6 +30,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Resources\LogResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LogResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\UserExceptionMessageResource.Designer.cs">
       <DependentUpon>UserExceptionMessageResource.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -48,17 +53,15 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <CustomToolNamespace>Habr.Common.Resources</CustomToolNamespace>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\LogResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LogResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\UserExceptionMessageResource.resx">
       <LastGenOutput>UserExceptionMessageResource.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
       <CustomToolNamespace>Habr.Common.Resources</CustomToolNamespace>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Logging\NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

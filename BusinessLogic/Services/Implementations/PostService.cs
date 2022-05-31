@@ -3,10 +3,11 @@ using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.Common.Exceptions;
-using Habr.Common.Logging;
+using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Habr.BusinessLogic.Services.Implementations
 {
@@ -14,8 +15,8 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILoggerManager _logger;
-        public PostService(DataContext context, IMapper mapper, ILoggerManager logger)
+        private readonly ILogger _logger;
+        public PostService(DataContext context, IMapper mapper, ILogger<PostService> logger)
         {
             _context = context;
             _mapper = mapper;
@@ -38,7 +39,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             
             if(isPublished)
             {
-                _logger.LogInfo($"A post titled \"{title}\" has been published.");
+                _logger.LogInformation($"\"{title}\"" + LogResources.PublishPost);
             }
         }
         public async Task DeletePostAsync(int postId)
@@ -111,7 +112,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if(post.IsPublished)
             {
-                throw new BusinessException(Common.Resources.PostExceptionMessageResource.PostAlreadyPublished);
+                throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
             }
 
             return _mapper.Map<NotPublishedPostDTO>(post);
@@ -164,7 +165,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (!post.IsPublished)
             {
-                throw new BusinessException(Common.Resources.PostExceptionMessageResource.PostNotPublished);
+                throw new BusinessException(PostExceptionMessageResource.PostNotPublished);
             }
 
             var postDTO = _mapper.Map<PublishedPostDTO>(post);
@@ -195,7 +196,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (post.IsPublished)
             {
-                throw new BusinessException("The post has already been published!");
+                throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
             }
 
             post.User = await GetUserByIdAsync(post.UserId);
@@ -203,7 +204,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var modifiedPost = _context.Entry(post);
             modifiedPost.State = EntityState.Modified;
             await _context.SaveChangesAsync();
-            _logger.LogInfo($"A post titled \"{post.Title}\" has been published.");
+            _logger.LogInformation($"\"{post.Title}\"" + LogResources.PublishPost);
         }
         public async Task SendPostToDraftsAsync(int postId)
         { 
@@ -215,7 +216,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (post.Comments.Count > 0)
             {
-                throw new BusinessException("A post with comments cannot be sent to drafts!");
+                throw new BusinessException(PostExceptionMessageResource.CannotSendDrafts);
             }
 
             post.IsPublished = false;
@@ -227,7 +228,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (updatePost.IsPublished)
             {
-                throw new BusinessException(Common.Resources.PostExceptionMessageResource.PostCannotBeEdited);
+                throw new BusinessException(PostExceptionMessageResource.PostCannotBeEdited);
             }
 
             updatePost.User = await _context.Users
@@ -295,7 +296,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (post == null)
             {
-                throw new NotFoundException(Common.Resources.PostExceptionMessageResource.PostNotFound);
+                throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
             }
         }
         private void GuardAgainstInvalidPost(string title, string text)
@@ -325,14 +326,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if(posts is null || posts.Count() == null)
             {
-                throw new NotFoundException(Common.Resources.PostExceptionMessageResource.PostNotFound);
+                throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
             }
         }
         private void GuardAgainstInvalidUser (User? user)
         {
             if (user == null)
             {
-                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.UserNotFound);
+                throw new BadRequestException(UserExceptionMessageResource.UserNotFound);
             }
         }
         private async Task<User> GetUserByIdAsync(int userId)

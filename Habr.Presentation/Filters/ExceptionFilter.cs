@@ -1,18 +1,14 @@
-﻿using System.Web.Http.Results;
-using EO.Base;
-using Habr.Common.DTOs.ResponceDTOs;
-using Habr.Common.Logging;
+﻿using Habr.Common.DTOs.ResponceDTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Logging;
 
 namespace Habr.Common.Exceptions
 {
     public class ExceptionFilter : ExceptionFilterAttribute
     {
-        private readonly ILoggerManager _logger;
+        private readonly ILogger<ExceptionFilter> _logger;
 
-        public ExceptionFilter(ILoggerManager logger)
+        public ExceptionFilter(ILogger<ExceptionFilter> logger)
         {
             _logger = logger;
         }
