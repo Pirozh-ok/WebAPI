@@ -1,9 +1,16 @@
 ﻿using Habr.BusinessLogic;
 using Habr.Common.AutoMappers;
+using Habr.Common.Exceptions;
 using Habr.Common.Mapping;
 using Habr.DataAccess;
+using NLog;
+using NLog.Web; 
 
 var builder = WebApplication.CreateBuilder(args);
+var logger = LogManager.LoadConfiguration("NLog.config").GetCurrentClassLogger();
+builder.Logging.ClearProviders();
+builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+builder.Host.UseNLog();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -23,15 +30,18 @@ builder.Services.AddSwaggerDocument(config =>
     };
 });
 
+builder.Services.AddMvc(options =>
+{
+    options.Filters.Add(typeof(ExceptionFilter));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseOpenApi();
 app.UseSwaggerUi3();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

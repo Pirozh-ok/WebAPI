@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
+using Habr.Common.Exceptions;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +20,12 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<Comment>> GetFullCommentsAsync()
         {
-            return await _context.Comments
+            var comments =  await _context.Comments
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListComments(comments);
+            return comments;
         }
         public async Task<Comment> GetFullCommentByIdAsync(int id)
         {
@@ -84,29 +88,38 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<CommentDTO>> GetCommentsAsync()
         {
-            return await _context.Comments
+            var comments = await _context.Comments
                 .AsNoTracking()
                 .ProjectTo<CommentDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+
+            GuardAgainstInvalidListComments(comments);
+            return comments;
         }
         public async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
         {
-            return await _context.Comments
+            var comments = await _context.Comments
                 .Where(c => c.PostId == postId)
                 .Include(c => c.User)
                 .Include(c => c.SubComments)
                 .ProjectTo<CommentDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListComments(comments);
+            return comments;
         }
         public async Task<IEnumerable<CommentDTO>> GetCommentsByUserAsync(int userId)
         {
-            return await _context.Comments
+            var comments = await _context.Comments
                 .Where(c => c.UserId == userId)
                 .Include(c => c.SubComments)
                 .ProjectTo<CommentDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListComments(comments);
+            return comments;
         }
         private async Task<User> GetUserByIdAsync(int userId)
         {
@@ -121,25 +134,36 @@ namespace Habr.BusinessLogic.Services.Implementations
             var post = await _context.Posts
                 .SingleOrDefaultAsync(u => u.Id == postId);
 
-            if (post == null)
-            {
-                throw new Exception("Post not found");
-            }
-
+            GuardAgainstInvalidPost(post);
             return post;
         }
-        private void GuardAgainstInvalidUser(User? user)
+
+        private void GuardAgainstInvalidPost(Post post)
+        {
+            if (post == null)
+            {
+                throw new BadRequestException(Common.Resources.PostExceptionMessageResource.PostNotFound);
+            }
+        }
+        private void GuardAgainstInvalidUser(User user)
         {
             if (user == null)
             {
-                throw new Exception("User is not found!");
+                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
         private void GuardAgainstInvalidComment(Comment comment)
         {
             if (comment == null)
             {
-                throw new Exception("Comment not found!");
+                throw new NotFoundException(Common.Resources.CommentExceptionMessageResource.CommentNotFound);
+            }
+        }
+        private void GuardAgainstInvalidListComments<T>(IEnumerable<T> comments)
+        {
+            if(comments is null || comments.Count() == 0)
+            {
+                throw new NotFoundException(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
     }

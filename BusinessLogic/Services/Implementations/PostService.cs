@@ -2,9 +2,12 @@
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
+using Habr.Common.Exceptions;
+using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Habr.BusinessLogic.Services.Implementations
 {
@@ -12,10 +15,12 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        public PostService(DataContext context, IMapper mapper)
+        private readonly ILogger _logger;
+        public PostService(DataContext context, IMapper mapper, ILogger<PostService> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
         public async Task CreatePostAsync(string title, string text, int userId, bool isPublished)
         {
@@ -31,6 +36,11 @@ namespace Habr.BusinessLogic.Services.Implementations
                     IsPublished = isPublished
                 });
             await _context.SaveChangesAsync();
+            
+            if(isPublished)
+            {
+                _logger.LogInformation($"\"{title}\" {LogResources.PublishPost}");
+            }
         }
         public async Task DeletePostAsync(int postId)
         {
@@ -45,11 +55,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<Post>> GetFullPostsAsync()
         {
-            return await _context.Posts
+            var posts = await _context.Posts
                 .Include(p => p.User)
                 .Include(p => p.Comments)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<Post> GetFullPostByIdAsync(int id)
         {
@@ -63,11 +76,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<PostDTO>> GetPostsAsync()
         {
-            return await _context.Posts
+            var posts =  await _context.Posts
                 .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<PostDTO> GetPostByIdAsync(int postId)
         {
@@ -80,12 +96,15 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<PostDTO>> GetPostsByUserAsync(int userId)
         {
-            return await _context.Posts
+            var posts =  await _context.Posts
                 .Where(p => p.UserId == userId)
                 .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<NotPublishedPostDTO> GetNotPublishedPostByIdAsync(int id)
         {
@@ -93,7 +112,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if(post.IsPublished)
             {
-                throw new Exception("Post is published!");
+                throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
             }
 
             return _mapper.Map<NotPublishedPostDTO>(post);
@@ -101,20 +120,26 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId)
         {
             var user = await GetUserByIdAsync(userId);
-            return await _context.Posts
+            var posts = await _context.Posts
                 .Where(p => p.UserId == userId && !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsAsync()
         {
-            return await _context.Posts
+            var posts = await _context.Posts
                 .Where(p => !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .OrderByDescending(p => p.Updated)
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+            return posts;
         }
         public async Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsAsync()
         {
@@ -124,6 +149,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Where(p => p.IsPublished)
                 .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
 
             foreach(var post in posts)
             {
@@ -138,7 +165,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (!post.IsPublished)
             {
-                throw new Exception("Post not published");
+                throw new BusinessException(PostExceptionMessageResource.PostNotPublished);
             }
 
             var postDTO = _mapper.Map<PublishedPostDTO>(post);
@@ -154,6 +181,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
+            GuardAgainstInvalidListPosts(posts);
+
             foreach (var post in posts)
             {
                 post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
@@ -167,7 +196,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (post.IsPublished)
             {
-                throw new Exception("The post has already been published!");
+                throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
             }
 
             post.User = await GetUserByIdAsync(post.UserId);
@@ -175,6 +204,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var modifiedPost = _context.Entry(post);
             modifiedPost.State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"\"{post.Title}\" {LogResources.PublishPost}");
         }
         public async Task SendPostToDraftsAsync(int postId)
         { 
@@ -186,7 +216,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (post.Comments.Count > 0)
             {
-                throw new Exception("A post with comments cannot be sent to drafts!");
+                throw new BusinessException(PostExceptionMessageResource.CannotSendDrafts);
             }
 
             post.IsPublished = false;
@@ -198,7 +228,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             if (updatePost.IsPublished)
             {
-                throw new Exception("Published post cannot be edited!");
+                throw new BusinessException(PostExceptionMessageResource.PostCannotBeEdited);
             }
 
             updatePost.User = await _context.Users
@@ -266,36 +296,44 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (post == null)
             {
-                throw new Exception("Post not found!");
+                throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
             }
         }
         private void GuardAgainstInvalidPost(string title, string text)
         {
             if (string.IsNullOrEmpty(title))
             {
-                throw new Exception("The post title is required!");
+                throw new ValidationException(Common.Resources.PostExceptionMessageResource.PostTitleRequired);
             }
 
             if (title.Length > 200)
             {
-                throw new Exception("Post title cannot exceed 200 characters!");
+                throw new ValidationException(Common.Resources.PostExceptionMessageResource.MaxLengthTitlePostExceeded);
             }
 
             if (string.IsNullOrEmpty(text))
             {
-                throw new Exception("Post text is required!");
+                throw new ValidationException(Common.Resources.PostExceptionMessageResource.EmptyPostText);
             }
 
             if (title.Length > 2000)
             {
-                throw new Exception("Post text cannot exceed 2000 characters!");
+                throw new ValidationException(Common.Resources.PostExceptionMessageResource.MaxLengthTextPostExceeded);
+            }
+        }
+
+        private void GuardAgainstInvalidListPosts<T>(IEnumerable<T> posts)
+        {
+            if(posts is null || posts.Count() == null)
+            {
+                throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
             }
         }
         private void GuardAgainstInvalidUser (User? user)
         {
             if (user == null)
             {
-                throw new Exception("User is not found!");
+                throw new BadRequestException(UserExceptionMessageResource.UserNotFound);
             }
         }
         private async Task<User> GetUserByIdAsync(int userId)

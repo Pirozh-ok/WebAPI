@@ -2,9 +2,12 @@
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs.UserDTOs;
+using Habr.Common.Exceptions;
+using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Habr.BusinessLogic.Services.Implementations
 {
@@ -12,10 +15,12 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        public UserService(DataContext context, IMapper mapper)
+        private readonly ILogger _logger; 
+        public UserService(DataContext context, IMapper mapper, ILogger<UserService> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
         public async Task DeleteAsync(int id)
         {
@@ -37,24 +42,33 @@ namespace Habr.BusinessLogic.Services.Implementations
         }
         public async Task<IEnumerable<UserDTO>> GetUsersAsync()
         {
-            return await _context.Users
+            var users = await _context.Users
                 .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgaunstInvalidListUsers(users);
+            return users;
         }
         public async Task<IEnumerable<UserWithCommentsDTO>> GetUsersWithCommentsAsync()
         {
-            return await _context.Users
+            var users =  await _context.Users
                 .ProjectTo<UserWithCommentsDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgaunstInvalidListUsers(users);
+            return users;
         }
         public async Task<IEnumerable<UserWithPostsDTO>> GetUsersWithPostsAsync()
         {
-            return await _context.Users
+            var users = await _context.Users
                 .ProjectTo<UserWithPostsDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+
+            GuardAgaunstInvalidListUsers(users);
+            return users;
         }
         public async Task<UserDTO> LogInAsync(string email, string password)
         {
@@ -62,6 +76,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .SingleOrDefaultAsync(u => u.Email == email);
 
             GuardAgainstInvalidUser(user, password);
+            _logger.LogInformation($"\"{user.Name}\" {LogResources.UserLogIn}");
             return _mapper.Map<UserDTO>(user);
         }
         public async Task RegisterAsync(string name, string email, string password)
@@ -69,7 +84,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             if (await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email) != null)
             {
-                throw new Exception("A user with this email address already exists!");
+                throw new BusinessException(UserExceptionMessageResource.EmailExists);
             }
 
             await _context.Users.AddAsync(
@@ -81,6 +96,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 });
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"\"{name}\" {LogResources.UserRegistered}");
         }
         public async Task UpdateAsync(User user)
         {
@@ -102,18 +118,26 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (user == null)
             {
-                throw new Exception("Invalid email!");
+                throw new AuthenticationException(UserExceptionMessageResource.InvalidEmail);
             }
             else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                throw new Exception("Incorrect password!");
+                throw new AuthenticationException(UserExceptionMessageResource.IncorrectPassword);
             }
         }
         private void GuardAgainstInvalidUser(User user)
         {
             if(user is null)
             {
-                throw new Exception("User is not found!");
+                throw new NotFoundException(UserExceptionMessageResource.UserNotFound);
+            }
+        }
+
+        private void GuardAgaunstInvalidListUsers<T>(IEnumerable<T> users)
+        {
+            if(users is null || users.Count() == 0)
+            {
+                throw new NotFoundException(UserExceptionMessageResource.UserNotFound);
             }
         }
     }
