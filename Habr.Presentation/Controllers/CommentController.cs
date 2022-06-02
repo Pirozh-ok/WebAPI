@@ -1,6 +1,5 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
-using Habr.DataAccess.Entities;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
@@ -18,56 +17,36 @@ namespace Habr.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetComments()
         {
-            var response = await _commentService.GetCommentsAsync();
-            return response is null || response.Count() == 0 ? NotFound("NotFound!") : Ok(response);
+            return Ok(await _commentService.GetCommentsAsync());
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCommentsById(int id)
         {
-            try
-            {
-                return Ok(await _commentService.GetCommentByIdAsync(id));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return Ok(await _commentService.GetCommentByIdAsync(id));
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateComment([FromQuery] int userId, [FromQuery] string text, [FromQuery] int postId, [FromQuery] int? parentId)
         {
-            try
+            if (parentId is null)
             {
-                if (parentId is null)
-                {
-                    await _commentService.CreateCommentAsync(userId, postId, text);
-                }
-                else
-                {
-                    await _commentService.CreateCommentAnswerAsync(userId, text, (int)parentId, postId);
-                }
-                return StatusCode(202);
+                await _commentService.CreateCommentAsync(userId, postId, text);
             }
-            catch (Exception ex)
+            else
             {
-                return BadRequest(ex.Message);
+                await _commentService.CreateCommentAnswerAsync(userId, text, (int)parentId, postId);
             }
+            return StatusCode(202);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            try
-            {
-                await _commentService.DeleteCommentAsync(id);
-                return StatusCode(204);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _commentService.DeleteCommentAsync(id);
+            return StatusCode(204);
         }
-    } 
+    }
 }

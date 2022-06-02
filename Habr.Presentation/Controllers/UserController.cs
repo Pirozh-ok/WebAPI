@@ -1,5 +1,7 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.DataAccess.Entities;
+using Habr.Presentation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
@@ -11,11 +13,13 @@ namespace Habr.Presentation.Controllers
         private readonly IUserService _userService;
         private readonly IPostService _postService;
         private readonly ICommentService _commentsService;
-        public UserController(IUserService userService, IPostService postService, ICommentService commentService)
+        private readonly IJwtService _jwtService;
+        public UserController(IUserService userService, IPostService postService, ICommentService commentService, IJwtService jwtService)
         {
             _userService = userService;
             _postService = postService;
             _commentsService = commentService;
+            _jwtService = jwtService;
         }
 
         [HttpGet]
@@ -42,13 +46,14 @@ namespace Habr.Presentation.Controllers
             return Ok(await _commentsService.GetCommentsByUserAsync(id));
         }
 
-        [HttpPost("/log-in")]
+        [HttpPost("log-in")]
         public async Task<IActionResult> LogIn([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
             await _userService.RegisterAsync(name, email, password);
             return StatusCode(201);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -56,6 +61,7 @@ namespace Habr.Presentation.Controllers
             return StatusCode(204);
         }
 
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] User user)
         {
@@ -63,11 +69,19 @@ namespace Habr.Presentation.Controllers
             return StatusCode(204);
         }
 
-        [HttpGet("/sign-in")]
+        [HttpGet("sign-in")]
         public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
         {
             var user = await _userService.LogInAsync(email, password);
-            return Ok(user);
+
+            var token = _jwtService.GenerateAccessToken(user);
+            var response = new
+            {
+                access_token = token,
+                userdata = user
+            };
+
+            return Ok(response);
         }
     }
 }
