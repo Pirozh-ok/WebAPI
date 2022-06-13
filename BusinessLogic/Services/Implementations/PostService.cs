@@ -16,12 +16,14 @@ namespace Habr.BusinessLogic.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
+
         public PostService(DataContext context, IMapper mapper, ILogger<PostService> logger)
         {
             _context = context;
             _mapper = mapper;
             _logger = logger;
         }
+
         public async Task CreatePostAsync(string title, string text, int userId, bool isPublished)
         {
             GuardAgainstInvalidPost(title, text);
@@ -42,6 +44,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 _logger.LogInformation($"\"{title}\" {LogResources.PublishPost}");
             }
         }
+
         public async Task DeletePostAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
@@ -53,6 +56,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<Post>> GetFullPostsAsync()
         {
             var posts = await _context.Posts
@@ -64,6 +68,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidListPosts(posts);
             return posts;
         }
+
         public async Task<Post> GetFullPostByIdAsync(int id)
         {
             var post = await _context.Posts
@@ -74,6 +79,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             return post;
         }
+
         public async Task<IEnumerable<PostDTO>> GetPostsAsync()
         {
             var posts =  await _context.Posts
@@ -85,6 +91,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidListPosts(posts);
             return posts;
         }
+
         public async Task<PostDTO> GetPostByIdAsync(int postId)
         {
             var post = await _context.Posts
@@ -94,6 +101,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidPost(post);
             return _mapper.Map<PostDTO>(post);
         }
+
         public async Task<IEnumerable<PostDTO>> GetPostsByUserAsync(int userId)
         {
             var posts =  await _context.Posts
@@ -106,6 +114,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidListPosts(posts);
             return posts;
         }
+
         public async Task<NotPublishedPostDTO> GetNotPublishedPostByIdAsync(int id)
         {
             var post = await GetFullPostByIdAsync(id);
@@ -117,6 +126,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             return _mapper.Map<NotPublishedPostDTO>(post);
         }
+
         public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId)
         {
             var user = await GetUserByIdAsync(userId);
@@ -129,6 +139,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidListPosts(posts);
             return posts;
         }
+
         public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsAsync()
         {
             var posts = await _context.Posts
@@ -141,6 +152,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidListPosts(posts);
             return posts;
         }
+
         public async Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsAsync()
         {
             var posts = await _context.Posts
@@ -159,6 +171,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             return posts; 
         }
+
         public async Task<PublishedPostDTO> GetPublishedPostByIdAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
@@ -172,6 +185,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
             return postDTO;
         }
+
         public async Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId)
         {
             var posts = await _context.Posts
@@ -190,6 +204,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             return posts;
         }
+
         public async Task PublishPostAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
@@ -206,6 +221,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             await _context.SaveChangesAsync();
             _logger.LogInformation($"\"{post.Title}\" {LogResources.PublishPost}");
         }
+
         public async Task SendPostToDraftsAsync(int postId)
         { 
             var post = await _context.Posts
@@ -222,6 +238,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             post.IsPublished = false;
             await _context.SaveChangesAsync();
         }
+
         public async Task UpdatePostAsync(Post post)
         {
             var updatePost = await GetFullPostByIdAsync(post.Id);
@@ -240,6 +257,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             updatePost.Text = post.Text;
             await _context.SaveChangesAsync();
         }
+
         private async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
         {
             var postComments = await _context.Comments
@@ -263,6 +281,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             return commentsDTO;
         }
+
         private async Task<IEnumerable<CommentDTO>> GetCommentsByParentIdAsync(int parentId)
         {
             var subComments = await _context.Comments
@@ -292,6 +311,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             return subCommentDTOs;
         }
+
         private void GuardAgainstInvalidPost(Post? post)
         {
             if (post == null)
@@ -299,6 +319,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
             }
         }
+
         private void GuardAgainstInvalidPost(string title, string text)
         {
             if (string.IsNullOrEmpty(title))
@@ -329,6 +350,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
             }
         }
+
         private void GuardAgainstInvalidUser (User? user)
         {
             if (user == null)
@@ -336,6 +358,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new BadRequestException(UserExceptionMessageResource.UserNotFound);
             }
         }
+
         private async Task<User> GetUserByIdAsync(int userId)
         {
             
