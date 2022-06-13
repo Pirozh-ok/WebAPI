@@ -46,17 +46,27 @@ namespace Habr.Presentation.Controllers
             return Ok(await _commentsService.GetCommentsByUserAsync(id));
         }
 
-        [HttpPost("log-in")]
-        public async Task<IActionResult> LogIn([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
+        [HttpPost("sign-up")]
+        public async Task<IActionResult> SignUp([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
             await _userService.RegisterAsync(name, email, password);
-            return StatusCode(201);
+            var user = await _userService.LogInAsync(email, password);
+
+            var token = _jwtService.GenerateAccessToken(user);
+            var response = new
+            {
+                access_token = token,
+                userdata = user
+            };
+
+            return Ok(response);
         }
 
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            
             await _userService.DeleteAsync(id);
             return StatusCode(204);
         }
