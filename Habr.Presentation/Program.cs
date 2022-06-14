@@ -3,7 +3,7 @@ using Habr.Common.AutoMappers;
 using Habr.Common.Exceptions;
 using Habr.Common.Mapping;
 using Habr.DataAccess;
-using Habr.Presentation;
+using Habr.Presentation.Extensions;
 using NLog;
 using NLog.Web;
 

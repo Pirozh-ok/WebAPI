@@ -2,7 +2,7 @@
 using Habr.Presentation.Services;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Habr.Presentation
+namespace Habr.Presentation.Extensions
 {
     static public class AuthorizationExtension
     {

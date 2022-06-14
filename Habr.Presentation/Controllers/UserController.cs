@@ -1,5 +1,7 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.Exceptions;
 using Habr.DataAccess.Entities;
+using Habr.Presentation.Extensions;
 using Habr.Presentation.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +16,9 @@ namespace Habr.Presentation.Controllers
         private readonly IPostService _postService;
         private readonly ICommentService _commentsService;
         private readonly IJwtService _jwtService;
+
+        public object UserExceptionMessageResource { get; private set; }
+
         public UserController(IUserService userService, IPostService postService, ICommentService commentService, IJwtService jwtService)
         {
             _userService = userService;
@@ -63,11 +68,10 @@ namespace Habr.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        [HttpDelete()]
+        public async Task<IActionResult> DeleteUser()
         {
-            
-            await _userService.DeleteAsync(id);
+            await _userService.DeleteAsync(HttpContext.User.Identity.GetAuthorizedUserId());
             return StatusCode(204);
         }
 
@@ -75,8 +79,15 @@ namespace Habr.Presentation.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] User user)
         {
-            await _userService.UpdateAsync(user);
-            return StatusCode(204);
+            if (user is not null && user.Id == HttpContext.User.Identity.GetAuthorizedUserId())
+            {
+                await _userService.UpdateAsync(user);
+                return StatusCode(204);
+            }
+            else
+            {
+                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.AccessError);
+            }
         }
 
         [HttpGet("sign-in")]
