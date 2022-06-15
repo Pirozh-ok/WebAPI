@@ -61,6 +61,15 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Access error.
+        /// </summary>
+        public static string AccessError {
+            get {
+                return ResourceManager.GetString("AccessError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на A user with this email address already exists!.
         /// </summary>
         public static string EmailExists {

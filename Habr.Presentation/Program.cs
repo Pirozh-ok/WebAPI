@@ -3,8 +3,9 @@ using Habr.Common.AutoMappers;
 using Habr.Common.Exceptions;
 using Habr.Common.Mapping;
 using Habr.DataAccess;
+using Habr.Presentation.Extensions;
 using NLog;
-using NLog.Web; 
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 var logger = LogManager.LoadConfiguration("NLog.config").GetCurrentClassLogger();
@@ -18,6 +19,7 @@ builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
+builder.Services.AddJwtAuthorization(builder.Configuration);
 builder.Services.AddServices();
 builder.Services.ConfigureServices(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile));
@@ -38,6 +40,7 @@ builder.Services.AddMvc(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseAuthentication();
 app.UseOpenApi();
 app.UseSwaggerUi3();
 app.UseHttpsRedirection();

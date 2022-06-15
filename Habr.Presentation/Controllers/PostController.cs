@@ -1,5 +1,8 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.Exceptions;
 using Habr.DataAccess;
+using Habr.Presentation.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
@@ -10,6 +13,7 @@ namespace Habr.Presentation.Controllers
     {
         private readonly IPostService _postService;
         private readonly ICommentService _commentService;
+
         public PostController(IPostService postService, ICommentService commentService)
         {
             _postService = postService;
@@ -17,93 +21,77 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPosts([FromQuery] bool? isPublished)
+        public async Task<IActionResult> GetPostsAsync()
         {
-            if (isPublished is not null)
-            {
-                if ((bool)isPublished)
-                {
-                    var response = await _postService.GetPublishedPostsAsync();
-                    return response is null || response.Count() == 0 ? NotFound("NotFound") : Ok(response);
-                }
-                else
-                {
-                    var response = await _postService.GetNotPublishedPostsAsync();
-                    return response is null || response.Count() == 0 ? NotFound("NotFound") : Ok(response);
-                }
-            }
-            else
-            {
-                var response = await _postService.GetPostsAsync();
-                return response is null || response.Count() == 0 ? NotFound("NotFound") : Ok(response);
-            }
+            return Ok(await _postService.GetPublishedPostsAsync());
+        }
+
+        [HttpGet("my-drafts")]
+        [Authorize]
+        public async Task<IActionResult> GetNotPublishedPostsAsync()
+        {
+            return Ok(await _postService.GetNotPublishedPostsByUserAsync(HttpContext.User.Identity
+                                                                        .GetAuthorizedUserId()));
+        }
+
+        [HttpGet("my-posts")]
+        [Authorize]
+        public async Task<IActionResult> GetPublishedPostsAsync()
+        {
+            return Ok(await _postService.GetPublishedPostsByUserAsync(HttpContext.User.Identity
+                                                                        .GetAuthorizedUserId()));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPostByIdAsync(int id)
         {
-            try
-            {
-                return Ok(await _postService.GetPublishedPostByIdAsync(id));
-            }
-            catch(Exception ex)
-            {
-                return NotFound("Not found");
-            }
+
+            return Ok(await _postService.GetPublishedPostByIdAsync(id));
         }
 
         [HttpGet("{id}/comments")]
         public async Task<IActionResult> GetCommentByPost(int id)
         {
-            try
-            {
-                return Ok(await _commentService.GetCommentsByPostAsync(id));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return Ok(await _commentService.GetCommentsByPostAsync(id));
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreatePost([FromQuery] string title, [FromQuery] string text, [FromQuery] int userId, [FromQuery] bool isPublished)
+        public async Task<IActionResult> CreatePost([FromQuery] string title, [FromQuery] string text, [FromQuery] bool isPublished)
         {
-            try
-            {
-                await _postService.CreatePostAsync(title, text, userId, isPublished);
-                return StatusCode(201);
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+
+            await _postService.CreatePostAsync(title, text, HttpContext.User.Identity.GetAuthorizedUserId(), isPublished);
+            return StatusCode(201);
         }
 
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdatePost([FromBody] Post post)
         {
-            try
+            if (post is not null && post.UserId == HttpContext.User.Identity.GetAuthorizedUserId())
             {
                 await _postService.UpdatePostAsync(post);
                 return StatusCode(204);
             }
-            catch(Exception ex)
+            else
             {
-                return BadRequest(ex.Message);
+                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.AccessError);
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(int id)
         {
-            try
+            var post = await _postService.GetFullPostByIdAsync(id);
+            if (post is not null && post.UserId == HttpContext.User.Identity.GetAuthorizedUserId())
             {
                 await _postService.DeletePostAsync(id);
                 return StatusCode(204);
             }
-            catch (Exception ex)
+            else
             {
-                return BadRequest(ex.Message);
+                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.AccessError);
             }
         }
     }

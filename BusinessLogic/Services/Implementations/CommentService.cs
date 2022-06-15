@@ -13,11 +13,13 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+
         public CommentService(DataContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
         }
+
         public async Task<IEnumerable<Comment>> GetFullCommentsAsync()
         {
             var comments =  await _context.Comments
@@ -27,6 +29,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidListComments(comments);
             return comments;
         }
+
         public async Task<Comment> GetFullCommentByIdAsync(int id)
         {
             var comment = await _context.Comments
@@ -36,6 +39,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidComment(comment);
             return comment;
         }
+
         public async Task<CommentDTO> GetCommentByIdAsync(int commentId)
         {
             var comment = await _context.Comments
@@ -45,6 +49,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidComment(comment);
             return _mapper.Map<CommentDTO>(comment);
         }
+
         public async Task CreateCommentAsync(int userId, int postId, string text)
         {
             var user = await GetUserByIdAsync(userId);
@@ -60,6 +65,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             await _context.SaveChangesAsync();
         }
+
         public async Task CreateCommentAnswerAsync(int userId, string text, int parentId, int postId)
         {
             var user = await GetUserByIdAsync(userId);
@@ -80,12 +86,14 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             await _context.SaveChangesAsync();
         }
+
         public async Task DeleteCommentAsync(int commentId)
         {
             var comment = await GetFullCommentByIdAsync(commentId);
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<CommentDTO>> GetCommentsAsync()
         {
             var comments = await _context.Comments
@@ -96,6 +104,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidListComments(comments);
             return comments;
         }
+
         public async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
         {
             var comments = await _context.Comments
@@ -121,6 +130,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidListComments(comments);
             return comments;
         }
+
         private async Task<User> GetUserByIdAsync(int userId)
         {
             var user = await _context.Users
@@ -129,6 +139,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidUser(user);
             return user;
         }
+
         private async Task<Post> GetPostByIdAsync(int postId)
         {
             var post = await _context.Posts
@@ -145,6 +156,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new BadRequestException(Common.Resources.PostExceptionMessageResource.PostNotFound);
             }
         }
+
         private void GuardAgainstInvalidUser(User user)
         {
             if (user == null)
@@ -152,6 +164,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new BadRequestException(Common.Resources.UserExceptionMessageResource.UserNotFound);
             }
         }
+
         private void GuardAgainstInvalidComment(Comment comment)
         {
             if (comment == null)
@@ -159,6 +172,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new NotFoundException(Common.Resources.CommentExceptionMessageResource.CommentNotFound);
             }
         }
+
         private void GuardAgainstInvalidListComments<T>(IEnumerable<T> comments)
         {
             if(comments is null || comments.Count() == 0)

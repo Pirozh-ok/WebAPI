@@ -1,5 +1,10 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.DTOs.UserDTOs;
+using Habr.Common.Exceptions;
 using Habr.DataAccess.Entities;
+using Habr.Presentation.Extensions;
+using Habr.Presentation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
@@ -11,11 +16,14 @@ namespace Habr.Presentation.Controllers
         private readonly IUserService _userService;
         private readonly IPostService _postService;
         private readonly ICommentService _commentsService;
-        public UserController(IUserService userService, IPostService postService, ICommentService commentService)
+        private readonly IJwtService _jwtService;
+
+        public UserController(IUserService userService, IPostService postService, ICommentService commentService, IJwtService jwtService)
         {
             _userService = userService;
             _postService = postService;
             _commentsService = commentService;
+            _jwtService = jwtService;
         }
 
         [HttpGet]
@@ -42,32 +50,49 @@ namespace Habr.Presentation.Controllers
             return Ok(await _commentsService.GetCommentsByUserAsync(id));
         }
 
-        [HttpPost("/log-in")]
-        public async Task<IActionResult> LogIn([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
+        [HttpPost("sign-up")]
+        public async Task<IActionResult> SignUp([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
-            await _userService.RegisterAsync(name, email, password);
-            return StatusCode(201);
+            var user = await _userService.RegisterAsync(name, email, password);
+            var token = _jwtService.GenerateAccessToken(user);
+            var response = new
+            {
+                access_token = token,
+                userdata = user
+            };
+
+            return Ok(response);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        [Authorize]
+        [HttpDelete()]
+        public async Task<IActionResult> DeleteUser()
         {
-            await _userService.DeleteAsync(id);
+            await _userService.DeleteAsync(HttpContext.User.Identity.GetAuthorizedUserId());
             return StatusCode(204);
         }
 
+        [Authorize]
         [HttpPut]
-        public async Task<IActionResult> UpdateUser([FromBody] User user)
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDTO user)
         {
-            await _userService.UpdateAsync(user);
+            await _userService.UpdateAsync(HttpContext.User.Identity.GetAuthorizedUserId(), user);
             return StatusCode(204);
         }
 
-        [HttpGet("/sign-in")]
+        [HttpGet("sign-in")]
         public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
         {
             var user = await _userService.LogInAsync(email, password);
-            return Ok(user);
+
+            var token = _jwtService.GenerateAccessToken(user);
+            var response = new
+            {
+                access_token = token,
+                userdata = user
+            };
+
+            return Ok(response);
         }
     }
 }
