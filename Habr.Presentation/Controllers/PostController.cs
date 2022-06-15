@@ -21,23 +21,25 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPosts([FromQuery] bool? isPublished)
+        public async Task<IActionResult> GetPostsAsync()
         {
-            if (isPublished is not null)
-            {
-                if ((bool)isPublished)
-                {
-                    return Ok(await _postService.GetPublishedPostsAsync());
-                }
-                else
-                {
-                    return Ok(await _postService.GetNotPublishedPostsAsync());
-                }
-            }
-            else
-            {
-                return Ok(await _postService.GetPostsAsync());
-            }
+            return Ok(await _postService.GetPublishedPostsAsync());
+        }
+
+        [HttpGet("my-drafts")]
+        [Authorize]
+        public async Task<IActionResult> GetNotPublishedPostsAsync()
+        {
+            return Ok(await _postService.GetNotPublishedPostsByUserAsync(HttpContext.User.Identity
+                                                                        .GetAuthorizedUserId()));
+        }
+
+        [HttpGet("my-posts")]
+        [Authorize]
+        public async Task<IActionResult> GetPublishedPostsAsync()
+        {
+            return Ok(await _postService.GetPublishedPostsByUserAsync(HttpContext.User.Identity
+                                                                        .GetAuthorizedUserId()));
         }
 
         [HttpGet("{id}")]
@@ -60,7 +62,6 @@ namespace Habr.Presentation.Controllers
 
             await _postService.CreatePostAsync(title, text, HttpContext.User.Identity.GetAuthorizedUserId(), isPublished);
             return StatusCode(201);
-
         }
 
         [Authorize]
