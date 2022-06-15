@@ -15,7 +15,9 @@ namespace Habr.Presentation.Extensions
                 .FirstOrDefault();
 
             if (id is null)
+            {
                 throw new AuthorizationException(Common.Resources.UserExceptionMessageResource.AccessError);
+            }
 
             return int.Parse(id.Value);
         }

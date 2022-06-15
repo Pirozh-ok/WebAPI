@@ -1,4 +1,5 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Exceptions;
 using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
@@ -16,8 +17,6 @@ namespace Habr.Presentation.Controllers
         private readonly IPostService _postService;
         private readonly ICommentService _commentsService;
         private readonly IJwtService _jwtService;
-
-        public object UserExceptionMessageResource { get; private set; }
 
         public UserController(IUserService userService, IPostService postService, ICommentService commentService, IJwtService jwtService)
         {
@@ -54,9 +53,7 @@ namespace Habr.Presentation.Controllers
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
-            await _userService.RegisterAsync(name, email, password);
-            var user = await _userService.LogInAsync(email, password);
-
+            var user = await _userService.RegisterAsync(name, email, password);
             var token = _jwtService.GenerateAccessToken(user);
             var response = new
             {
@@ -77,17 +74,10 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpPut]
-        public async Task<IActionResult> UpdateUser([FromBody] User user)
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDTO user)
         {
-            if (user is not null && user.Id == HttpContext.User.Identity.GetAuthorizedUserId())
-            {
-                await _userService.UpdateAsync(user);
-                return StatusCode(204);
-            }
-            else
-            {
-                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.AccessError);
-            }
+            await _userService.UpdateAsync(HttpContext.User.Identity.GetAuthorizedUserId(), user);
+            return StatusCode(204);
         }
 
         [HttpGet("sign-in")]

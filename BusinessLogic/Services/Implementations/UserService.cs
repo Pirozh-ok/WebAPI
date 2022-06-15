@@ -87,7 +87,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             return _mapper.Map<UserDTO>(user);
         }
 
-        public async Task RegisterAsync(string name, string email, string password)
+        public async Task<UserDTO> RegisterAsync(string name, string email, string password)
         {
             if (await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email) != null)
@@ -105,20 +105,36 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             await _context.SaveChangesAsync();
             _logger.LogInformation($"\"{name}\" {LogResources.UserRegistered}");
+
+            return _mapper.Map<UserDTO>(_context.Users
+                                .SingleOrDefault(u => u.Email == email));
         }
 
-        public async Task UpdateAsync(User user)
+        public async Task UpdateAsync(int userId, UpdateUserDTO user)
         {
             var userToUpdate = await _context.Users
-                .SingleOrDefaultAsync(u => u.Id == user.Id);
+                .SingleOrDefaultAsync(u => u.Id == userId);
 
             GuardAgainstInvalidUser(userToUpdate);
 
+            if (userToUpdate.Email != user.Email && await _context.Users
+                                                        .SingleOrDefaultAsync(u => u.Email == user.Email) != null)
+            {
+                throw new BusinessException(UserExceptionMessageResource.EmailExists);
+            }
+
+            if (BCrypt.Net.BCrypt.HashPassword(user.OldPassword) != userToUpdate.Password)
+            {
+                throw new BusinessException(UserExceptionMessageResource.IncorrectPassword);
+            }
+
             userToUpdate.Name = user.Name;
-            userToUpdate.Password = BCrypt.Net.BCrypt.HashPassword(userToUpdate.Password);
             userToUpdate.Email = user.Email;
-            userToUpdate.Posts = user.Posts;
-            userToUpdate.Comments = user.Comments;
+
+            if (!string.IsNullOrEmpty(user.NewPassword))
+            {
+                userToUpdate.Password = BCrypt.Net.BCrypt.HashPassword(user.NewPassword);
+            }
 
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
