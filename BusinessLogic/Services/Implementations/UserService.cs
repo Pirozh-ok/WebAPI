@@ -117,24 +117,23 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             GuardAgainstInvalidUser(userToUpdate);
 
-            if (userToUpdate.Email != user.Email && await _context.Users
+            if (user.Email is not null && userToUpdate.Email != user.Email && await _context.Users
                                                         .SingleOrDefaultAsync(u => u.Email == user.Email) != null)
             {
                 throw new BusinessException(UserExceptionMessageResource.EmailExists);
             }
 
-            if (BCrypt.Net.BCrypt.HashPassword(user.OldPassword) != userToUpdate.Password)
+            if (!BCrypt.Net.BCrypt.Verify(user.OldPassword, userToUpdate.Password))
             {
                 throw new BusinessException(UserExceptionMessageResource.IncorrectPassword);
             }
 
-            userToUpdate.Name = user.Name;
-            userToUpdate.Email = user.Email;
+            userToUpdate.Name = !string.IsNullOrEmpty(user.Name) ? user.Name : userToUpdate.Name;
+            userToUpdate.Email = !string.IsNullOrEmpty(user.Email) ? user.Email : userToUpdate.Email;
+            userToUpdate.Password = !string.IsNullOrEmpty(user.NewPassword) ?
+                                        BCrypt.Net.BCrypt.HashPassword(user.NewPassword) :
+                                        userToUpdate.Password;
 
-            if (!string.IsNullOrEmpty(user.NewPassword))
-            {
-                userToUpdate.Password = BCrypt.Net.BCrypt.HashPassword(user.NewPassword);
-            }
 
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
