@@ -239,6 +239,63 @@ namespace Habr.BusinessLogic.Tests.Services
 
             await Assert.ThrowsAsync<NotFoundException>(act);
         }
+
+        [Fact]
+        public async void SendPostToDrafts_CorrectId_Success()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            int postId = 1;
+
+            // Act
+
+            await postService.SendPostToDraftsAsync(postId);
+
+            // Assert
+
+            Assert.True(!(await postService.GetPostByIdAsync(postId)).IsPublished);
+        }
+
+        [Fact]
+        public async void SendPostToDrafts_InvalidId_NotFoundException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            int postId = -1;
+
+            // Act
+
+            Func<Task> act = () => postService.SendPostToDraftsAsync(postId);
+
+            // Assert
+
+            await Assert.ThrowsAsync<NotFoundException>(act);
+        }
+
+        [Fact]
+        public async void SendPostToDrafts_PostWithComments_BusinessException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            int postId = 3;
+
+            // Act
+
+            Func<Task> act = () => postService.SendPostToDraftsAsync(postId);
+
+            // Assert
+
+            await Assert.ThrowsAsync<BusinessException>(act);
+        }
+
+        ~PostServiceTest()
+        {
+            _context.Database.EnsureDeleted();
+        }
+
         private async void SeedDatabase()
         {
             var user1 = new User
@@ -259,7 +316,7 @@ namespace Habr.BusinessLogic.Tests.Services
 
             await _context.Users.AddRangeAsync(user1, user2);
 
-            await _context.Posts.AddRangeAsync( new List<Post>
+            await _context.Posts.AddRangeAsync(new List<Post>
             {
                 new Post()
                 {
@@ -282,18 +339,22 @@ namespace Habr.BusinessLogic.Tests.Services
                     Title = "Post3",
                     Text = "Text3",
                     User = user2,
-                    IsPublished = false,
+                    IsPublished = true
                 }
             });
 
             await _context.SaveChangesAsync();
-            var users = _context.Users.ToList();
-        }
 
-        /*[OneTimeTearDown]
-        public async void CleanUp()
-        {
-            await _context.Database.EnsureDeletedAsync();
-        }*/
+            var post = await _context.Posts.SingleOrDefaultAsync(p => p.Id == 3);
+            post.Comments
+                .Add(
+                    new Comment()
+                    {
+                        Text = "Comment1",
+                        UserId = user1.Id
+                    });
+
+            await _context.SaveChangesAsync();
+        }
     }
 }
