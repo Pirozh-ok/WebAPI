@@ -173,7 +173,7 @@ namespace Habr.BusinessLogic.Tests.Services
         }
 
         [Fact]
-        public async void DeletePost_NotExists_Success()
+        public async void DeletePost_InvalidId_ThrowsNotFoundException()
         {
             // Avarage
 
@@ -182,13 +182,63 @@ namespace Habr.BusinessLogic.Tests.Services
 
             // Act
 
-            Func<Task> act = () => postService.DeletePostAsync(postId);;
+            Func<Task> act = () => postService.DeletePostAsync(postId);
 
             // Assert
 
             await Assert.ThrowsAsync<NotFoundException>(act);
         }
 
+        [Fact]
+        public async void PublishPost_CorrectId_Success()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            int postId = 2;
+
+            // Act
+
+            await postService.PublishPostAsync(postId);
+
+            // Assert
+
+            Assert.True((await postService.GetPostByIdAsync(postId)).IsPublished);
+        }
+
+        [Fact]
+        public async void PublishPost_IdAlreadyPublishedPost_BusinessException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            int postId = 1;
+
+            // Act
+
+            Func<Task> act = () => postService.PublishPostAsync(postId);
+
+            // Assert
+
+            await Assert.ThrowsAsync<BusinessException>(act);
+        }
+
+        [Fact] 
+        public async void PublishPost_InvalidId_NotFoundException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            int postId = -1;
+
+            // Act
+
+            Func<Task> act = () => postService.PublishPostAsync(postId);
+
+            // Assert
+
+            await Assert.ThrowsAsync<NotFoundException>(act);
+        }
         private async void SeedDatabase()
         {
             var user1 = new User

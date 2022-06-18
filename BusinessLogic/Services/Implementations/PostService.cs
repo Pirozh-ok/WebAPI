@@ -209,6 +209,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task PublishPostAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
+            GuardAgainstInvalidPost(post);
 
             if (post.IsPublished)
             {
