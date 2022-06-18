@@ -54,7 +54,8 @@ namespace Habr.BusinessLogic.Tests.Services
 
             // Assert
 
-            Assert.True(await _context.Posts.SingleOrDefaultAsync(p => p.Title == title) is not null);
+            Assert.True(await _context.Posts
+                .SingleOrDefaultAsync(p => p.Title == title) is not null);
         }
 
         [Fact]
@@ -152,6 +153,40 @@ namespace Habr.BusinessLogic.Tests.Services
             // Assert
 
             await Assert.ThrowsAsync<BadRequestException>(act);
+        }
+
+        [Fact]
+        public async void DeletePost_CorrectId_Success()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            int postId = 1;
+
+            // Act
+
+            await postService.DeletePostAsync(postId);
+
+            // Assert
+
+            Assert.True(await _context.Posts.SingleOrDefaultAsync(p => p.Id == postId) is null);
+        }
+
+        [Fact]
+        public async void DeletePost_NotExists_Success()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            int postId = -1;
+
+            // Act
+
+            Func<Task> act = () => postService.DeletePostAsync(postId);;
+
+            // Assert
+
+            await Assert.ThrowsAsync<NotFoundException>(act);
         }
 
         private async void SeedDatabase()
