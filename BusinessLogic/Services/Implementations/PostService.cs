@@ -324,22 +324,22 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             if (string.IsNullOrEmpty(title))
             {
-                throw new ValidationException(Common.Resources.PostExceptionMessageResource.PostTitleRequired);
+                throw new ValidationException(PostExceptionMessageResource.PostTitleRequired);
             }
 
             if (title.Length > 200)
             {
-                throw new ValidationException(Common.Resources.PostExceptionMessageResource.MaxLengthTitlePostExceeded);
+                throw new ValidationException(PostExceptionMessageResource.MaxLengthTitlePostExceeded);
             }
 
             if (string.IsNullOrEmpty(text))
             {
-                throw new ValidationException(Common.Resources.PostExceptionMessageResource.EmptyPostText);
+                throw new ValidationException(PostExceptionMessageResource.EmptyPostText);
             }
 
-            if (title.Length > 2000)
+            if (text.Length > 2000)
             {
-                throw new ValidationException(Common.Resources.PostExceptionMessageResource.MaxLengthTextPostExceeded);
+                throw new ValidationException(PostExceptionMessageResource.MaxLengthTextPostExceeded);
             }
         }
 

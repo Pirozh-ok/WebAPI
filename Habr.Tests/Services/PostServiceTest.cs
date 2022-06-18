@@ -1,12 +1,13 @@
-﻿using AutoMapper;
+﻿using System.Text;
+using AutoMapper;
 using Habr.BusinessLogic.Services.Implementations;
 using Habr.Common.AutoMappers;
+using Habr.Common.Exceptions;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
-using NLog;
-using NUnit.Framework;
 
 namespace Habr.BusinessLogic.Tests.Services
 {
@@ -18,46 +19,139 @@ namespace Habr.BusinessLogic.Tests.Services
 
         private DataContext _context;
         private IMapper _mapper;
-        private ILogger _logger; 
+        private ILogger<PostService> _logger;
 
-        [OneTimeSetUp]
-        public async void Setup()
+        public PostServiceTest()
         {
             _context = new DataContext(_dbContextOptions);
-            await _context.Database.EnsureCreatedAsync();
+            _context.Database.EnsureCreated();
 
-            _mapper = new Mapper( new MapperConfiguration(
+            _mapper = new Mapper(new MapperConfiguration(
                 options =>
                 {
                     options.AddProfile(typeof(PostProfile));
                 }));
 
-            var loggerMock = new Mock<ILogger>();
-            loggerMock
-            SeedDatabase();
-        }
+            var loggerMock = new Mock<ILogger<PostService>>();
+            _logger = loggerMock.Object;
 
-        [OneTimeTearDown]
-        public async void CleanUp()
-        {
-            await _context.Database.EnsureDeletedAsync(); 
+            SeedDatabase();
         }
 
         [Fact]
         public async void CreatePost_CorrectData_Success()
         {
             // Avarage
-            AutoMapper.IMapper mapper = new AutoMapper.IMapper();
-            var postService = new PostService(_context, null, null);
-            var user = _context.Users.First();
+
+            var postService = new PostService(_context, _mapper, _logger);
+            var user = await _context.Users.FirstOrDefaultAsync(); 
+            var title = "Post4";
+            var text = "Text4";
+    
+            // Act
+
+            await postService.CreatePostAsync(title, text, user.Id, false);
+
+            // Assert
+
+            Assert.True(await _context.Posts.SingleOrDefaultAsync(p => p.Title == title) is not null);
+        }
+
+        [Fact]
+        public async void CreatePost_NullOrEmptyTitle_ThrowValidationException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            var user = await _context.Users.FirstOrDefaultAsync();
+            var title = string.Empty;
+            var text = "Text4";
+
+            // Act
+
+            Func<Task> act = () => postService.CreatePostAsync(title, text, user.Id, false);
+
+            // Assert
+
+            await Assert.ThrowsAsync<ValidationException>(act);
+        }
+
+        [Fact]
+        public async void CreatePost_TitleOfLengthExceedsMax_ThrowValidationException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            var user = await _context.Users.FirstOrDefaultAsync();
+            var title = new StringBuilder(300);
+            title.Length = 300; 
+            var text = "Text4";
+
+            // Act
+
+            Func<Task> act = () => postService.CreatePostAsync(title.ToString(), text, user.Id, false);
+
+            // Assert
+
+            await Assert.ThrowsAsync<ValidationException>(act);
+        }
+
+        [Fact]
+        public async void CreatePost_NullOrEmptyText_ThrowValidationException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            var user = await _context.Users.FirstOrDefaultAsync();
+            var title = "Post4";
+            var text = string.Empty;
+
+            // Act
+
+            Func<Task> act = () => postService.CreatePostAsync(title, text, user.Id, false);
+
+            // Assert
+
+            await Assert.ThrowsAsync<ValidationException>(act);
+        }
+
+        [Fact]
+        public async void CreatePost_TextOfLengthExceedsMax_ThrowValidationException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            var user = await _context.Users.FirstOrDefaultAsync();
+            var title = "Post4";
+            var text = new StringBuilder(2500);
+            text.Length = 2500;
+
+            // Act
+
+            Func<Task> act = () => postService.CreatePostAsync(title, text.ToString(), user.Id, false);
+
+            // Assert
+
+            await Assert.ThrowsAsync<ValidationException>(act);
+        }
+
+        [Fact]
+        public async void CreatePost_InvalidAuthorId_ThrowBadRequestException()
+        {
+            // Avarage
+
+            var postService = new PostService(_context, _mapper, _logger);
+            var userId = -1;
             var title = "Post4";
             var text = "Text4";
 
             // Act
-            await postService.CreatePostAsync(title, text, user.Id, false);
+
+            Func<Task> act = () => postService.CreatePostAsync(title, text, userId, false);
 
             // Assert
-            Xunit.Assert.NotNull(await _context.Posts.SingleOrDefaultAsync(p => p.Title == title));
+
+            await Assert.ThrowsAsync<BadRequestException>(act);
         }
 
         private async void SeedDatabase()
@@ -88,8 +182,6 @@ namespace Habr.BusinessLogic.Tests.Services
                     Text = "Text1",
                     UserId = user1.Id,
                     IsPublished = true,
-                    //Created = DateTime.Now,
-                    //Updated = DateTime.Now
                 },
 
                 new Post()
@@ -98,8 +190,6 @@ namespace Habr.BusinessLogic.Tests.Services
                     Text = "Text2",
                     UserId = user2.Id,
                     IsPublished = false,
-                    //Created = DateTime.Now,
-                    //Updated = DateTime.Now
                 },
 
                 new Post()
@@ -108,12 +198,17 @@ namespace Habr.BusinessLogic.Tests.Services
                     Text = "Text3",
                     User = user2,
                     IsPublished = false,
-                    //Created = DateTime.Now,
-                    //Updated = DateTime.Now
                 }
             });
 
             await _context.SaveChangesAsync();
+            var users = _context.Users.ToList();
         }
+
+        /*[OneTimeTearDown]
+        public async void CleanUp()
+        {
+            await _context.Database.EnsureDeletedAsync();
+        }*/
     }
 }
