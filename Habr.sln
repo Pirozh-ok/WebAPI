@@ -16,7 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.Common", "Habr.Common\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.Application", "Habr.Application\Habr.Application.csproj", "{2697A737-C3CD-40F9-A487-F5927324AD5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habr.Presentation", "Habr.Presentation\Habr.Presentation.csproj", "{0DD9DDA1-F356-4397-9307-ACF8D1150115}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.Presentation", "Habr.Presentation\Habr.Presentation.csproj", "{0DD9DDA1-F356-4397-9307-ACF8D1150115}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habr.BusinessLogic.Tests", "Habr.Tests\Habr.BusinessLogic.Tests.csproj", "{E7D6A9E4-28C8-4FD2-8F1A-4246222072A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +46,10 @@ Global
 		{0DD9DDA1-F356-4397-9307-ACF8D1150115}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DD9DDA1-F356-4397-9307-ACF8D1150115}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DD9DDA1-F356-4397-9307-ACF8D1150115}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7D6A9E4-28C8-4FD2-8F1A-4246222072A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7D6A9E4-28C8-4FD2-8F1A-4246222072A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7D6A9E4-28C8-4FD2-8F1A-4246222072A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7D6A9E4-28C8-4FD2-8F1A-4246222072A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
