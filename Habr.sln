@@ -18,7 +18,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.Application", "Habr.Ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.Presentation", "Habr.Presentation\Habr.Presentation.csproj", "{0DD9DDA1-F356-4397-9307-ACF8D1150115}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habr.BusinessLogic.Tests", "Habr.Tests\Habr.BusinessLogic.Tests.csproj", "{E7D6A9E4-28C8-4FD2-8F1A-4246222072A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Habr.BusinessLogic.Tests", "Habr.Tests\Habr.BusinessLogic.Tests.csproj", "{E7D6A9E4-28C8-4FD2-8F1A-4246222072A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

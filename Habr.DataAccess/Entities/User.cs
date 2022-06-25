@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Habr.Presentation.Auth;
 
 namespace Habr.DataAccess.Entities
 {
@@ -18,6 +14,7 @@ namespace Habr.DataAccess.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         public DateTime RegistrationDate { get; set; }
+        public RefreshToken RefreshToken { get; set; }
 
         // Post
         public ICollection<Post> Posts { get; set; }

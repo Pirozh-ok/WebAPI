@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Habr.Common.DTOs.UserDTOs;
 using Microsoft.Extensions.Options;
+using Habr.Presentation.Auth;
 
 namespace Habr.Presentation.Services
 {
@@ -32,7 +33,7 @@ namespace Habr.Presentation.Services
                 Issuer = _options.Issuer,
                 Audience = _options.Audience,
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddSeconds(int.Parse(_options.ExpiresInSecond)),
+                Expires = DateTime.UtcNow.AddSeconds(int.Parse(_options.TokenValidityInSecond)),
                 SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature)
             };
 
