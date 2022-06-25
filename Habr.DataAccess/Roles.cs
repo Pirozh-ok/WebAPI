@@ -1,4 +1,4 @@
-﻿namespace Habr.Common
+﻿namespace Habr.DataAccess
 {
     public enum Roles
     {

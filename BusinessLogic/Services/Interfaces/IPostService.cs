@@ -1,5 +1,4 @@
 ﻿using Habr.Common.DTOs;
-using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 
 namespace Habr.BusinessLogic.Services.Interfaces

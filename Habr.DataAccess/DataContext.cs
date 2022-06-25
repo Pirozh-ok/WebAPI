@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Habr.DataAccess.EntitiesConfigurations;
-using Microsoft.Extensions.Configuration;
 using Habr.DataAccess.Entities;
 
 namespace Habr.DataAccess
@@ -10,6 +9,11 @@ namespace Habr.DataAccess
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         { 
         }
+
+        public DataContext() 
+        {
+        }
+
         public DbSet<Post> Posts { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Comment> Comments { get; set; }

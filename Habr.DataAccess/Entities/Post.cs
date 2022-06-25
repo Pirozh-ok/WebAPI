@@ -1,6 +1,4 @@
-﻿using Habr.DataAccess.Entities;
-
-namespace Habr.DataAccess
+﻿namespace Habr.DataAccess.Entities
 {
     public class Post
     {

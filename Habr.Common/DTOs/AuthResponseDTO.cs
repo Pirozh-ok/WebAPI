@@ -1,4 +1,6 @@
-﻿namespace Habr.Common.DTOs
+﻿using Habr.DataAccess;
+
+namespace Habr.Common.DTOs
 {
     internal class AuthResponseDTO
     {
