@@ -1,7 +1,5 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs.UserDTOs;
-using Habr.Common.Exceptions;
-using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
 using Habr.Presentation.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -55,10 +53,19 @@ namespace Habr.Presentation.Controllers
         {
             var user = await _userService.RegisterAsync(name, email, password);
             var token = _jwtService.GenerateAccessToken(user);
+            var refreshToken = await _jwtService.UpdateRefreshTokenUser(user.Id);
+            _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
+
             var response = new
             {
                 access_token = token,
-                userdata = user
+                userdata = new UserDTO
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    RegistrationDate = user.RegistrationDate
+                }
             };
 
             return Ok(response);
@@ -84,12 +91,20 @@ namespace Habr.Presentation.Controllers
         public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
         {
             var user = await _userService.LogInAsync(email, password);
-
             var token = _jwtService.GenerateAccessToken(user);
+            var refreshToken = await _jwtService.UpdateRefreshTokenUser(user.Id);
+            _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
+
             var response = new
             {
                 access_token = token,
-                userdata = user
+                userdata = new UserDTO
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    RegistrationDate = user.RegistrationDate
+                }
             };
 
             return Ok(response);
