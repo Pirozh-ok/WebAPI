@@ -1,8 +1,11 @@
-﻿using Habr.BusinessLogic.Services.Interfaces;
+﻿using System.Security.Claims;
+using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.Common.DTOs.UserDTOs;
+using Habr.DataAccess;
 using Habr.Presentation.Extensions;
 using Habr.Presentation.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

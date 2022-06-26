@@ -34,7 +34,8 @@ namespace Habr.Common.Mapping
                 .ForMember(u => u.Email, c => c.MapFrom(u => u.Email))
                 .ForMember(u => u.RegistrationDate, c => c.MapFrom(u => u.RegistrationDate))
                 .ForMember(u => u.RefreshToken, c => c.MapFrom(u => u.RefreshToken))
-                .ForMember(u => u.RefreshTokenExpirationDate, c => c.MapFrom(u => u.RefreshTokenExpirationDate));
+                .ForMember(u => u.RefreshTokenExpirationDate, c => c.MapFrom(u => u.RefreshTokenExpirationDate))
+                .ForMember(u => u.Role, c => c.MapFrom(u => u.Role));
         }
     }
 }

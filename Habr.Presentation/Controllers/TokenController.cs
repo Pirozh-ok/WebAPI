@@ -18,8 +18,13 @@ namespace Habr.Presentation.Controllers
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["RefreshToken"];
-            var response = await _jwtService.RefreshJwtToken(refreshToken, Response);
 
+            if(refreshToken is null)
+            {
+                return NotFound();
+            }
+
+            var response = await _jwtService.RefreshJwtToken(refreshToken, Response);
             return Ok(response);
         }
     }

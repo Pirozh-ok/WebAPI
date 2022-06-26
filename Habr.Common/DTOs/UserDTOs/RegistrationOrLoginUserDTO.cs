@@ -1,4 +1,6 @@
-﻿namespace Habr.Common.DTOs.UserDTOs
+﻿using Habr.DataAccess;
+
+namespace Habr.Common.DTOs.UserDTOs
 {
     public class RegistrationOrLoginUserDTO
     {
@@ -8,5 +10,6 @@
         public DateTime RegistrationDate { get; set; }
         public string RefreshToken { get; set; }
         public DateTime RefreshTokenExpirationDate { get; set; }
+        public Roles Role { get; set; }
     }
 }
