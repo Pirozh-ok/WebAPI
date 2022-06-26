@@ -1,44 +1,26 @@
-﻿using System.Security.Cryptography;
-using Habr.Presentation.Auth;
-using Microsoft.AspNetCore.Http;
+﻿using Habr.Presentation.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/tokens/")]
     [ApiController]
     public class TokenController : ControllerBase
     {
-        private IConfiguration _configuration;
+        private readonly IJwtService _jwtService;
 
-        public TokenController(IConfiguration configuration)
+        public TokenController(IJwtService jwtService)
         {
-            _configuration = configuration;
+            _jwtService = jwtService;
         }
 
-        private RefreshToken CreateRefreshToken()
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
         {
-            var randomNumber = new byte[32];
-            using var generator = new RNGCryptoServiceProvider();
-            generator.GetBytes(randomNumber);
+            var refreshToken = Request.Cookies["RefreshToken"];
+            var response = await _jwtService.RefreshJwtToken(refreshToken, Response);
 
-            return new RefreshToken
-            {
-                Token = Convert.ToBase64String(randomNumber),
-                Expires = DateTime.UtcNow.AddDays(int.Parse(_configuration["RefreshToken:RefreshTokenValidityInDays"])),
-                Created = DateTime.UtcNow
-            };
-        }
-
-        private void SetRefreshTokenInCookie(string refreshToken)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(int.Parse(_configuration["RefreshToken:RefreshTokenValidityInDays"]))
-            };
-
-            Response.Cookies.Append("RefreshToken", refreshToken, cookieOptions);
+            return Ok(response);
         }
     }
 }

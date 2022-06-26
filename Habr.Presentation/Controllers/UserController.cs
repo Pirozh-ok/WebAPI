@@ -1,4 +1,5 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.DTOs;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Presentation.Extensions;
 using Habr.Presentation.Services;
@@ -53,13 +54,13 @@ namespace Habr.Presentation.Controllers
         {
             var user = await _userService.RegisterAsync(name, email, password);
             var token = _jwtService.GenerateAccessToken(user);
-            var refreshToken = await _jwtService.UpdateRefreshTokenUser(user.Id);
+            var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
             _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
 
-            var response = new
+            var response = new AuthResponseDTO
             {
-                access_token = token,
-                userdata = new UserDTO
+                AccessToken = token,
+                UserData = new UserDTO
                 {
                     Id = user.Id,
                     Name = user.Name,
@@ -92,13 +93,13 @@ namespace Habr.Presentation.Controllers
         {
             var user = await _userService.LogInAsync(email, password);
             var token = _jwtService.GenerateAccessToken(user);
-            var refreshToken = await _jwtService.UpdateRefreshTokenUser(user.Id);
+            var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
             _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
 
-            var response = new
+            var response = new AuthResponseDTO
             {
-                access_token = token,
-                userdata = new UserDTO
+                AccessToken = token,
+                UserData = new UserDTO
                 {
                     Id = user.Id,
                     Name = user.Name,

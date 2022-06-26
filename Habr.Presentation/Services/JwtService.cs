@@ -8,6 +8,9 @@ using Habr.Presentation.Auth;
 using System.Security.Cryptography;
 using Habr.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Habr.Common.DTOs;
+using Habr.Common.Exceptions;
+using Habr.Common.Resources;
 
 namespace Habr.Presentation.Services
 {
@@ -73,7 +76,7 @@ namespace Habr.Presentation.Services
             response.Cookies.Append("RefreshToken", refreshToken, cookieOptions);
         }
 
-        public async Task<RefreshToken> UpdateRefreshTokenUser(int userId)
+        public async Task<RefreshToken> UpdateRefreshTokenUserAsync(int userId)
         {
             var refreshToken = GenerateRefreshToken();
             var user = await _context.Users
@@ -86,6 +89,45 @@ namespace Habr.Presentation.Services
             await _context.SaveChangesAsync();
 
             return refreshToken; 
+        }
+
+        public async Task<AuthResponseDTO> RefreshJwtToken(string refreshToken, HttpResponse response)
+        {
+            var user = await _context.Users
+                .SingleOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+            if (user is null)
+            {
+                throw new BusinessException(TokenExceptionMessageResource.NoCorrectRefreshToken);
+            }
+
+            if (user.RefreshTokenExpirationDate < DateTime.UtcNow)
+            {
+                throw new BusinessException(TokenExceptionMessageResource.TokenNotActive);
+            }
+
+            var newRefreshToken = await UpdateRefreshTokenUserAsync(user.Id);
+            SetRefreshTokenInCookie(newRefreshToken.Token, response);
+            var accessToken = GenerateAccessToken(
+                new RegistrationOrLoginUserDTO
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    RegistrationDate = user.RegistrationDate,
+                });
+
+            return new AuthResponseDTO
+            {
+                AccessToken = accessToken,
+                UserData = new UserDTO
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    RegistrationDate = user.RegistrationDate,
+                }
+            };
         }
     }
 }
