@@ -21,5 +21,21 @@ namespace Habr.Presentation.Extensions
 
             return int.Parse(id.Value);
         }
+
+        static public string GetAuthorizedUserRole(this IIdentity principal)
+        {
+            var identity = principal as ClaimsIdentity;
+            var claim = identity.Claims;
+            var id = claim
+                .Where(x => x.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
+                .FirstOrDefault();
+
+            if (id is null)
+            {
+                throw new AuthorizationException(Common.Resources.UserExceptionMessageResource.AccessError);
+            }
+
+            return id.Value;
+        }
     }
 }

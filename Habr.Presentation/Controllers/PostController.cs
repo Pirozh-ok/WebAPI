@@ -1,5 +1,6 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.Exceptions;
+using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -66,9 +67,11 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpPut]
+        [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> UpdatePost([FromBody] Post post)
         {
-            if (post is not null && post.UserId == HttpContext.User.Identity.GetAuthorizedUserId())
+            if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId() 
+                                 || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
             {
                 await _postService.UpdatePostAsync(post);
                 return StatusCode(204);
@@ -81,10 +84,12 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpDelete("{id}")]
+        [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> DeletePost(int id)
         {
             var post = await _postService.GetFullPostByIdAsync(id);
-            if (post is not null && post.UserId == HttpContext.User.Identity.GetAuthorizedUserId())
+            if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId()
+                                 || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
             {
                 await _postService.DeletePostAsync(id);
                 return StatusCode(204);
