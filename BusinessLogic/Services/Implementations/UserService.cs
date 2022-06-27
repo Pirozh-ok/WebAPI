@@ -100,7 +100,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 {
                     Email = email,
                     Name = name,
-                    Password = BCrypt.Net.BCrypt.HashPassword(password)
+                    Password = BCrypt.Net.BCrypt.HashPassword(password),
+                    Role = Roles.User
                 });
 
             await _context.SaveChangesAsync();

@@ -49,7 +49,6 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpDelete("{id}")]
-        [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> DeleteComment(int id)
         {
             var comment = await _commentService.GetFullCommentByIdAsync(id);

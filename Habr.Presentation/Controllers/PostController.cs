@@ -67,7 +67,6 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpPut]
-        [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> UpdatePost([FromBody] Post post)
         {
             if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId() 
@@ -84,7 +83,6 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpDelete("{id}")]
-        [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> DeletePost(int id)
         {
             var post = await _postService.GetFullPostByIdAsync(id);

@@ -21,6 +21,7 @@ builder.Services.AddControllersWithViews()
 );
 builder.Services.AddJwtAuthorization(builder.Configuration);
 builder.Services.AddServices();
+builder.Services.AddAdminService();
 builder.Services.ConfigureServices(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile));
 builder.Services.AddSwaggerDocument(config =>
