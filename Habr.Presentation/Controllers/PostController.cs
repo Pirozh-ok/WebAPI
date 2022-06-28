@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
 {
-    [Route("api/posts/")]
+    [ApiVersion("1.0", Deprecated = true)]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/posts/")]
     [ApiController]
     public class PostController : ControllerBase
     {
@@ -22,9 +24,15 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPostsAsync()
+        public async Task<IActionResult> GetPostsAsyncV1()
         {
             return Ok(await _postService.GetPublishedPostsAsync());
+        }
+
+        [HttpGet("v2"), MapToApiVersion("2.0")]
+        public async Task<IActionResult> GetPostsAsyncV2()
+        {
+            return Ok(await _postService.GetPublishedPostsAsyncV2());
         }
 
         [HttpGet("my-drafts")]
@@ -44,10 +52,17 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [ApiVersion("1.0", Deprecated = true)]
         public async Task<IActionResult> GetPostByIdAsync(int id)
         {
-
             return Ok(await _postService.GetPublishedPostByIdAsync(id));
+        }
+
+        [HttpGet("{id}")]
+        [ApiVersion("2.0")]
+        public async Task<IActionResult> GetPostByIdAsyncV2(int id)
+        {
+            return Ok(await _postService.GetPublishedPostByIdAsyncV2(id));
         }
 
         [HttpGet("{id}/comments")]

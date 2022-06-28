@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
 {
-    [Route("api/tokens/")]
+    [ApiVersion("1.0", Deprecated = true)]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/tokens/")]
     [ApiController]
     public class TokenController : ControllerBase
     {

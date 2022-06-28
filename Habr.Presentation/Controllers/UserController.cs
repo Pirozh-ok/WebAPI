@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
 {
-    [Route("api/users/")]
+    [ApiVersion("1.0", Deprecated = true)]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/users/")]
     [ApiController]
     public class UserController : ControllerBase
     {

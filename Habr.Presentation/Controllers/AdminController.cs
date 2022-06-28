@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
 {
-
-    [Route("api/admins/")]
+    [ApiVersion("1.0", Deprecated = true)]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/admins/")]
     [Authorize(Roles = "Admin")]
     [ApiController]
     public class AdminController : ControllerBase

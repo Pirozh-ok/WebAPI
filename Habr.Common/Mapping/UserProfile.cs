@@ -36,6 +36,10 @@ namespace Habr.Common.Mapping
                 .ForMember(u => u.RefreshToken, c => c.MapFrom(u => u.RefreshToken))
                 .ForMember(u => u.RefreshTokenExpirationDate, c => c.MapFrom(u => u.RefreshTokenExpirationDate))
                 .ForMember(u => u.Role, c => c.MapFrom(u => u.Role));
+
+            CreateMap<User, ShortUserDTO>()
+               .ForMember(u => u.Name, c => c.MapFrom(u => u.Name))
+               .ForMember(u => u.Email, c => c.MapFrom(u => u.Email));
         }
     }
 }

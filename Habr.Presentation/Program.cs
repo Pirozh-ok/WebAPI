@@ -24,14 +24,17 @@ builder.Services.AddServices();
 builder.Services.AddAdminService();
 builder.Services.ConfigureServices(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile));
-builder.Services.AddSwaggerDocument(config =>
+/*builder.Services.AddSwaggerDocument(config =>
 {
     config.PostProcess = document =>
     {
         document.Info.Version = "v1";
         document.Info.Title = "Habr API";
     };
-});
+});*/
+
+builder.Services.AddVersioning();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddMvc(options =>
 {
@@ -42,10 +45,21 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseAuthentication();
-app.UseOpenApi();
-app.UseSwaggerUi3();
+app.UseStaticFiles();
+//app.UseOpenApi();
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.RoutePrefix = string.Empty;
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.SwaggerEndpoint("/swagger/v2/swagger.json", "v2");
+});
+
+//app.UseSwaggerUi3();
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseApiVersioning();
 app.MapControllers();
 
 app.Run();
