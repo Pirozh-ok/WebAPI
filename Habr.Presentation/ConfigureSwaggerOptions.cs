@@ -24,11 +24,6 @@ namespace Habr.Presentation
             }
         }
 
-        public void Configure(string name, SwaggerGenOptions options)
-        {
-            Configure(options);
-        }
-
         private OpenApiInfo CreateVersionInfo(ApiVersionDescription description)
         {
             var info = new OpenApiInfo()

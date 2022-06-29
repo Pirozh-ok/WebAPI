@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Habr.Presentation.Extensions
 {
@@ -10,7 +12,7 @@ namespace Habr.Presentation.Extensions
             services.AddApiVersioning(options =>
             {
                 options.AssumeDefaultVersionWhenUnspecified = true;
-                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.DefaultApiVersion = new ApiVersion(2, 0);
                 options.ReportApiVersions = true;
                 options.ApiVersionReader = ApiVersionReader.Combine(
                             new UrlSegmentApiVersionReader(),
@@ -25,8 +27,9 @@ namespace Habr.Presentation.Extensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
-            services.AddSwaggerGen();
-            services.ConfigureOptions<ConfigureSwaggerOptions>(); 
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>,
+                ConfigureSwaggerOptions>();
+            //services.ConfigureOptions<ConfigureSwaggerOptions>();
         }
     }
 }

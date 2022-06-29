@@ -23,13 +23,13 @@ namespace Habr.Presentation.Controllers
             _commentService = commentService;
         }
 
-        [HttpGet, MapToApiVersion("1.0")]
+        [HttpGet]
         public async Task<IActionResult> GetPostsAsyncV1()
         {
             return Ok(await _postService.GetPublishedPostsAsync());
         }
 
-        [HttpGet, MapToApiVersion("2.0")]
+        [HttpGet("v2"), MapToApiVersion("2.0")]
         public async Task<IActionResult> GetPostsAsyncV2()
         {
             return Ok(await _postService.GetPublishedPostsAsyncV2());
