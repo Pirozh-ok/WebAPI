@@ -27,7 +27,7 @@ namespace Habr.Presentation.Services
             _context = context;
         }
 
-        public string GenerateAccessToken(RegistrationOrLoginUserDTO user)
+        public string GenerateAccessToken(IdentityDTO user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -110,7 +110,7 @@ namespace Habr.Presentation.Services
             var newRefreshToken = await UpdateRefreshTokenUserAsync(user.Id);
             SetRefreshTokenInCookie(newRefreshToken.Token, response);
             var accessToken = GenerateAccessToken(
-                new RegistrationOrLoginUserDTO
+                new IdentityDTO
                 {
                     Id = user.Id,
                     Name = user.Name,

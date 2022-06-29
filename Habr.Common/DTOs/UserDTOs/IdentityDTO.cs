@@ -2,7 +2,7 @@
 
 namespace Habr.Common.DTOs.UserDTOs
 {
-    public class RegistrationOrLoginUserDTO
+    public class IdentityDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }

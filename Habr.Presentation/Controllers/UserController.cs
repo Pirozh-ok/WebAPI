@@ -54,7 +54,7 @@ namespace Habr.Presentation.Controllers
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
-            var user = await _userService.RegisterAsync(name, email, password);
+            var user = await _userService.SignUpAsync(name, email, password);
             var token = _jwtService.GenerateAccessToken(user);
             var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
             _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
@@ -93,7 +93,7 @@ namespace Habr.Presentation.Controllers
         [HttpGet("sign-in")]
         public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
         {
-            var user = await _userService.LogInAsync(email, password);
+            var user = await _userService.SignInAsync(email, password);
             var token = _jwtService.GenerateAccessToken(user);
             var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
             _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);

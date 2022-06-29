@@ -6,7 +6,7 @@ namespace Habr.Presentation.Services
 {
     public interface IJwtService
     {
-        public string GenerateAccessToken(RegistrationOrLoginUserDTO user);
+        public string GenerateAccessToken(IdentityDTO user);
         public RefreshToken GenerateRefreshToken();
         public void SetRefreshTokenInCookie(string refreshToken, HttpResponse response);
         public Task<RefreshToken> UpdateRefreshTokenUserAsync(int userId);
