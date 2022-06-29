@@ -1,13 +1,16 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.Exceptions;
 using Habr.DataAccess;
+using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
 {
-    [Route("api/posts/")]
+    [ApiVersion("1.0", Deprecated = true)]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/posts/")]
     [ApiController]
     public class PostController : ControllerBase
     {
@@ -20,10 +23,16 @@ namespace Habr.Presentation.Controllers
             _commentService = commentService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetPostsAsync()
+        [HttpGet, MapToApiVersion("1.0")]
+        public async Task<IActionResult> GetPostsAsyncV1()
         {
             return Ok(await _postService.GetPublishedPostsAsync());
+        }
+
+        [HttpGet, MapToApiVersion("2.0")]
+        public async Task<IActionResult> GetPostsAsyncV2()
+        {
+            return Ok(await _postService.GetPublishedPostsAsyncV2());
         }
 
         [HttpGet("my-drafts")]
@@ -43,10 +52,17 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [ApiVersion("1.0", Deprecated = true)]
         public async Task<IActionResult> GetPostByIdAsync(int id)
         {
-
             return Ok(await _postService.GetPublishedPostByIdAsync(id));
+        }
+
+        [HttpGet("{id}")]
+        [ApiVersion("2.0")]
+        public async Task<IActionResult> GetPostByIdAsyncV2(int id)
+        {
+            return Ok(await _postService.GetPublishedPostByIdAsyncV2(id));
         }
 
         [HttpGet("{id}/comments")]
@@ -68,7 +84,8 @@ namespace Habr.Presentation.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdatePost([FromBody] Post post)
         {
-            if (post is not null && post.UserId == HttpContext.User.Identity.GetAuthorizedUserId())
+            if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId() 
+                                 || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
             {
                 await _postService.UpdatePostAsync(post);
                 return StatusCode(204);
@@ -84,7 +101,8 @@ namespace Habr.Presentation.Controllers
         public async Task<IActionResult> DeletePost(int id)
         {
             var post = await _postService.GetFullPostByIdAsync(id);
-            if (post is not null && post.UserId == HttpContext.User.Identity.GetAuthorizedUserId())
+            if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId()
+                                 || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
             {
                 await _postService.DeletePostAsync(id);
                 return StatusCode(204);

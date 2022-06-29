@@ -1,7 +1,6 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.DTOs;
 using Habr.Common.DTOs.UserDTOs;
-using Habr.Common.Exceptions;
-using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
 using Habr.Presentation.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers
 {
-    [Route("api/users/")]
+    [ApiVersion("1.0", Deprecated = true)]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/users/")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -53,12 +54,21 @@ namespace Habr.Presentation.Controllers
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
-            var user = await _userService.RegisterAsync(name, email, password);
+            var user = await _userService.SignUpAsync(name, email, password);
             var token = _jwtService.GenerateAccessToken(user);
-            var response = new
+            var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
+            _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
+
+            var response = new AuthResponseDTO
             {
-                access_token = token,
-                userdata = user
+                AccessToken = token,
+                UserData = new UserDTO
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    RegistrationDate = user.RegistrationDate
+                }
             };
 
             return Ok(response);
@@ -83,13 +93,21 @@ namespace Habr.Presentation.Controllers
         [HttpGet("sign-in")]
         public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
         {
-            var user = await _userService.LogInAsync(email, password);
-
+            var user = await _userService.SignInAsync(email, password);
             var token = _jwtService.GenerateAccessToken(user);
-            var response = new
+            var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
+            _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
+
+            var response = new AuthResponseDTO
             {
-                access_token = token,
-                userdata = user
+                AccessToken = token,
+                UserData = new UserDTO
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    RegistrationDate = user.RegistrationDate
+                }
             };
 
             return Ok(response);

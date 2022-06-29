@@ -5,8 +5,8 @@ namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IUserService
     {
-        public Task<UserDTO> LogInAsync(string email, string password);
-        public Task<UserDTO> RegisterAsync(string name, string email, string password);
+        public Task<IdentityDTO> SignInAsync(string email, string password);
+        public Task<IdentityDTO> SignUpAsync(string name, string email, string password);
         public Task<UserDTO> GetUserById(int id);
         public Task<IEnumerable<UserDTO>> GetUsersAsync();
         public Task<IEnumerable<UserWithPostsDTO>> GetUsersWithPostsAsync();

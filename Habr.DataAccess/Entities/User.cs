@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Habr.DataAccess.Entities
+﻿namespace Habr.DataAccess.Entities
 {
     public class User
     {
@@ -13,11 +7,15 @@ namespace Habr.DataAccess.Entities
             Posts = new HashSet<Post>();
             Comments = new HashSet<Comment>();
         }
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
         public DateTime RegistrationDate { get; set; }
+        public Roles Role { get; set; }
+        public string RefreshToken { get; set; }
+        public DateTime RefreshTokenExpirationDate { get; set; }
 
         // Post
         public ICollection<Post> Posts { get; set; }

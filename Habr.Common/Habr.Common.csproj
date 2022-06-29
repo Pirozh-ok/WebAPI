@@ -35,6 +35,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>LogResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\TokenExceptionMessageResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TokenExceptionMessageResource.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\UserExceptionMessageResource.Designer.cs">
       <DependentUpon>UserExceptionMessageResource.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -56,6 +61,10 @@
     <EmbeddedResource Update="Resources\LogResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LogResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\TokenExceptionMessageResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TokenExceptionMessageResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\UserExceptionMessageResource.resx">
       <LastGenOutput>UserExceptionMessageResource.Designer.cs</LastGenOutput>

@@ -46,6 +46,18 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .IsRequired()
                 .HasDefaultValue("")
                 .HasMaxLength(150);
+
+            builder.Property("Role")
+                .IsRequired()
+                .HasDefaultValue(Roles.User);
+
+            builder.Property("RefreshToken")
+                .IsRequired()
+                .HasDefaultValue("");
+
+            builder.Property("RefreshTokenExpirationDate")
+                .IsRequired()
+                .HasDefaultValueSql("getdate()");
         }
     }
 }

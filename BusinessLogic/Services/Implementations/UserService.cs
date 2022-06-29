@@ -77,17 +77,17 @@ namespace Habr.BusinessLogic.Services.Implementations
             return users;
         }
 
-        public async Task<UserDTO> LogInAsync(string email, string password)
+        public async Task<IdentityDTO> SignInAsync(string email, string password)
         {
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email);
 
             GuardAgainstInvalidUser(user, password);
             _logger.LogInformation($"\"{user.Name}\" {LogResources.UserLogIn}");
-            return _mapper.Map<UserDTO>(user);
+            return _mapper.Map<IdentityDTO>(user);
         }
 
-        public async Task<UserDTO> RegisterAsync(string name, string email, string password)
+        public async Task<IdentityDTO> SignUpAsync(string name, string email, string password)
         {
             if (await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == email) != null)
@@ -100,13 +100,14 @@ namespace Habr.BusinessLogic.Services.Implementations
                 {
                     Email = email,
                     Name = name,
-                    Password = BCrypt.Net.BCrypt.HashPassword(password)
+                    Password = BCrypt.Net.BCrypt.HashPassword(password),
+                    Role = Roles.User
                 });
 
             await _context.SaveChangesAsync();
             _logger.LogInformation($"\"{name}\" {LogResources.UserRegistered}");
 
-            return _mapper.Map<UserDTO>(_context.Users
+            return _mapper.Map<IdentityDTO>(_context.Users
                                 .SingleOrDefault(u => u.Email == email));
         }
 

@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
+using Habr.Common.DTOs.PostDTOs;
 using Habr.Common.Exceptions;
 using Habr.Common.Resources;
 using Habr.DataAccess;
@@ -194,6 +195,58 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .Where(p => p.IsPublished && p.UserId == userId)
                 .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+
+            foreach (var post in posts)
+            {
+                post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            }
+
+            return posts;
+        }
+
+        public async Task<IEnumerable<PublishedPostDTOv2>> GetPublishedPostsAsyncV2()
+        {
+            var posts = await _context.Posts
+                .Include(u => u.User)
+                .AsNoTracking()
+                .Where(p => p.IsPublished)
+                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            GuardAgainstInvalidListPosts(posts);
+
+            foreach (var post in posts)
+            {
+                post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            }
+
+            return posts;
+        }
+
+        public async Task<PublishedPostDTOv2> GetPublishedPostByIdAsyncV2(int postId)
+        {
+            var post = await GetFullPostByIdAsync(postId);
+
+            if (!post.IsPublished)
+            {
+                throw new BusinessException(PostExceptionMessageResource.PostNotPublished);
+            }
+
+            var postDTO = _mapper.Map<PublishedPostDTOv2>(post);
+            postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            return postDTO;
+        }
+
+        public async Task<IEnumerable<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId)
+        {
+            var posts = await _context.Posts
+                .Include(u => u.User)
+                .AsNoTracking()
+                .Where(p => p.IsPublished && p.UserId == userId)
+                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
             GuardAgainstInvalidListPosts(posts);
