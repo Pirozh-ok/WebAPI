@@ -20,20 +20,20 @@ namespace Habr.Presentation.Controllers
             _commentService = commentService;
         }
 
-        [HttpGet]
+        [HttpGet, ApiVersionNeutral]
         public async Task<IActionResult> GetComments()
         {
             return Ok(await _commentService.GetCommentsAsync());
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}"), ApiVersionNeutral]
         public async Task<IActionResult> GetCommentsById(int id)
         {
             return Ok(await _commentService.GetCommentByIdAsync(id));
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPost, ApiVersionNeutral]
         public async Task<IActionResult> CreateComment([FromQuery] string text, [FromQuery] int postId, [FromQuery] int? parentId)
         {
             int userId = HttpContext.User.Identity.GetAuthorizedUserId();
@@ -50,7 +50,7 @@ namespace Habr.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), ApiVersionNeutral]
         public async Task<IActionResult> DeleteComment(int id)
         {
             var comment = await _commentService.GetFullCommentByIdAsync(id);

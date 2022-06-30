@@ -1,10 +1,12 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.Exceptions;
+using Habr.Common.Parameters;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Habr.Presentation.Controllers
 {
@@ -24,55 +26,107 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet, MapToApiVersion("1.0")]
-        public async Task<IActionResult> GetPostsAsyncV1()
+        public async Task<IActionResult> GetPostsAsyncV1([FromQuery] PostParameters postParameters)
         {
-            return Ok(await _postService.GetPublishedPostsAsync());
+            var posts = await _postService.GetPublishedPostsAsync(postParameters);
+
+            var metadata = new
+            {
+                posts.TotalCount,
+                posts.PageSize,
+                posts.CurrentPage,
+                posts.TotalPages,
+                posts.HasNext,
+                posts.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            return Ok(posts);
         }
 
         [HttpGet, MapToApiVersion("2.0")]
-        public async Task<IActionResult> GetPostsAsyncV2()
+        public async Task<IActionResult> GetPostsAsyncV2([FromQuery] PostParameters postParameters)
         {
-            return Ok(await _postService.GetPublishedPostsAsyncV2());
+            var posts = await _postService.GetPublishedPostsAsyncV2(postParameters);
+
+            var metadata = new
+            {
+                posts.TotalCount,
+                posts.PageSize,
+                posts.CurrentPage,
+                posts.TotalPages,
+                posts.HasNext,
+                posts.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            return Ok(posts);
         }
 
-        [HttpGet("my-drafts")]
+        [HttpGet("my-drafts"), ApiVersionNeutral]
         [Authorize]
-        public async Task<IActionResult> GetNotPublishedPostsAsync()
+        public async Task<IActionResult> GetNotPublishedPostsAsync([FromQuery] PostParameters postParameters)
         {
-            return Ok(await _postService.GetNotPublishedPostsByUserAsync(HttpContext.User.Identity
-                                                                        .GetAuthorizedUserId()));
+            var posts = await _postService.GetNotPublishedPostsByUserAsync(
+                HttpContext.User.Identity.GetAuthorizedUserId(), 
+                postParameters);
+
+            var metadata = new
+            {
+                posts.TotalCount,
+                posts.PageSize,
+                posts.CurrentPage,
+                posts.TotalPages,
+                posts.HasNext,
+                posts.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            return Ok(posts);
         }
 
-        [HttpGet("my-posts")]
+        [HttpGet("my-posts"), ApiVersionNeutral]
         [Authorize]
-        public async Task<IActionResult> GetPublishedPostsAsync()
+        public async Task<IActionResult> GetPublishedPostsAsync([FromQuery] PostParameters postParameters)
         {
-            return Ok(await _postService.GetPublishedPostsByUserAsync(HttpContext.User.Identity
-                                                                        .GetAuthorizedUserId()));
+            var posts = await _postService.GetPublishedPostsByUserAsync(
+                HttpContext.User.Identity.GetAuthorizedUserId(),
+                postParameters);
+
+            var metadata = new
+            {
+                posts.TotalCount,
+                posts.PageSize,
+                posts.CurrentPage,
+                posts.TotalPages,
+                posts.HasNext,
+                posts.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            return Ok(posts);
         }
 
-        [HttpGet("{id}")]
-        [ApiVersion("1.0", Deprecated = true)]
-        public async Task<IActionResult> GetPostByIdAsync(int id)
+        [HttpGet("{id}"), MapToApiVersion("1.0")]
+        public async Task<IActionResult> GetPostByIdAsyncV1(int id)
         {
             return Ok(await _postService.GetPublishedPostByIdAsync(id));
         }
 
-        [HttpGet("{id}")]
-        [ApiVersion("2.0")]
+        [HttpGet("{id}"), MapToApiVersion("2.0")]
         public async Task<IActionResult> GetPostByIdAsyncV2(int id)
         {
             return Ok(await _postService.GetPublishedPostByIdAsyncV2(id));
         }
 
-        [HttpGet("{id}/comments")]
+        [HttpGet("{id}/comments"), ApiVersionNeutral]
         public async Task<IActionResult> GetCommentByPost(int id)
         {
             return Ok(await _commentService.GetCommentsByPostAsync(id));
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPost, ApiVersionNeutral]
         public async Task<IActionResult> CreatePost([FromQuery] string title, [FromQuery] string text, [FromQuery] bool isPublished)
         {
 
@@ -81,7 +135,7 @@ namespace Habr.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpPut]
+        [HttpPut, ApiVersionNeutral]
         public async Task<IActionResult> UpdatePost([FromBody] Post post)
         {
             if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId() 
@@ -97,7 +151,7 @@ namespace Habr.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), ApiVersionNeutral]
         public async Task<IActionResult> DeletePost(int id)
         {
             var post = await _postService.GetFullPostByIdAsync(id);
