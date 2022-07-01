@@ -1,4 +1,6 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common.DTOs;
+using Habr.Common.DTOs.PostDTOs;
 using Habr.Common.Exceptions;
 using Habr.Common.Parameters;
 using Habr.DataAccess;
@@ -6,7 +8,6 @@ using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Habr.Presentation.Controllers
 {
@@ -30,18 +31,18 @@ namespace Habr.Presentation.Controllers
         {
             var posts = await _postService.GetPublishedPostsAsync(postParameters);
 
-            var metadata = new
+            var response = new PagedListDTO<PublishedPostDTO>()
             {
-                posts.TotalCount,
-                posts.PageSize,
-                posts.CurrentPage,
-                posts.TotalPages,
-                posts.HasNext,
-                posts.HasPrevious
+                items = posts,
+                TotalCount = posts.TotalCount,
+                PageSize = posts.PageSize,
+                CurrentPage = posts.CurrentPage,
+                TotalPages = posts.TotalPages,
+                HasNext = posts.HasNext,
+                HasPrevious = posts.HasPrevious
             };
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-            return Ok(posts);
+            return Ok(response);
         }
 
         [HttpGet, MapToApiVersion("2.0")]
@@ -49,18 +50,18 @@ namespace Habr.Presentation.Controllers
         {
             var posts = await _postService.GetPublishedPostsAsyncV2(postParameters);
 
-            var metadata = new
+            var response = new PagedListDTO<PublishedPostDTOv2>()
             {
-                posts.TotalCount,
-                posts.PageSize,
-                posts.CurrentPage,
-                posts.TotalPages,
-                posts.HasNext,
-                posts.HasPrevious
+                items = posts,
+                TotalCount = posts.TotalCount,
+                PageSize = posts.PageSize,
+                CurrentPage = posts.CurrentPage,
+                TotalPages = posts.TotalPages,
+                HasNext = posts.HasNext,
+                HasPrevious = posts.HasPrevious
             };
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-            return Ok(posts);
+            return Ok(response);
         }
 
         [HttpGet("my-drafts"), ApiVersionNeutral]
@@ -71,18 +72,18 @@ namespace Habr.Presentation.Controllers
                 HttpContext.User.Identity.GetAuthorizedUserId(), 
                 postParameters);
 
-            var metadata = new
+            var response = new PagedListDTO<NotPublishedPostDTO>()
             {
-                posts.TotalCount,
-                posts.PageSize,
-                posts.CurrentPage,
-                posts.TotalPages,
-                posts.HasNext,
-                posts.HasPrevious
+                items = posts,
+                TotalCount = posts.TotalCount,
+                PageSize = posts.PageSize,
+                CurrentPage = posts.CurrentPage,
+                TotalPages = posts.TotalPages,
+                HasNext = posts.HasNext,
+                HasPrevious = posts.HasPrevious
             };
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-            return Ok(posts);
+            return Ok(response);
         }
 
         [HttpGet("my-posts"), ApiVersionNeutral]
@@ -93,18 +94,18 @@ namespace Habr.Presentation.Controllers
                 HttpContext.User.Identity.GetAuthorizedUserId(),
                 postParameters);
 
-            var metadata = new
+            var response = new PagedListDTO<PublishedPostDTO>()
             {
-                posts.TotalCount,
-                posts.PageSize,
-                posts.CurrentPage,
-                posts.TotalPages,
-                posts.HasNext,
-                posts.HasPrevious
+                items = posts,
+                TotalCount = posts.TotalCount,
+                PageSize = posts.PageSize,
+                CurrentPage = posts.CurrentPage,
+                TotalPages = posts.TotalPages,
+                HasNext = posts.HasNext,
+                HasPrevious = posts.HasPrevious
             };
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-            return Ok(posts);
+            return Ok(response);
         }
 
         [HttpGet("{id}"), MapToApiVersion("1.0")]
