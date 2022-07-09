@@ -1,6 +1,6 @@
 ﻿namespace Habr.Common.Parameters
 {
-    public abstract class QueryStringParameters
+    public abstract class PaginationRequestParameters
     {
         const int maxPageSize = 30;
         public int PageNumber { get; set; } = 1;

@@ -7,7 +7,7 @@ namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IPostService
     {
-        Task<PagedList<Post>> GetFullPostsAsync(PostParameters postParameters);
+        Task<PagedList<PostDTO>> GetFullPostsAsync(PostParameters postParameters);
         Task<Post> GetFullPostByIdAsync(int id);
         Task<PagedList<PostDTO>> GetPostsAsync(PostParameters postParameters);
         Task<PostDTO> GetPostByIdAsync(int id);
