@@ -4,6 +4,8 @@ using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.Common.DTOs.PostDTOs;
 using Habr.Common.Exceptions;
+using Habr.Common.Extensions;
+using Habr.Common.Parameters;
 using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
@@ -49,7 +51,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task DeletePostAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
-            GuardAgainstInvalidPost(post);
+            GuardAgainstPostNotFound(post);
 
             await _context.Entry(post)
                 .Collection(c => c.Comments)
@@ -59,16 +61,15 @@ namespace Habr.BusinessLogic.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Post>> GetFullPostsAsync()
+        public async Task<PagedList<PostDTO>> GetFullPostsAsync(PostParameters postParameters)
         {
-            var posts = await _context.Posts
+            var posts = _context.Posts
                 .Include(p => p.User)
                 .Include(p => p.Comments)
-                .AsNoTracking()
-                .ToListAsync();
+                .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
-            GuardAgainstInvalidListPosts(posts);
-            return posts;
+            return await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
         }
 
         public async Task<Post> GetFullPostByIdAsync(int id)
@@ -77,21 +78,19 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(p => p.User)
                 .SingleOrDefaultAsync(p => p.Id == id);
 
-            GuardAgainstInvalidPost(post);
+            GuardAgainstPostNotFound(post);
 
             return post;
         }
 
-        public async Task<IEnumerable<PostDTO>> GetPostsAsync()
+        public async Task<PagedList<PostDTO>> GetPostsAsync(PostParameters postParameters)
         {
-            var posts =  await _context.Posts
+            var posts = _context.Posts
                 .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .ToListAsync();
+                .AsNoTracking();
 
-            GuardAgainstInvalidListPosts(posts);
-            return posts;
+            return await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
         }
 
         public async Task<PostDTO> GetPostByIdAsync(int postId)
@@ -100,21 +99,19 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(p => p.User)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
-            GuardAgainstInvalidPost(post);
+            GuardAgainstPostNotFound(post);
             return _mapper.Map<PostDTO>(post);
         }
 
-        public async Task<IEnumerable<PostDTO>> GetPostsByUserAsync(int userId)
+        public async Task<PagedList<PostDTO>> GetPostsByUserAsync(int userId, PostParameters postParameters)
         {
-            var posts =  await _context.Posts
+            var posts = _context.Posts
                 .Where(p => p.UserId == userId)
                 .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .ToListAsync();
+                .AsNoTracking();
 
-            GuardAgainstInvalidListPosts(posts);
-            return posts;
+            return await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
         }
 
         public async Task<NotPublishedPostDTO> GetNotPublishedPostByIdAsync(int id)
@@ -129,49 +126,49 @@ namespace Habr.BusinessLogic.Services.Implementations
             return _mapper.Map<NotPublishedPostDTO>(post);
         }
 
-        public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId)
+        public async Task<PagedList<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId, PostParameters postParameters)
         {
             var user = await GetUserByIdAsync(userId);
-            var posts = await _context.Posts
+            GuardAgainstInvalidUser(user); 
+
+            var posts = _context.Posts
                 .Where(p => p.UserId == userId && !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .ToListAsync();
+                .AsNoTracking();
 
-            GuardAgainstInvalidListPosts(posts);
-            return posts;
+            return await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
         }
 
-        public async Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsAsync()
+        public async Task<PagedList<NotPublishedPostDTO>> GetNotPublishedPostsAsync(PostParameters postParameters)
         {
-            var posts = await _context.Posts
+            var posts = _context.Posts
                 .Where(p => !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
-                .OrderByDescending(p => p.Updated)
-                .ToListAsync();
+                .OrderByDescending(p => p.Updated);
 
-            GuardAgainstInvalidListPosts(posts);
-            return posts;
+            return await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
         }
 
-        public async Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsAsync()
+        public async Task<PagedList<PublishedPostDTO>> GetPublishedPostsAsync(PostParameters postParameters)
         {
-            var posts = await _context.Posts
+            var posts = _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
                 .Where(p => p.IsPublished)
-                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider);
 
-            GuardAgainstInvalidListPosts(posts);
+            var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
-            foreach(var post in posts)
+            if (posts is not null)
             {
-                post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+                }
             }
 
-            return posts; 
+            return pagedPosts; 
         }
 
         public async Task<PublishedPostDTO> GetPublishedPostByIdAsync(int postId)
@@ -188,42 +185,46 @@ namespace Habr.BusinessLogic.Services.Implementations
             return postDTO;
         }
 
-        public async Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId)
+        public async Task<PagedList<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId, PostParameters postParameters)
         {
-            var posts = await _context.Posts
+            var posts = _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
                 .Where(p => p.IsPublished && p.UserId == userId)
-                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider);
 
-            GuardAgainstInvalidListPosts(posts);
+            var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
-            foreach (var post in posts)
+            if (posts is not null)
             {
-                post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+                }
             }
 
-            return posts;
+            return pagedPosts;
         }
 
-        public async Task<IEnumerable<PublishedPostDTOv2>> GetPublishedPostsAsyncV2()
+        public async Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsAsyncV2(PostParameters postParameters)
         {
-            var posts = await _context.Posts
+            var posts = _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
                 .Where(p => p.IsPublished)
-                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider);
 
-            GuardAgainstInvalidListPosts(posts);
+            var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
-            foreach (var post in posts)
+            if (posts is not null)
             {
-                post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+                }
             }
 
-            return posts;
+            return pagedPosts;
         }
 
         public async Task<PublishedPostDTOv2> GetPublishedPostByIdAsyncV2(int postId)
@@ -240,29 +241,31 @@ namespace Habr.BusinessLogic.Services.Implementations
             return postDTO;
         }
 
-        public async Task<IEnumerable<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId)
+        public async Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId, PostParameters postParameters)
         {
-            var posts = await _context.Posts
+            var posts = _context.Posts
                 .Include(u => u.User)
                 .AsNoTracking()
                 .Where(p => p.IsPublished && p.UserId == userId)
-                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider);
 
-            GuardAgainstInvalidListPosts(posts);
+            var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
-            foreach (var post in posts)
+            if (posts is not null)
             {
-                post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+                }
             }
 
-            return posts;
+            return pagedPosts;
         }
 
         public async Task PublishPostAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
-            GuardAgainstInvalidPost(post);
+            GuardAgainstPostNotFound(post);
 
             if (post.IsPublished)
             {
@@ -283,7 +286,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(p => p.Comments)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
-            GuardAgainstInvalidPost(post);
+            GuardAgainstPostNotFound(post);
 
             if (post.Comments.Count > 0)
             {
@@ -367,7 +370,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             return subCommentDTOs;
         }
 
-        private void GuardAgainstInvalidPost(Post? post)
+        private void GuardAgainstPostNotFound(Post? post)
         {
             if (post == null)
             {
@@ -395,14 +398,6 @@ namespace Habr.BusinessLogic.Services.Implementations
             if (text.Length > 2000)
             {
                 throw new ValidationException(PostExceptionMessageResource.MaxLengthTextPostExceeded);
-            }
-        }
-
-        private void GuardAgainstInvalidListPosts<T>(IEnumerable<T> posts)
-        {
-            if(posts is null || posts.Count() == null)
-            {
-                throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
             }
         }
 

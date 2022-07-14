@@ -1,10 +1,12 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.Common.DTOs.UserDTOs;
+using Habr.Common.Parameters;
 using Habr.Presentation.Extensions;
 using Habr.Presentation.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Habr.Presentation.Controllers
 {
@@ -27,31 +29,44 @@ namespace Habr.Presentation.Controllers
             _jwtService = jwtService;
         }
 
-        [HttpGet]
+        [HttpGet, ApiVersionNeutral]
         public async Task<IActionResult> GetUsersAsync()
         {
             return Ok(await _userService.GetUsersAsync());
         }
 
-        [HttpGet("{userId}")]
+        [HttpGet("{userId}"), ApiVersionNeutral]
         public async Task<IActionResult> GetUserById(int userId)
         {
             return Ok(await _userService.GetUserById(userId));
         }
 
-        [HttpGet("{id}/posts")]
-        public async Task<IActionResult> GetPostByUserId(int id)
+        [HttpGet("{id}/posts"), ApiVersionNeutral]
+        public async Task<IActionResult> GetPostByUserId(int id, PostParameters postParameters)
         {
-            return Ok(await _postService.GetPostsByUserAsync(id));
+            var posts = await _postService.GetPostsByUserAsync(id, postParameters);
+
+            var metadata = new
+            {
+                posts.TotalCount,
+                posts.PageSize,
+                posts.CurrentPage,
+                posts.TotalPages,
+                posts.HasNext,
+                posts.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            return Ok(posts);
         }
 
-        [HttpGet("{id}/comments")]
+        [HttpGet("{id}/comments"), ApiVersionNeutral]
         public async Task<IActionResult> GetCommentsByUserId(int id)
         {
             return Ok(await _commentsService.GetCommentsByUserAsync(id));
         }
 
-        [HttpPost("sign-up")]
+        [HttpPost("sign-up"), ApiVersionNeutral]
         public async Task<IActionResult> SignUp([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
             var user = await _userService.SignUpAsync(name, email, password);
@@ -75,7 +90,7 @@ namespace Habr.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpDelete()]
+        [HttpDelete, ApiVersionNeutral]
         public async Task<IActionResult> DeleteUser()
         {
             await _userService.DeleteAsync(HttpContext.User.Identity.GetAuthorizedUserId());
@@ -83,14 +98,14 @@ namespace Habr.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpPut]
+        [HttpPut, ApiVersionNeutral]
         public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDTO user)
         {
             await _userService.UpdateAsync(HttpContext.User.Identity.GetAuthorizedUserId(), user);
             return StatusCode(204);
         }
 
-        [HttpGet("sign-in")]
+        [HttpGet("sign-in"), ApiVersionNeutral]
         public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
         {
             var user = await _userService.SignInAsync(email, password);

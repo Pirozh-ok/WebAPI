@@ -18,7 +18,7 @@ namespace Habr.Presentation.Controllers
             _adminService = adminService;
         }
 
-        [HttpPost]
+        [HttpPost, ApiVersionNeutral]
         public async Task<IActionResult> RegisterNewAdmin([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
         {
             await _adminService.RegisterAdminAsync(name,email, password);

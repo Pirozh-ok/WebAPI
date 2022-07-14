@@ -16,7 +16,7 @@ namespace Habr.Presentation.Controllers
             _jwtService = jwtService;
         }
 
-        [HttpPost("refresh-token")]
+        [HttpPost("refresh-token"), ApiVersionNeutral]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["RefreshToken"];

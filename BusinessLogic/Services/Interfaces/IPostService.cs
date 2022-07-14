@@ -1,25 +1,26 @@
 ﻿using Habr.Common.DTOs;
 using Habr.Common.DTOs.PostDTOs;
+using Habr.Common.Parameters;
 using Habr.DataAccess.Entities;
 
 namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IPostService
     {
-        Task<IEnumerable<Post>> GetFullPostsAsync();
+        Task<PagedList<PostDTO>> GetFullPostsAsync(PostParameters postParameters);
         Task<Post> GetFullPostByIdAsync(int id);
-        Task<IEnumerable<PostDTO>> GetPostsAsync();
+        Task<PagedList<PostDTO>> GetPostsAsync(PostParameters postParameters);
         Task<PostDTO> GetPostByIdAsync(int id);
-        Task<IEnumerable<PostDTO>> GetPostsByUserAsync(int userId);
-        Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsAsync();
+        Task<PagedList<PostDTO>> GetPostsByUserAsync(int userId, PostParameters postParameters);
+        Task<PagedList<NotPublishedPostDTO>> GetNotPublishedPostsAsync(PostParameters postParameters);
         Task<NotPublishedPostDTO> GetNotPublishedPostByIdAsync(int id);
-        Task<IEnumerable<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId);
-        Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsAsync();
-        Task<IEnumerable<PublishedPostDTOv2>> GetPublishedPostsAsyncV2();
+        Task<PagedList<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId, PostParameters postParameters);
+        Task<PagedList<PublishedPostDTO>> GetPublishedPostsAsync(PostParameters postParameters);
+        Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsAsyncV2(PostParameters postParameters);
         Task<PublishedPostDTO> GetPublishedPostByIdAsync(int postId);
         Task<PublishedPostDTOv2> GetPublishedPostByIdAsyncV2(int postId);
-        Task<IEnumerable<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId);
-        Task<IEnumerable<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId);
+        Task<PagedList<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId, PostParameters postParameters);
+        Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId, PostParameters postParameters);
         Task CreatePostAsync(string title, string text, int userId, bool isPublished);
         Task UpdatePostAsync(Post post);
         Task PublishPostAsync(int postId);
