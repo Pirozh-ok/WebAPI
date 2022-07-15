@@ -326,6 +326,9 @@ namespace Habr.BusinessLogic.Services.Implementations
             var post = await GetFullPostByIdAsync(postId);
             GuardAgainstPostNotFound(post);
 
+            if (!post.IsPublished)
+                return;
+
             var user = await GetUserByIdAsync(userId);
             GuardAgainstInvalidUser(user);
 
@@ -350,25 +353,6 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             await _context.SaveChangesAsync();
         }
-
-       /* public async Task RatePostUpdate()
-        {
-            foreach(var post in _context.Posts)
-            {
-                var postRatings = await _context.RatingsPosts
-                    .Where(r => r.PostId == post.Id)
-                    .ToListAsync();
-
-                //var sumRatings = postRatings.Aggregate((r1,r2) => r1.Value + r2.Value);
-                if (postRatings.Count > 0)
-                {
-                    var sumRatings = postRatings.Sum(r => r.Value);
-                    post.TotalRating = Math.Round(sumRatings / (double)postRatings.Count, 1);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-        }*/
 
         private async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
         {

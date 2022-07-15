@@ -8,6 +8,7 @@ namespace Habr.Common.DTOs.PostDTOs
         public string Title { get; set; }
         public string Text { get; set; }
         public ShortUserDTO Author { get; set; }
+        public double Rating { get; set; }
         public DateTime PublicationDate { get; set; }
         public List<CommentDTO> Comments { get; set; }
     }

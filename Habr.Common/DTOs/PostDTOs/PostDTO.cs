@@ -7,5 +7,6 @@
         public string EmailAuthor { get; set; }
         public DateTime CreateDate { get; set; }
         public bool IsPublished { get; set; }
+        public double Rating { get; set; }
     }
 }

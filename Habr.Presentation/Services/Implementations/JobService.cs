@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Habr.Presentation.Services.Implementations
 {
-    public class JobService
+    public static class JobService
     {
         public static void StartRecurringJob()
         {
-            IRecurringJobManager recurringJobManager = new RecurringJobManager();
-            recurringJobManager.AddOrUpdate("jobId", () => RatePostUpdateAsync(), Cron.Minutely);
+            RecurringJobManager recurringJobManager = new RecurringJobManager();
+            recurringJobManager.AddOrUpdate("jobId", () => RatePostUpdateAsync(), Cron.Daily);
         }
 
         public static async Task RatePostUpdateAsync()
@@ -23,7 +23,6 @@ namespace Habr.Presentation.Services.Implementations
                     .Where(r => r.PostId == post.Id)
                     .ToListAsync();
 
-                //var sumRatings = postRatings.Aggregate((r1,r2) => r1.Value + r2.Value);
                 if (postRatings.Count > 0)
                 {
                     var sumRatings = postRatings.Sum(r => r.Value);
