@@ -1,6 +1,6 @@
 ﻿using Habr.Common.DTOs.UserDTOs;
 
-namespace Habr.Presentation.Services
+namespace Habr.Presentation.Services.Interfaces
 {
     public interface IAdminService
     {

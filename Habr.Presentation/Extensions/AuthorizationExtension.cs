@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Habr.Presentation.Auth;
-using Habr.Presentation.Services;
+using Habr.Presentation.Services.Implementations;
+using Habr.Presentation.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Habr.Presentation.Extensions

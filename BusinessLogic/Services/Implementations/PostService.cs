@@ -316,6 +316,60 @@ namespace Habr.BusinessLogic.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
+        public async Task RatePost(int postId, int userId, int rate)
+        {
+            if (rate < 1 || rate > 5)
+            {
+                throw new BusinessException(PostExceptionMessageResource.RateExceedsLimits);
+            }
+
+            var post = await GetFullPostByIdAsync(postId);
+            GuardAgainstPostNotFound(post);
+
+            var user = await GetUserByIdAsync(userId);
+            GuardAgainstInvalidUser(user);
+
+            var postRating = await _context.RatingsPosts
+                .SingleOrDefaultAsync(r => r.UserId == userId && r.PostId == postId);
+
+            if (postRating is null)
+            {
+                _context.RatingsPosts.Add(
+                    new RatingPost
+                    {
+                        User = user,
+                        Post = post,
+                        Value = rate,
+                        DateLastModified = DateTime.UtcNow,
+                    });
+            }
+            else
+            {
+                postRating.Value = rate;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+       /* public async Task RatePostUpdate()
+        {
+            foreach(var post in _context.Posts)
+            {
+                var postRatings = await _context.RatingsPosts
+                    .Where(r => r.PostId == post.Id)
+                    .ToListAsync();
+
+                //var sumRatings = postRatings.Aggregate((r1,r2) => r1.Value + r2.Value);
+                if (postRatings.Count > 0)
+                {
+                    var sumRatings = postRatings.Sum(r => r.Value);
+                    post.TotalRating = Math.Round(sumRatings / (double)postRatings.Count, 1);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }*/
+
         private async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
         {
             var postComments = await _context.Comments

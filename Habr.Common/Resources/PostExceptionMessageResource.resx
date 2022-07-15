@@ -144,4 +144,7 @@
   <data name="PostTitleRequired" xml:space="preserve">
     <value>The post title is required!</value>
   </data>
+  <data name="RateExceedsLimits" xml:space="preserve">
+    <value>Rate the post exceeds the limits from 1 to 5</value>
+  </data>
 </root>

@@ -26,5 +26,7 @@ namespace Habr.BusinessLogic.Services.Interfaces
         Task PublishPostAsync(int postId);
         Task DeletePostAsync(int postId);
         Task SendPostToDraftsAsync(int postId);
+        Task RatePost(int postId, int userId, int rate);
+        //Task RatePostUpdate(); 
     }
 }

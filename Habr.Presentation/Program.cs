@@ -4,6 +4,7 @@ using Habr.Common.Exceptions;
 using Habr.Common.Mapping;
 using Habr.DataAccess;
 using Habr.Presentation.Extensions;
+using Hangfire;
 using NLog;
 using NLog.Web;
 
@@ -26,6 +27,7 @@ builder.Services.ConfigureServices(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile));
 
 builder.Services.AddVersioning();
+builder.Services.AddHangfireServer(builder.Configuration);
 
 builder.Services.AddMvc(options =>
 {
@@ -44,5 +46,7 @@ app.UseSwaggerWithVersioning();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.AddHangfireDashboard();
+app.StartJobs();
 
 app.Run();
