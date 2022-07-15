@@ -6,6 +6,7 @@
         {
             Posts = new HashSet<Post>();
             Comments = new HashSet<Comment>();
+            PostsRatings = new HashSet<RatingPost>();
         }
 
         public int Id { get; set; }
@@ -22,5 +23,8 @@
 
         // Comment
         public ICollection<Comment> Comments { get; set; }
+
+        // PostRating
+        public ICollection<RatingPost> PostsRatings { get; set; }
     }
 }
