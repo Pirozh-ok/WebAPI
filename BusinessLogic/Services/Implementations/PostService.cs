@@ -332,13 +332,13 @@ namespace Habr.BusinessLogic.Services.Implementations
             var user = await GetUserByIdAsync(userId);
             GuardAgainstInvalidUser(user);
 
-            var postRating = await _context.RatingsPosts
+            var postRating = await _context.PostsRatings
                 .SingleOrDefaultAsync(r => r.UserId == userId && r.PostId == postId);
 
             if (postRating is null)
             {
-                _context.RatingsPosts.Add(
-                    new RatingPost
+                _context.PostsRatings.Add(
+                    new PostRating
                     {
                         User = user,
                         Post = post,

@@ -1,6 +1,6 @@
 ﻿namespace Habr.DataAccess.Entities
 {
-    public class RatingPost
+    public class PostRating
     {
         public int Id;
         public int UserId;

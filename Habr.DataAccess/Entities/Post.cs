@@ -22,6 +22,6 @@
         public ICollection<Comment> Comments { get; set; }
 
         // RatingPost
-        public ICollection<RatingPost> PostsRatings { get; set; }
+        public ICollection<PostRating> PostsRatings { get; set; }
     }
 }

@@ -9,17 +9,17 @@ namespace Habr.Presentation.Services.Implementations
     {
         public static void StartRecurringJob()
         {
-            RecurringJobManager recurringJobManager = new RecurringJobManager();
-            recurringJobManager.AddOrUpdate("jobId", () => RatePostUpdateAsync(), Cron.Daily);
+            var recurringJobManager = new RecurringJobManager();
+            recurringJobManager.AddOrUpdate("jobId", () => PostRatingUpdateAsync(), Cron.Daily);
         }
 
-        public static async Task RatePostUpdateAsync()
+        public static async Task PostRatingUpdateAsync()
         {
             using var context = new DataContext();
 
             foreach (var post in context.Posts)
             {
-                var postRatings = await context.RatingsPosts
+                var postRatings = await context.PostsRatings
                     .Where(r => r.PostId == post.Id)
                     .ToListAsync();
 

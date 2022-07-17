@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Habr.DataAccess.EntitiesConfigurations
 {
-    public class RatingConfiguration : IEntityTypeConfiguration<RatingPost>
+    public class RatingConfiguration : IEntityTypeConfiguration<PostRating>
     {
-        public void Configure(EntityTypeBuilder<RatingPost> builder)
+        public void Configure(EntityTypeBuilder<PostRating> builder)
         {
             builder.HasKey("Id");
 
