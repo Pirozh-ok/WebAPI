@@ -14,6 +14,12 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .OnDelete(DeleteBehavior.ClientCascade)
                 .IsRequired();
 
+            builder.HasMany(p => p.PostsRatings)
+               .WithOne(r => r.Post)
+               .HasForeignKey(r => r.PostId)
+               .OnDelete(DeleteBehavior.ClientCascade)
+               .IsRequired();
+
             builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
@@ -39,6 +45,10 @@ namespace Habr.DataAccess.EntitiesConfigurations
             builder.Property("IsPublished")
                 .IsRequired()
                 .HasDefaultValue(false);
+
+            builder.Property("TotalRating")
+                .IsRequired()
+                .HasDefaultValue(0);
         }
     }
 }

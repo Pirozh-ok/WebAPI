@@ -3,7 +3,7 @@ using Habr.Common.DTOs;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Parameters;
 using Habr.Presentation.Extensions;
-using Habr.Presentation.Services;
+using Habr.Presentation.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;

@@ -1,4 +1,4 @@
-﻿using Habr.Presentation.Services;
+﻿using Habr.Presentation.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Habr.Presentation.Controllers

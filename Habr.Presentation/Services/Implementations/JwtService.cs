@@ -11,14 +11,15 @@ using Microsoft.EntityFrameworkCore;
 using Habr.Common.DTOs;
 using Habr.Common.Exceptions;
 using Habr.Common.Resources;
+using Habr.Presentation.Services.Interfaces;
 
-namespace Habr.Presentation.Services
+namespace Habr.Presentation.Services.Implementations
 {
     public class JwtService : IJwtService
     {
         private readonly JwtOptions _options;
         private readonly IConfiguration _configuration;
-        private readonly DataContext _context; 
+        private readonly DataContext _context;
 
         public JwtService(IOptions<JwtOptions> options, IConfiguration configuration, DataContext context)
         {
@@ -89,7 +90,7 @@ namespace Habr.Presentation.Services
             _context.Update(user);
             await _context.SaveChangesAsync();
 
-            return refreshToken; 
+            return refreshToken;
         }
 
         public async Task<AuthResponseDTO> RefreshJwtToken(string refreshToken, HttpResponse response)

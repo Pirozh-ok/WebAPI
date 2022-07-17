@@ -12,6 +12,7 @@
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
         public bool IsPublished { get; set; }
+        public double TotalRating { get; set; }
 
         // User
         public int UserId { get; set; }
@@ -19,5 +20,8 @@
 
         // Comment
         public ICollection<Comment> Comments { get; set; }
+
+        // RatingPost
+        public ICollection<PostRating> PostsRatings { get; set; }
     }
 }

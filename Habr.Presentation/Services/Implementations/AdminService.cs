@@ -2,9 +2,10 @@
 using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
+using Habr.Presentation.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Habr.Presentation.Services
+namespace Habr.Presentation.Services.Implementations
 {
     public class AdminService : IAdminService
     {

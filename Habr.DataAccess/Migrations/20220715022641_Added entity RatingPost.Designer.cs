@@ -4,6 +4,7 @@ using Habr.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Habr.DataAccess.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220715022641_Added entity RatingPost")]
+    partial class AddedentityRatingPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,7 +116,7 @@ namespace Habr.DataAccess.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("Habr.DataAccess.Entities.PostRating", b =>
+            modelBuilder.Entity("Habr.DataAccess.Entities.RatingPost", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -144,7 +146,7 @@ namespace Habr.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PostsRatings");
+                    b.ToTable("RatingsPosts");
                 });
 
             modelBuilder.Entity("Habr.DataAccess.Entities.User", b =>
@@ -242,7 +244,7 @@ namespace Habr.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Habr.DataAccess.Entities.PostRating", b =>
+            modelBuilder.Entity("Habr.DataAccess.Entities.RatingPost", b =>
                 {
                     b.HasOne("Habr.DataAccess.Entities.Post", "Post")
                         .WithMany("PostsRatings")

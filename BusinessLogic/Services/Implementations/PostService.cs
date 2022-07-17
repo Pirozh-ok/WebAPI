@@ -316,6 +316,44 @@ namespace Habr.BusinessLogic.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
+        public async Task RatePost(int postId, int userId, int rate)
+        {
+            if (rate < 1 || rate > 5)
+            {
+                throw new BusinessException(PostExceptionMessageResource.RateExceedsLimits);
+            }
+
+            var post = await GetFullPostByIdAsync(postId);
+            GuardAgainstPostNotFound(post);
+
+            if (!post.IsPublished)
+                return;
+
+            var user = await GetUserByIdAsync(userId);
+            GuardAgainstInvalidUser(user);
+
+            var postRating = await _context.PostsRatings
+                .SingleOrDefaultAsync(r => r.UserId == userId && r.PostId == postId);
+
+            if (postRating is null)
+            {
+                _context.PostsRatings.Add(
+                    new PostRating
+                    {
+                        User = user,
+                        Post = post,
+                        Value = rate,
+                        DateLastModified = DateTime.UtcNow,
+                    });
+            }
+            else
+            {
+                postRating.Value = rate;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         private async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
         {
             var postComments = await _context.Comments

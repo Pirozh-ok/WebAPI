@@ -69,7 +69,7 @@ namespace Habr.Presentation.Controllers
         public async Task<IActionResult> GetNotPublishedPostsAsync([FromQuery] PostParameters postParameters)
         {
             var posts = await _postService.GetNotPublishedPostsByUserAsync(
-                HttpContext.User.Identity.GetAuthorizedUserId(), 
+                HttpContext.User.Identity.GetAuthorizedUserId(),
                 postParameters);
 
             var response = new PagedListDTO<NotPublishedPostDTO>()
@@ -139,7 +139,7 @@ namespace Habr.Presentation.Controllers
         [HttpPut, ApiVersionNeutral]
         public async Task<IActionResult> UpdatePost([FromBody] Post post)
         {
-            if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId() 
+            if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId()
                                  || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
             {
                 await _postService.UpdatePostAsync(post);
@@ -166,6 +166,14 @@ namespace Habr.Presentation.Controllers
             {
                 throw new BadRequestException(Common.Resources.UserExceptionMessageResource.AccessError);
             }
+        }
+
+        [Authorize]
+        [HttpPost("Rating"), ApiVersionNeutral]
+        public async Task<IActionResult> RatingPost([FromQuery] int postId, [FromQuery] int rate)
+        {
+            await _postService.RatePost(postId, HttpContext.User.Identity.GetAuthorizedUserId(), rate);
+            return Ok();
         }
     }
 }

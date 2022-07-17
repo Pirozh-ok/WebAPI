@@ -55,7 +55,7 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\PostExceptionMessageResource.resx">
       <LastGenOutput>PostExceptionMessageResource.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <CustomToolNamespace>Habr.Common.Resources</CustomToolNamespace>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\LogResources.resx">

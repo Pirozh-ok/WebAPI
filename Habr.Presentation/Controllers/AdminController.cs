@@ -1,4 +1,4 @@
-﻿using Habr.Presentation.Services;
+﻿using Habr.Presentation.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

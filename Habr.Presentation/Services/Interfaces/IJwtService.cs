@@ -2,7 +2,7 @@
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Presentation.Auth;
 
-namespace Habr.Presentation.Services
+namespace Habr.Presentation.Services.Interfaces
 {
     public interface IJwtService
     {

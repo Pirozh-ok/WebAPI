@@ -29,7 +29,7 @@ namespace Habr.Common.Resources {
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        public PostExceptionMessageResource() {
+        internal PostExceptionMessageResource() {
         }
         
         /// <summary>
@@ -138,6 +138,15 @@ namespace Habr.Common.Resources {
         public static string PostTitleRequired {
             get {
                 return ResourceManager.GetString("PostTitleRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Rate the post exceeds the limits from 1 to 5.
+        /// </summary>
+        public static string RateExceedsLimits {
+            get {
+                return ResourceManager.GetString("RateExceedsLimits", resourceCulture);
             }
         }
     }
