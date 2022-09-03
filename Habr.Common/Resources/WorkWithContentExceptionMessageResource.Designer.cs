@@ -22,14 +22,14 @@ namespace Habr.Common.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class UserExceptionMessageResource {
+    public class WorkWithContentExceptionMessageResource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal UserExceptionMessageResource() {
+        internal WorkWithContentExceptionMessageResource() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Habr.Common.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Habr.Common.Resources.UserExceptionMessageResource", typeof(UserExceptionMessageResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Habr.Common.Resources.WorkWithContentExceptionMessageResource", typeof(WorkWithContentExceptionMessageResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,65 +61,20 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Access error.
+        ///   Ищет локализованную строку, похожую на The transmitted file is not valid. Null has arrived.
         /// </summary>
-        public static string AccessError {
+        public static string ContentIsNull {
             get {
-                return ResourceManager.GetString("AccessError", resourceCulture);
+                return ResourceManager.GetString("ContentIsNull", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на A user with this email address already exists!.
+        ///   Ищет локализованную строку, похожую на An image format file is expected.
         /// </summary>
-        public static string EmailExists {
+        public static string FileIsNotImage {
             get {
-                return ResourceManager.GetString("EmailExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Unable to get the path to the user&apos;s profile photo.
-        /// </summary>
-        public static string ErrorGetAvatar {
-            get {
-                return ResourceManager.GetString("ErrorGetAvatar", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Incorrect password!.
-        /// </summary>
-        public static string IncorrectPassword {
-            get {
-                return ResourceManager.GetString("IncorrectPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Invalid email!.
-        /// </summary>
-        public static string InvalidEmail {
-            get {
-                return ResourceManager.GetString("InvalidEmail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на The data for updating user information came as null.
-        /// </summary>
-        public static string UncorrectDataForUpdateUser {
-            get {
-                return ResourceManager.GetString("UncorrectDataForUpdateUser", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на User is not found!.
-        /// </summary>
-        public static string UserNotFound {
-            get {
-                return ResourceManager.GetString("UserNotFound", resourceCulture);
+                return ResourceManager.GetString("FileIsNotImage", resourceCulture);
             }
         }
     }

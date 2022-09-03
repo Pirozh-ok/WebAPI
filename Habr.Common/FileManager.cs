@@ -17,7 +17,7 @@ namespace Habr.Common
             imagePath = configuration["Path:Images"];
         }
 
-        public string LoadFile(string filePath)
+        public async Task<string> LoadFile(string filePath)
         {
             var loadPath = Path.Combine(imagePath, filePath);
 
@@ -27,7 +27,7 @@ namespace Habr.Common
             }
 
             using var fs = new FileStream(loadPath, FileMode.Open, FileAccess.Read);
-            return fs.FileStreamToBase64(); 
+            return await fs.FileStreamToBase64(); 
         }
 
         public async Task<string> SaveFile(IFormFile image, int userId)
@@ -45,7 +45,7 @@ namespace Habr.Common
             var fileName = $"user{userId}_img_{DateTime.Now.ToString("dd-MM-yyyy-HH-mm-ss")}{mime}";
 
             using var fs = new FileStream(Path.Combine(savePath, fileName) , FileMode.Create);
-            await fs.CopyToAsync(fs);
+            await image.CopyToAsync(fs);
 
             return fileName;
         }

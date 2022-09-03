@@ -117,25 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccessError" xml:space="preserve">
-    <value>Access error</value>
+  <data name="ContentIsNull" xml:space="preserve">
+    <value>The transmitted file is not valid. Null has arrived</value>
   </data>
-  <data name="EmailExists" xml:space="preserve">
-    <value>A user with this email address already exists!</value>
-  </data>
-  <data name="ErrorGetAvatar" xml:space="preserve">
-    <value>Unable to get the path to the user's profile photo</value>
-  </data>
-  <data name="IncorrectPassword" xml:space="preserve">
-    <value>Incorrect password!</value>
-  </data>
-  <data name="InvalidEmail" xml:space="preserve">
-    <value>Invalid email!</value>
-  </data>
-  <data name="UncorrectDataForUpdateUser" xml:space="preserve">
-    <value>The data for updating user information came as null</value>
-  </data>
-  <data name="UserNotFound" xml:space="preserve">
-    <value>User is not found!</value>
+  <data name="FileIsNotImage" xml:space="preserve">
+    <value>An image format file is expected</value>
   </data>
 </root>

@@ -21,7 +21,11 @@ namespace Habr.Presentation.Controllers
         private readonly ICommentService _commentsService;
         private readonly IJwtService _jwtService;
 
-        public UserController(IUserService userService, IPostService postService, ICommentService commentService, IJwtService jwtService)
+        public UserController(
+            IUserService userService, 
+            IPostService postService, 
+            ICommentService commentService, 
+            IJwtService jwtService)
         {
             _userService = userService;
             _postService = postService;
@@ -30,7 +34,7 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet, ApiVersionNeutral]
-        public async Task<IActionResult> GetUsersAsync()
+        public async Task<IActionResult> GetUsers()
         {
             return Ok(await _userService.GetUsersAsync());
         }
@@ -38,7 +42,7 @@ namespace Habr.Presentation.Controllers
         [HttpGet("{userId}"), ApiVersionNeutral]
         public async Task<IActionResult> GetUserById(int userId)
         {
-            return Ok(await _userService.GetUserById(userId));
+            return Ok(await _userService.GetUserByIdAsync(userId));
         }
 
         [HttpGet("{id}/posts"), ApiVersionNeutral]
@@ -93,15 +97,26 @@ namespace Habr.Presentation.Controllers
         [HttpDelete, ApiVersionNeutral]
         public async Task<IActionResult> DeleteUser()
         {
-            await _userService.DeleteAsync(HttpContext.User.Identity.GetAuthorizedUserId());
+            var userId = HttpContext.User.Identity.GetAuthorizedUserId();
+            await _userService.DeleteAsync(userId);
             return StatusCode(204);
         }
 
         [Authorize]
-        [HttpPut, ApiVersionNeutral]
+        [HttpPut("edit"), ApiVersionNeutral]
         public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDTO user)
         {
-            await _userService.UpdateAsync(HttpContext.User.Identity.GetAuthorizedUserId(), user);
+            var userId = HttpContext.User.Identity.GetAuthorizedUserId();
+            await _userService.UpdateAsync(userId, user);
+            return StatusCode(204);
+        }
+
+        [Authorize]
+        [HttpPut("edit/avatar"), ApiVersionNeutral]
+        public async Task<IActionResult> UpdateUserAvatar([FromForm] IFormFile image)
+        {
+            var userId = HttpContext.User.Identity.GetAuthorizedUserId();
+            await _userService.UpdateAvatarAsync(userId, image);
             return StatusCode(204);
         }
 

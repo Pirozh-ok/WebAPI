@@ -5,6 +5,6 @@ namespace Habr.Common
     public interface IFileManager
     {
         Task<string> SaveFile(IFormFile file, int userId);
-        string LoadFile(string filePath); 
+        Task<string> LoadFile(string filePath); 
     }
 }
