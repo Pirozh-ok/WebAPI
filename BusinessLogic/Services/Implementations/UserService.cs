@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Exceptions;
 using Habr.Common.Resources;
@@ -15,13 +16,15 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger; 
+        private readonly ILogger _logger;
+        private readonly IFileManager _fileManager; 
 
-        public UserService(DataContext context, IMapper mapper, ILogger<UserService> logger)
+        public UserService(DataContext context, IMapper mapper, ILogger<UserService> logger, IFileManager fileManager)
         {
             _context = context;
             _mapper = mapper;
             _logger = logger;
+            _fileManager = fileManager; 
         }
 
         public async Task DeleteAsync(int id)
@@ -41,7 +44,9 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .SingleOrDefaultAsync(u => u.Id == id);
 
             GuardAgainstInvalidUser(user);
-            return _mapper.Map<UserDTO>(user);
+            var result = _mapper.Map<UserDTO>(user);
+            result.Avatar = _fileManager.LoadFile(user.AvatarPath);
+            return result; 
         }
 
         public async Task<IEnumerable<UserDTO>> GetUsersAsync()

@@ -123,6 +123,9 @@
   <data name="EmailExists" xml:space="preserve">
     <value>A user with this email address already exists!</value>
   </data>
+  <data name="ErrorGetAvatar" xml:space="preserve">
+    <value>Unable to get the path to the user's profile photo</value>
+  </data>
   <data name="IncorrectPassword" xml:space="preserve">
     <value>Incorrect password!</value>
   </data>

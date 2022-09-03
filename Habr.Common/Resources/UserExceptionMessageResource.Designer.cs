@@ -79,6 +79,15 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Unable to get the path to the user&apos;s profile photo.
+        /// </summary>
+        public static string ErrorGetAvatar {
+            get {
+                return ResourceManager.GetString("ErrorGetAvatar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Incorrect password!.
         /// </summary>
         public static string IncorrectPassword {

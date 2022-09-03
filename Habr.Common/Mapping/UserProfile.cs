@@ -13,6 +13,7 @@ namespace Habr.Common.Mapping
                 .ForMember(u => u.Name, c => c.MapFrom(u => u.Name))
                 .ForMember(u => u.Email, c => c.MapFrom(u => u.Email))
                 .ForMember(u => u.RegistrationDate, c => c.MapFrom(u => u.RegistrationDate));
+                /*.ForMember(u => fileManager.LoadFile(u.Avatar), c => c.MapFrom(u => u.AvatarPath));*/
 
             CreateMap<User, UserWithCommentsDTO>()
                 .ForMember(u => u.Id, c => c.MapFrom(u => u.Id))

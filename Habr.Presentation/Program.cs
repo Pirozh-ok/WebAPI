@@ -25,6 +25,7 @@ builder.Services.AddServices();
 builder.Services.AddAdminService();
 builder.Services.ConfigureServices(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile));
+builder.Services.AddFileManager();
 
 builder.Services.AddVersioning();
 builder.Services.AddHangfireServer(builder.Configuration);
@@ -44,6 +45,7 @@ app.UseApiVersioning();
 app.UseSwaggerWithVersioning();
 
 app.UseHttpsRedirection();
+
 app.UseAuthorization();
 app.MapControllers();
 app.AddHangfireDashboard();

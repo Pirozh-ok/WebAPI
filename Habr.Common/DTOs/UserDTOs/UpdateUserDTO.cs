@@ -1,4 +1,6 @@
-﻿namespace Habr.Common.DTOs.UserDTOs
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Habr.Common.DTOs.UserDTOs
 {
     public class UpdateUserDTO
     {
@@ -6,5 +8,6 @@
         public string? Email { get; set; }
         public string OldPassword { get; set; }
         public string? NewPassword { get; set; }
+        public IFormFile? NewAvatar { get; set; }
     }
 }
