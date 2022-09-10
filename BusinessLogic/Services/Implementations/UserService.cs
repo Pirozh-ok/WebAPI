@@ -46,10 +46,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .SingleOrDefaultAsync(u => u.Id == id);
 
             GuardAgainstInvalidUser(user);
-
-            var dto = _mapper.Map<UserDTO>(user);
-            dto.Avatar = await _fileManager.LoadFile(user.AvatarPath);
-            return dto; 
+            return _mapper.Map<UserDTO>(user); 
         }
 
         public async Task<IEnumerable<UserDTO>> GetUsersAsync()
@@ -152,6 +149,15 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> GetUserAvatar(int userId)
+        {
+            var user = await _context.Users
+                .SingleOrDefaultAsync(u => u.Id == userId);
+
+            GuardAgainstInvalidUser(user);
+            return await _fileManager.LoadFile(user.AvatarPath); 
         }
 
         private void GuardAgainstInvalidUser(User user, string password)

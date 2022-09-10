@@ -45,6 +45,12 @@ namespace Habr.Presentation.Controllers
             return Ok(await _userService.GetUserByIdAsync(userId));
         }
 
+        [HttpGet("{userId}/avatar"), ApiVersionNeutral]
+        public async Task<IActionResult> GetAvatarByUserId(int userId)
+        {
+            return Ok(await _userService.GetUserAvatar(userId));
+        }
+
         [HttpGet("{id}/posts"), ApiVersionNeutral]
         public async Task<IActionResult> GetPostByUserId(int id, PostParameters postParameters)
         {
