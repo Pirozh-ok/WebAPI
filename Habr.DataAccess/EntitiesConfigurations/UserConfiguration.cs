@@ -73,9 +73,9 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .IsRequired()
                 .HasDefaultValueSql("getdate()");
 
-            builder.Property("AvatarPath")
+            builder.Property("Avatar")
                 .IsRequired()
-                .HasDefaultValue(_configuration["Path:Images"]); 
+                .HasDefaultValue(_configuration["Content:DefaultAvatar"]); 
         }
     }
 }

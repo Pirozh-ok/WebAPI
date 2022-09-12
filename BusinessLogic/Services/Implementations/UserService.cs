@@ -145,7 +145,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidUser(userToUpdate);
 
             var newAvatarPath = await _fileManager.SaveFile(newAvatar, userId);
-            userToUpdate.AvatarPath = newAvatarPath;
+            //userToUpdate.AvatarPath = newAvatarPath;
 
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
@@ -157,7 +157,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
             GuardAgainstInvalidUser(user);
-            return await _fileManager.LoadFile(user.AvatarPath); 
+            return await _fileManager.LoadFile(""); 
         }
 
         private void GuardAgainstInvalidUser(User user, string password)

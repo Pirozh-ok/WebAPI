@@ -20,6 +20,12 @@ namespace Habr.DataAccess.EntitiesConfigurations
                .OnDelete(DeleteBehavior.ClientCascade)
                .IsRequired();
 
+            builder.HasMany(p => p.Images)
+               .WithOne(i => i.Post)
+               .HasForeignKey(i => i.PostId)
+               .OnDelete(DeleteBehavior.ClientCascade)
+               .IsRequired();
+
             builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
