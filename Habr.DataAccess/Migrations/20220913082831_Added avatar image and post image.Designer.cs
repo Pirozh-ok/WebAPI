@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Habr.DataAccess.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220912123230_Add entity Images and PostImages")]
-    partial class AddentityImagesandPostImages
+    [Migration("20220913082831_Added avatar image and post image")]
+    partial class Addedavatarimageandpostimage
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -76,21 +76,15 @@ namespace Habr.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageEncodedBase64")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("LoadDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("PathImage")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Image");
+                    b.ToTable("Images");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Image");
                 });
@@ -214,6 +208,20 @@ namespace Habr.DataAccess.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Habr.DataAccess.Entities.AvatarImage", b =>
+                {
+                    b.HasBaseType("Habr.DataAccess.Entities.Image");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.HasDiscriminator().HasValue("AvatarImage");
+                });
+
             modelBuilder.Entity("Habr.DataAccess.Entities.PostImage", b =>
                 {
                     b.HasBaseType("Habr.DataAccess.Entities.Image");
@@ -252,17 +260,6 @@ namespace Habr.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Habr.DataAccess.Entities.Image", b =>
-                {
-                    b.HasOne("Habr.DataAccess.Entities.User", "User")
-                        .WithOne("Avatar")
-                        .HasForeignKey("Habr.DataAccess.Entities.Image", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Habr.DataAccess.Entities.Post", b =>
                 {
                     b.HasOne("Habr.DataAccess.Entities.User", "User")
@@ -287,6 +284,17 @@ namespace Habr.DataAccess.Migrations
                         .HasForeignKey("UserId1");
 
                     b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("Habr.DataAccess.Entities.AvatarImage", b =>
+                {
+                    b.HasOne("Habr.DataAccess.Entities.User", "User")
+                        .WithOne("AvatarImage")
+                        .HasForeignKey("Habr.DataAccess.Entities.AvatarImage", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Habr.DataAccess.Entities.PostImage", b =>
@@ -316,7 +324,7 @@ namespace Habr.DataAccess.Migrations
 
             modelBuilder.Entity("Habr.DataAccess.Entities.User", b =>
                 {
-                    b.Navigation("Avatar");
+                    b.Navigation("AvatarImage");
 
                     b.Navigation("Comments");
 

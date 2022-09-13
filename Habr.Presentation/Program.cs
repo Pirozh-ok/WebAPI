@@ -13,6 +13,7 @@ var logger = LogManager.LoadConfiguration("NLog.config").GetCurrentClassLogger()
 builder.Logging.ClearProviders();
 builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
 builder.Host.UseNLog();
+//builder.WebHost.UseWebRoot(builder.Configuration.GetSection("Content").GetSection("PathContent").ToString()); 
 
 // Add services to the container.
 builder.Services.AddControllers();

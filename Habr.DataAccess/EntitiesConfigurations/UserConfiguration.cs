@@ -34,9 +34,15 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            /*builder
+                .HasOne(u => u.AvatarImage)
+                .WithOne(i => i.User)
+                .HasForeignKey(i => i.); 
+*/
             builder.HasKey(u => u.Id);
 
-            builder.HasIndex(u => u.Email).IsUnique();
+            builder.HasIndex(u => u.Email)
+                .IsUnique();
 
             builder.Property("Id")
                 .IsRequired()
@@ -72,10 +78,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
             builder.Property("RefreshTokenExpirationDate")
                 .IsRequired()
                 .HasDefaultValueSql("getdate()");
-
-            builder.Property("Avatar")
-                .IsRequired()
-                .HasDefaultValue(_configuration["Content:DefaultAvatar"]); 
         }
     }
 }

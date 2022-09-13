@@ -44,4 +44,8 @@
     <ProjectReference Include="..\BusinessLogic\Habr.BusinessLogic.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Content\" />
+  </ItemGroup>
+
 </Project>

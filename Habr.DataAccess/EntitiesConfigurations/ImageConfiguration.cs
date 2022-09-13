@@ -5,23 +5,23 @@ using Microsoft.Extensions.Configuration;
 
 namespace Habr.DataAccess.EntitiesConfigurations
 {
-    public class PostImageConfiguration : IEntityTypeConfiguration<PostImage>
+    public class ImageConfiguration : IEntityTypeConfiguration<Image>
     {
         private readonly IConfiguration _configuration;
 
-        public PostImageConfiguration(IConfiguration configuration)
+        public ImageConfiguration(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public void Configure(EntityTypeBuilder<PostImage> builder)
+        public void Configure(EntityTypeBuilder<Image> builder)
         {
             builder.HasKey(u => u.Id);
 
             builder.Property("Id")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
-
+            
             builder.Property("PathImage")
                 .IsRequired()
                 .HasDefaultValue("");

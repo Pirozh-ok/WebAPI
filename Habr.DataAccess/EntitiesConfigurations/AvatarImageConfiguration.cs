@@ -5,16 +5,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace Habr.DataAccess.EntitiesConfigurations
 {
-    public class ImagesConfiguration : IEntityTypeConfiguration<Image>
+    public class AvatarImageConfiguration : IEntityTypeConfiguration<AvatarImage>
     {
         private readonly IConfiguration _configuration;
 
-        public ImagesConfiguration(IConfiguration configuration)
+        public AvatarImageConfiguration(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public void Configure(EntityTypeBuilder<Image> builder)
+        public void Configure(EntityTypeBuilder<AvatarImage> builder)
         {
             builder.HasKey(u => u.Id);
 
@@ -22,13 +22,14 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property("ImageEncodedBase64")
+            builder.Property("PathImage")
                 .IsRequired()
-                .HasDefaultValue(_configuration["Content:DefaultAvatar"]);
+                .HasDefaultValue(_configuration["Content:PathDefaultAvatar"]);
 
             builder.Property("LoadDate")
                 .IsRequired()
                 .HasDefaultValueSql("getdate()");
+
         }
     }
 }

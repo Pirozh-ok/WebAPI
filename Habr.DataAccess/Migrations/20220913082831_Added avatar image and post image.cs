@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Habr.DataAccess.Migrations
 {
-    public partial class AddentityImagesandPostImages : Migration
+    public partial class Addedavatarimageandpostimage : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -20,10 +20,6 @@ namespace Habr.DataAccess.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_PostsRatings_UserId",
                 table: "PostsRatings");
-
-            migrationBuilder.DropColumn(
-                name: "AvatarPath",
-                table: "Users");
 
             migrationBuilder.DropColumn(
                 name: "UserId",
@@ -102,27 +98,27 @@ namespace Habr.DataAccess.Migrations
                 nullable: true);
 
             migrationBuilder.CreateTable(
-                name: "Image",
+                name: "Images",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ImageEncodedBase64 = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PathImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LoadDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true),
                     PostId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Image", x => x.Id);
+                    table.PrimaryKey("PK_Images", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Image_Posts_PostId",
+                        name: "FK_Images_Posts_PostId",
                         column: x => x.PostId,
                         principalTable: "Posts",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Image_Users_UserId",
+                        name: "FK_Images_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -135,15 +131,16 @@ namespace Habr.DataAccess.Migrations
                 column: "UserId1");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Image_PostId",
-                table: "Image",
+                name: "IX_Images_PostId",
+                table: "Images",
                 column: "PostId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Image_UserId",
-                table: "Image",
+                name: "IX_Images_UserId",
+                table: "Images",
                 column: "UserId",
-                unique: true);
+                unique: true,
+                filter: "[UserId] IS NOT NULL");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PostsRatings_Users_UserId1",
@@ -160,7 +157,7 @@ namespace Habr.DataAccess.Migrations
                 table: "PostsRatings");
 
             migrationBuilder.DropTable(
-                name: "Image");
+                name: "Images");
 
             migrationBuilder.DropIndex(
                 name: "IX_PostsRatings_UserId1",
@@ -239,13 +236,6 @@ namespace Habr.DataAccess.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "AvatarPath",
-                table: "Users",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "C:\\Users\\ivan-\\source\\repos\\Habr\\Content\\Images\\DefaultAvatar.png");
 
             migrationBuilder.AddColumn<int>(
                 name: "UserId",
