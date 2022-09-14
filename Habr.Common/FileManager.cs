@@ -14,7 +14,7 @@ namespace Habr.Common
         public FileManager(IConfiguration configuration)
         {
             _configuration = configuration;
-            imagePath = configuration["Path:Images"];
+            imagePath = configuration["Content:PathImages"];
         }
 
         public async Task<string> LoadFile(string filePath)
@@ -32,22 +32,22 @@ namespace Habr.Common
 
         public async Task<string> SaveFile(IFormFile image, int userId)
         {
-            var savePath = Path.Combine(imagePath);
 
-            if(!Directory.Exists(savePath))
+            if(!Directory.Exists(imagePath))
             {
-                Directory.CreateDirectory(savePath);
+                Directory.CreateDirectory(imagePath);
             }
 
             var mime = image.FileName
                             .Substring(image.FileName.LastIndexOf('.'));
 
             var fileName = $"user{userId}_img_{DateTime.Now.ToString("dd-MM-yyyy-HH-mm-ss")}{mime}";
+            var savePath = Path.Combine(imagePath, fileName);
 
-            using var fs = new FileStream(Path.Combine(savePath, fileName) , FileMode.Create);
+            using var fs = new FileStream(savePath, FileMode.Create);
             await image.CopyToAsync(fs);
 
-            return fileName;
+            return savePath; 
         }
     }
 }

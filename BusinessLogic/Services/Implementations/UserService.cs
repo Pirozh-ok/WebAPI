@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common;
+using Habr.Common.DTOs.ImageDTOs;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Exceptions;
 using Habr.Common.Extensions;
@@ -100,16 +101,19 @@ namespace Habr.BusinessLogic.Services.Implementations
                 throw new BusinessException(UserExceptionMessageResource.EmailExists);
             }
 
-            await _context.Users.AddAsync(
-                new User
-                {
-                    Email = email,
-                    Name = name,
-                    Password = BCrypt.Net.BCrypt.HashPassword(password),
-                    Role = Roles.User
-                });
+            var user = new User
+            {
+                Email = email,
+                Name = name,
+                Password = BCrypt.Net.BCrypt.HashPassword(password),
+                Role = Roles.User,
+                RegistrationDate = DateTime.UtcNow,
+                AvatarImage = new AvatarImage()
+            };
 
+            await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
+
             _logger.LogInformation($"\"{name}\" {LogResources.UserRegistered}");
 
             return _mapper.Map<IdentityDTO>(_context.Users
@@ -144,20 +148,29 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             GuardAgainstInvalidUser(userToUpdate);
 
-            var newAvatarPath = await _fileManager.SaveFile(newAvatar, userId);
-            //userToUpdate.AvatarPath = newAvatarPath;
+            var newImagePath = await _fileManager.SaveFile(newAvatar, userId);
+            var avatar = new AvatarImage()
+            {
+                PathImage = newImagePath,
+                LoadDate = DateTime.UtcNow,
+                UserId = userId
+            };
 
-            _context.Users.Update(userToUpdate);
+            _context.Images.Add(avatar);
+            userToUpdate.AvatarImage = avatar; 
+           // _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<string> GetUserAvatar(int userId)
+        public async Task<ImageDTO> GetUserAvatar(int userId)
         {
             var user = await _context.Users
+                .Include(u => u.AvatarImage)
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
             GuardAgainstInvalidUser(user);
-            return await _fileManager.LoadFile(""); 
+
+            return _mapper.Map<ImageDTO>(user.AvatarImage); 
         }
 
         private void GuardAgainstInvalidUser(User user, string password)

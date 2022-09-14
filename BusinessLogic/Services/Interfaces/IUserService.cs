@@ -1,4 +1,5 @@
-﻿using Habr.Common.DTOs.UserDTOs;
+﻿using Habr.Common.DTOs.ImageDTOs;
+using Habr.Common.DTOs.UserDTOs;
 using Habr.DataAccess.Entities;
 using Microsoft.AspNetCore.Http;
 
@@ -15,6 +16,6 @@ namespace Habr.BusinessLogic.Services.Interfaces
         public Task DeleteAsync(int id);
         public Task UpdateAsync(int userId, UpdateUserDTO user);
         public Task UpdateAvatarAsync(int userId, IFormFile newAvatar); 
-        public Task<string> GetUserAvatar(int userId);
+        public Task<ImageDTO> GetUserAvatar(int userId);
     }
 }

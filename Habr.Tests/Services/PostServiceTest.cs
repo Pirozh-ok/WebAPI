@@ -6,6 +6,7 @@ using Habr.Common.Exceptions;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -20,10 +21,13 @@ namespace Habr.BusinessLogic.Tests.Services
         private DataContext _context;
         private IMapper _mapper;
         private ILogger<PostService> _logger;
+        private IConfiguration _configuration; 
 
         public PostServiceTest()
         {
-            _context = new DataContext(_dbContextOptions);
+            _configuration = new Mock<IConfiguration>().Object; 
+
+            _context = new DataContext(_dbContextOptions, _configuration);
             _context.Database.EnsureCreated();
 
             _mapper = new Mapper(new MapperConfiguration(

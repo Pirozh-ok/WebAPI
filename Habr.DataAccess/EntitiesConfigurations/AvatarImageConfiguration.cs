@@ -16,7 +16,7 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
         public void Configure(EntityTypeBuilder<AvatarImage> builder)
         {
-            builder.HasKey(u => u.Id);
+            /*builder.HasKey(u => u.Id);
 
             builder.Property("Id")
                 .IsRequired()
@@ -28,8 +28,7 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.Property("LoadDate")
                 .IsRequired()
-                .HasDefaultValueSql("getdate()");
-
+                .HasDefaultValueSql("getdate()");*/
         }
     }
 }
