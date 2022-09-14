@@ -17,5 +17,6 @@ namespace Habr.BusinessLogic.Services.Interfaces
         public Task UpdateAsync(int userId, UpdateUserDTO user);
         public Task UpdateAvatarAsync(int userId, IFormFile newAvatar); 
         public Task<ImageDTO> GetUserAvatar(int userId);
+        public void AddImageAvatar();
     }
 }

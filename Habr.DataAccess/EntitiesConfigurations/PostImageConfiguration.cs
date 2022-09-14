@@ -1,4 +1,4 @@
-﻿using Habr.DataAccess.Entities;
+﻿/*using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Configuration;
@@ -16,19 +16,20 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
         public void Configure(EntityTypeBuilder<PostImage> builder)
         {
-            /*builder.HasKey(u => u.Id);
+            builder.HasKey(a => a.Id);
 
-            builder.Property("Id")
+            builder.Property(a => a.Id)
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property("PathImage")
+            builder.Property(a => a.PathImage)
                 .IsRequired()
                 .HasDefaultValue("");
 
-            builder.Property("LoadDate")
+            builder.Property(a => a.LoadDate)
                 .IsRequired()
-                .HasDefaultValueSql("getdate()");*/
+                .HasDefaultValueSql("getdate()");
         }
     }
 }
+*/

@@ -108,7 +108,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 Password = BCrypt.Net.BCrypt.HashPassword(password),
                 Role = Roles.User,
                 RegistrationDate = DateTime.UtcNow,
-                AvatarImage = new AvatarImage()
+                //AvatarImage = new AvatarImage()
             };
 
             await _context.Users.AddAsync(user);
@@ -149,28 +149,29 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidUser(userToUpdate);
 
             var newImagePath = await _fileManager.SaveFile(newAvatar, userId);
-            var avatar = new AvatarImage()
+           /* var avatar = new AvatarImage()
             {
                 PathImage = newImagePath,
                 LoadDate = DateTime.UtcNow,
                 UserId = userId
-            };
+            };*/
 
-            _context.Images.Add(avatar);
-            userToUpdate.AvatarImage = avatar; 
-           // _context.Users.Update(userToUpdate);
+            //_context.AvatarImages.Add(avatar);
+            //userToUpdate.AvatarImage = avatar; 
+            _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
         }
 
         public async Task<ImageDTO> GetUserAvatar(int userId)
         {
             var user = await _context.Users
-                .Include(u => u.AvatarImage)
+               // .Include(u => u.AvatarImage)
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
             GuardAgainstInvalidUser(user);
 
-            return _mapper.Map<ImageDTO>(user.AvatarImage); 
+            //return _mapper.Map<ImageDTO>(user.AvatarImage); 
+            return null; 
         }
 
         private void GuardAgainstInvalidUser(User user, string password)
@@ -243,6 +244,14 @@ namespace Habr.BusinessLogic.Services.Implementations
             {
                 throw new BusinessException(UserExceptionMessageResource.IncorrectPassword);
             }
+        }
+
+        public void AddImageAvatar()
+        {
+            var avatar = new AvatarImage();
+
+            _context.AvatarImages.Add(avatar);
+            _context.SaveChanges();
         }
     }
 }

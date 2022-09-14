@@ -148,5 +148,12 @@ namespace Habr.Presentation.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("image"), ApiVersionNeutral]
+        public IActionResult Image()
+        {
+            _userService.AddImageAvatar();
+            return Ok(); 
+        }
     }
 }

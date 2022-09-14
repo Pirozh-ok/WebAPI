@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Habr.DataAccess.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220914060651_add default value for entity field")]
-    partial class adddefaultvalueforentityfield
+    [Migration("20220914124710_Delete table Images")]
+    partial class DeletetableImages
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,31 +62,6 @@ namespace Habr.DataAccess.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("Habr.DataAccess.Entities.Image", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("LoadDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PathImage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Images");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Image");
                 });
 
             modelBuilder.Entity("Habr.DataAccess.Entities.Post", b =>
@@ -157,7 +132,7 @@ namespace Habr.DataAccess.Migrations
                     b.Property<int>("PostId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId1")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<int>("Value")
@@ -169,7 +144,7 @@ namespace Habr.DataAccess.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("PostsRatings");
                 });
@@ -183,55 +158,53 @@ namespace Habr.DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasDefaultValue("");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasDefaultValue("");
 
                     b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasDefaultValue("");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("");
 
                     b.Property<DateTime>("RefreshTokenExpirationDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<int>("Role")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Habr.DataAccess.Entities.AvatarImage", b =>
-                {
-                    b.HasBaseType("Habr.DataAccess.Entities.Image");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
-
-                    b.HasDiscriminator().HasValue("AvatarImage");
-                });
-
-            modelBuilder.Entity("Habr.DataAccess.Entities.PostImage", b =>
-                {
-                    b.HasBaseType("Habr.DataAccess.Entities.Image");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("PostId");
-
-                    b.HasDiscriminator().HasValue("PostImage");
                 });
 
             modelBuilder.Entity("Habr.DataAccess.Entities.Comment", b =>
@@ -279,33 +252,15 @@ namespace Habr.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.HasOne("Habr.DataAccess.Entities.User", null)
-                        .WithMany("PostsRatings")
-                        .HasForeignKey("UserId1");
-
-                    b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("Habr.DataAccess.Entities.AvatarImage", b =>
-                {
                     b.HasOne("Habr.DataAccess.Entities.User", "User")
-                        .WithOne("AvatarImage")
-                        .HasForeignKey("Habr.DataAccess.Entities.AvatarImage", "UserId")
+                        .WithMany("PostsRatings")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Habr.DataAccess.Entities.PostImage", b =>
-                {
-                    b.HasOne("Habr.DataAccess.Entities.Post", "Post")
-                        .WithMany("Images")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
                     b.Navigation("Post");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Habr.DataAccess.Entities.Comment", b =>
@@ -317,15 +272,11 @@ namespace Habr.DataAccess.Migrations
                 {
                     b.Navigation("Comments");
 
-                    b.Navigation("Images");
-
                     b.Navigation("PostsRatings");
                 });
 
             modelBuilder.Entity("Habr.DataAccess.Entities.User", b =>
                 {
-                    b.Navigation("AvatarImage");
-
                     b.Navigation("Comments");
 
                     b.Navigation("Posts");

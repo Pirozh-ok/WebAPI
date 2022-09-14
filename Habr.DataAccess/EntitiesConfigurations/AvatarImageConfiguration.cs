@@ -16,19 +16,20 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
         public void Configure(EntityTypeBuilder<AvatarImage> builder)
         {
-            /*builder.HasKey(u => u.Id);
+            builder.HasKey(a => a.Id);
 
-            builder.Property("Id")
+            builder.Property(a => a.Id)
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property("PathImage")
+            builder.Property(a => a.PathImage)
                 .IsRequired()
                 .HasDefaultValue(_configuration["Content:PathDefaultAvatar"]);
 
-            builder.Property("LoadDate")
+            builder.Property(a => a.LoadDate)
                 .IsRequired()
-                .HasDefaultValueSql("getdate()");*/
+                .HasDefaultValueSql("getdate()");
         }
     }
 }
+

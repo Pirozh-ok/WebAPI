@@ -21,7 +21,8 @@ namespace Habr.DataAccess
         public DbSet<User> Users { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<PostRating> PostsRatings { get; set; }
-        public DbSet<Image> Images { get; set; }
+        public DbSet<AvatarImage> AvatarImages { get; set; }
+        /*public DbSet<PostImage> PostImages { get; set; }*/
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,9 +30,8 @@ namespace Habr.DataAccess
             modelBuilder.ApplyConfiguration(new PostConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration(_configuration));
             modelBuilder.ApplyConfiguration(new CommentConfiguration());
-            modelBuilder.ApplyConfiguration(new ImageConfiguration(_configuration));
             modelBuilder.ApplyConfiguration(new AvatarImageConfiguration(_configuration));
-            modelBuilder.ApplyConfiguration(new PostImageConfiguration(_configuration));
+            /*modelBuilder.ApplyConfiguration(new PostImageConfiguration(_configuration));*/
             modelBuilder.ApplyConfiguration(new RatingConfiguration());
         }
     }
