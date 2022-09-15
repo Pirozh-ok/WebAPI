@@ -3,17 +3,18 @@ using Habr.Common.AutoMappers;
 using Habr.Common.Exceptions;
 using Habr.Common.Mapping;
 using Habr.DataAccess;
+using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
 using Hangfire;
 using NLog;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var logger = LogManager.LoadConfiguration("NLog.config").GetCurrentClassLogger();
 builder.Logging.ClearProviders();
 builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
 builder.Host.UseNLog();
-//builder.WebHost.UseWebRoot(builder.Configuration.GetSection("Content").GetSection("PathContent").ToString()); 
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -25,7 +26,7 @@ builder.Services.AddJwtAuthorization(builder.Configuration);
 builder.Services.AddServices();
 builder.Services.AddAdminService();
 builder.Services.ConfigureServices(builder.Configuration);
-builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile));
+builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile), typeof(AvatarImage));
 builder.Services.AddFileManager();
 
 builder.Services.AddVersioning();
@@ -39,8 +40,8 @@ builder.Services.AddMvc(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseAuthentication();
 app.UseStaticFiles();
+app.UseAuthentication();
 
 app.UseApiVersioning();
 app.UseSwaggerWithVersioning();

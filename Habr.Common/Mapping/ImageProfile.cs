@@ -1,4 +1,4 @@
-﻿/*using AutoMapper;
+﻿using AutoMapper;
 using Habr.Common.DTOs.ImageDTOs;
 using Habr.DataAccess.Entities;
 
@@ -10,8 +10,8 @@ namespace Habr.Common.Mapping
         {
             CreateMap<AvatarImage, ImageDTO>()
                 .ForMember(d => d.PathImage, c => c.MapFrom(i => i.PathImage))
-                .ForMember(d => d.LoadDate, c => c.MapFrom(i => i.LoadDate)); 
+                .ForMember(d => d.LoadDate, c => c.MapFrom(i => i.LoadDate));
         }
     }
 }
-*/
+

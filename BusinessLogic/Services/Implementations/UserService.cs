@@ -11,6 +11,7 @@ using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Habr.BusinessLogic.Services.Implementations
@@ -20,14 +21,16 @@ namespace Habr.BusinessLogic.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
-        private readonly IFileManager _fileManager; 
+        private readonly IFileManager _fileManager;
+        private readonly IConfiguration _configuration; 
 
-        public UserService(DataContext context, IMapper mapper, ILogger<UserService> logger, IFileManager fileManager)
+        public UserService(DataContext context, IMapper mapper, ILogger<UserService> logger, IFileManager fileManager, IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
             _logger = logger;
             _fileManager = fileManager; 
+            _configuration = configuration;
         }
 
         public async Task DeleteAsync(int id)
@@ -108,7 +111,11 @@ namespace Habr.BusinessLogic.Services.Implementations
                 Password = BCrypt.Net.BCrypt.HashPassword(password),
                 Role = Roles.User,
                 RegistrationDate = DateTime.UtcNow,
-                //AvatarImage = new AvatarImage()
+                AvatarImage = new AvatarImage()
+                {
+                    LoadDate = DateTime.UtcNow,
+                    PathImage = _configuration["Content:PathDefaultAvatar"]
+                }
             };
 
             await _context.Users.AddAsync(user);
@@ -144,20 +151,15 @@ namespace Habr.BusinessLogic.Services.Implementations
             GuardAgainstInvalidImage(newAvatar);
 
             var userToUpdate = await _context.Users
+                .Include(u => u.AvatarImage)
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
             GuardAgainstInvalidUser(userToUpdate);
 
             var newImagePath = await _fileManager.SaveFile(newAvatar, userId);
-           /* var avatar = new AvatarImage()
-            {
-                PathImage = newImagePath,
-                LoadDate = DateTime.UtcNow,
-                UserId = userId
-            };*/
-
-            //_context.AvatarImages.Add(avatar);
-            //userToUpdate.AvatarImage = avatar; 
+            userToUpdate.AvatarImage.PathImage = newImagePath;
+            userToUpdate.AvatarImage.LoadDate = DateTime.UtcNow; 
+          
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
         }
@@ -165,13 +167,12 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<ImageDTO> GetUserAvatar(int userId)
         {
             var user = await _context.Users
-               // .Include(u => u.AvatarImage)
+                .Include(u => u.AvatarImage)
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
             GuardAgainstInvalidUser(user);
 
-            //return _mapper.Map<ImageDTO>(user.AvatarImage); 
-            return null; 
+            return _mapper.Map<ImageDTO>(user.AvatarImage); 
         }
 
         private void GuardAgainstInvalidUser(User user, string password)
@@ -248,7 +249,12 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public void AddImageAvatar()
         {
-            var avatar = new AvatarImage();
+            var avatar = new AvatarImage()
+            {
+                LoadDate = DateTime.UtcNow,
+                PathImage = "SomePath",
+                UserId = 1
+            };
 
             _context.AvatarImages.Add(avatar);
             _context.SaveChanges();
