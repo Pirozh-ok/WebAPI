@@ -112,10 +112,6 @@ namespace Habr.BusinessLogic.Services.Implementations
                 Role = Roles.User,
                 RegistrationDate = DateTime.UtcNow,
                 AvatarImage = new AvatarImage()
-                {
-                    LoadDate = DateTime.UtcNow,
-                    PathImage = _configuration["Content:PathDefaultAvatar"]
-                }
             };
 
             await _context.Users.AddAsync(user);
@@ -158,7 +154,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             var newImagePath = await _fileManager.SaveFile(newAvatar, userId);
             userToUpdate.AvatarImage.PathImage = newImagePath;
-            userToUpdate.AvatarImage.LoadDate = DateTime.UtcNow; 
+            userToUpdate.AvatarImage.LoadDate = DateTime.Now; 
           
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
@@ -251,8 +247,6 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var avatar = new AvatarImage()
             {
-                LoadDate = DateTime.UtcNow,
-                PathImage = "SomePath",
                 UserId = 1
             };
 

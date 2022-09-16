@@ -1,4 +1,4 @@
-﻿/*using Habr.DataAccess.Entities;
+﻿using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Configuration;
@@ -7,13 +7,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
 {
     public class PostImageConfiguration : IEntityTypeConfiguration<PostImage>
     {
-        private readonly IConfiguration _configuration;
-
-        public PostImageConfiguration(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
         public void Configure(EntityTypeBuilder<PostImage> builder)
         {
             builder.HasKey(a => a.Id);
@@ -27,9 +20,8 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasDefaultValue("");
 
             builder.Property(a => a.LoadDate)
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
         }
     }
 }
-*/
+

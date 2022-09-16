@@ -54,7 +54,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasDefaultValue("");
 
             builder.Property("RegistrationDate")
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
 
             builder.Property("Password")
@@ -63,7 +62,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasMaxLength(150);
 
             builder.Property("Role")
-                .IsRequired()
                 .HasDefaultValue(Roles.User);
 
             builder.Property("RefreshToken")
@@ -71,7 +69,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasDefaultValue("");
 
             builder.Property("RefreshTokenExpirationDate")
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
         }
     }

@@ -1,4 +1,4 @@
-﻿/*namespace Habr.DataAccess.Entities
+﻿namespace Habr.DataAccess.Entities
 {
     public class PostImage
     {
@@ -9,4 +9,4 @@
         public Post Post { get; set; }
     }
 }
-*/
+

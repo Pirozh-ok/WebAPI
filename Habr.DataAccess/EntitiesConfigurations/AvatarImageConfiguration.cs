@@ -23,11 +23,9 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .ValueGeneratedOnAdd();
 
             builder.Property(a => a.PathImage)
-                .IsRequired()
                 .HasDefaultValue(_configuration["Content:PathDefaultAvatar"]);
 
             builder.Property(a => a.LoadDate)
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
         }
     }

@@ -24,7 +24,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasDefaultValue("");
 
             builder.Property("CreateDate")
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
         }
     }

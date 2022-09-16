@@ -15,11 +15,9 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .ValueGeneratedOnAdd();
 
             builder.Property("Value")
-                .IsRequired()
                 .HasDefaultValue(0);
 
             builder.Property("DateLastModified")
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
         }
     }

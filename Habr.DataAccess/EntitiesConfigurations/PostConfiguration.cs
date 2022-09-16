@@ -20,11 +20,11 @@ namespace Habr.DataAccess.EntitiesConfigurations
                .OnDelete(DeleteBehavior.ClientCascade)
                .IsRequired();
 
-           /* builder.HasMany(p => p.Images)
+            builder.HasMany(p => p.Images)
                .WithOne(i => i.Post)
                .HasForeignKey(i => i.PostId)
                .OnDelete(DeleteBehavior.ClientCascade)
-               .IsRequired();*/
+               .IsRequired();
 
             builder.Property("Id")
                 .IsRequired()
@@ -41,11 +41,9 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasDefaultValue("");
 
             builder.Property("Created")
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
 
             builder.Property("Updated")
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
 
             builder.Property("IsPublished")
@@ -53,7 +51,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasDefaultValue(false);
 
             builder.Property("TotalRating")
-                .IsRequired()
                 .HasDefaultValue(0);
         }
     }

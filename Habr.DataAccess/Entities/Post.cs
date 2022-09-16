@@ -6,7 +6,7 @@
         {
             Comments = new HashSet<Comment>();
             PostsRatings = new HashSet<PostRating>();
-           // Images = new HashSet<PostImage>();
+            Images = new HashSet<PostImage>();
         }
         public int Id { get; set; }
         public string Title { get; set; }
@@ -27,6 +27,6 @@
         public ICollection<PostRating> PostsRatings { get; set; }
 
         // Images post
-        //public ICollection<PostImage> Images { get; set; }
+        public ICollection<PostImage> Images { get; set; }
     }
 }
