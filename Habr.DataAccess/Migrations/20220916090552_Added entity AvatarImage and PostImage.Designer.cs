@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Habr.DataAccess.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220916062649_Changed entity AvatarImage, added entity PostIMage, change attribute isRequired in field with date")]
-    partial class ChangedentityAvatarImageaddedentityPostIMagechangeattributeisRequiredinfieldwithdate
+    [Migration("20220916090552_Added entity AvatarImage and PostImage")]
+    partial class AddedentityAvatarImageandPostImage
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

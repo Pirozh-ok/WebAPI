@@ -247,7 +247,8 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var avatar = new AvatarImage()
             {
-                UserId = 1
+                UserId = 1,
+                LoadDate = DateTime.Now
             };
 
             _context.AvatarImages.Add(avatar);

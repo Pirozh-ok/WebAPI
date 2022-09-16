@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Habr.DataAccess.Migrations
 {
-    public partial class AddtableAvatarImage : Migration
+    public partial class AddedentityAvatarImageandPostImage : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,7 +15,7 @@ namespace Habr.DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PathImage = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "C:\\Users\\ivan-\\source\\repos\\Habr\\Habr.Presentation\\Content\\Images\\DefaultAvatar.png"),
+                    PathImage = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "Images\\DefaultAvatar.png"),
                     LoadDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "getdate()"),
                     UserId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -30,17 +30,45 @@ namespace Habr.DataAccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "PostImages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PathImage = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: ""),
+                    LoadDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "getdate()"),
+                    PostId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PostImages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PostImages_Posts_PostId",
+                        column: x => x.PostId,
+                        principalTable: "Posts",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AvatarImages_UserId",
                 table: "AvatarImages",
                 column: "UserId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PostImages_PostId",
+                table: "PostImages",
+                column: "PostId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "AvatarImages");
+
+            migrationBuilder.DropTable(
+                name: "PostImages");
         }
     }
 }
