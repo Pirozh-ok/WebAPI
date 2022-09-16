@@ -1,10 +1,10 @@
 ﻿using Habr.BusinessLogic;
 using Habr.Common.AutoMappers;
+using Habr.Common.Exceptions;
 using Habr.Common.Mapping;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
-using Habr.Presentation.Filters;
 using Hangfire;
 using NLog;
 using NLog.Web;
