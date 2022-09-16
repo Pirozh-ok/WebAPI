@@ -128,10 +128,10 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpPost, ApiVersionNeutral]
-        public async Task<IActionResult> CreatePost([FromQuery] string title, [FromQuery] string text, [FromQuery] bool isPublished)
+        public async Task<IActionResult> CreatePost([FromQuery] string title, [FromQuery] string text, [FromQuery] bool isPublished, List<IFormFile> images)
         {
 
-            await _postService.CreatePostAsync(title, text, HttpContext.User.Identity.GetAuthorizedUserId(), isPublished);
+            await _postService.CreatePostAsync(title, text, HttpContext.User.Identity.GetAuthorizedUserId(), isPublished, images);
             return StatusCode(201);
         }
 

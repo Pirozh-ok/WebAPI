@@ -44,3 +44,4 @@ artifacts/
 internallog*.txt
 *.log
 /Habr.Presentation/wwwroot
+/Habr.Presentation/Images

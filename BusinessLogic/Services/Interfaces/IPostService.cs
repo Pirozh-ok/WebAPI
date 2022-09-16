@@ -2,6 +2,7 @@
 using Habr.Common.DTOs.PostDTOs;
 using Habr.Common.Parameters;
 using Habr.DataAccess.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Habr.BusinessLogic.Services.Interfaces
 {
@@ -21,7 +22,7 @@ namespace Habr.BusinessLogic.Services.Interfaces
         Task<PublishedPostDTOv2> GetPublishedPostByIdAsyncV2(int postId);
         Task<PagedList<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId, PostParameters postParameters);
         Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId, PostParameters postParameters);
-        Task CreatePostAsync(string title, string text, int userId, bool isPublished);
+        Task CreatePostAsync(string title, string text, int userId, bool isPublished, List<IFormFile> images);
         Task UpdatePostAsync(Post post);
         Task PublishPostAsync(int postId);
         Task DeletePostAsync(int postId);

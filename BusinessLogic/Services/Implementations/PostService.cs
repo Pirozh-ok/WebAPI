@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common;
 using Habr.Common.DTOs;
 using Habr.Common.DTOs.PostDTOs;
 using Habr.Common.Exceptions;
@@ -9,6 +10,7 @@ using Habr.Common.Parameters;
 using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -19,30 +21,45 @@ namespace Habr.BusinessLogic.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
+        private readonly IFileManager _fileManager; 
 
-        public PostService(DataContext context, IMapper mapper, ILogger<PostService> logger)
+        public PostService(DataContext context, IMapper mapper, ILogger<PostService> logger, IFileManager fileManager)
         {
             _context = context;
             _mapper = mapper;
             _logger = logger;
+            _fileManager = fileManager; 
         }
 
-        public async Task CreatePostAsync(string title, string text, int userId, bool isPublished)
+        public async Task CreatePostAsync(string title, string text, int userId, bool isPublished, List<IFormFile> images)
         {
             GuardAgainstInvalidPost(title, text);
-            var user = await GetUserByIdAsync(userId);
 
-            await _context.Posts.AddAsync(
-                new Post()
+            var user = await GetUserByIdAsync(userId);
+            var post = new Post()
+            {
+                Title = title,
+                Text = text,
+                User = user,
+                IsPublished = isPublished
+            };
+
+            if (images?.Count > 0)
+            {
+                foreach (var image in images)
                 {
-                    Title = title,
-                    Text = text,
-                    User = user,
-                    IsPublished = isPublished
-                });
+                    post.Images.Add(
+                        new PostImage
+                        {
+                            PathImage = await _fileManager.SaveFile(image, user.Id)
+                        });
+                }
+            }
+
+            await _context.Posts.AddAsync(post);
             await _context.SaveChangesAsync();
-            
-            if(isPublished)
+
+            if (isPublished)
             {
                 _logger.LogInformation($"\"{title}\" {LogResources.PublishPost}");
             }
