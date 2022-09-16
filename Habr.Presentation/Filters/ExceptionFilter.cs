@@ -1,8 +1,9 @@
 ﻿using Habr.Common.DTOs.ResponceDTOs;
+using Habr.Common.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Habr.Common.Exceptions
+namespace Habr.Presentation.Filters
 {
     public class ExceptionFilter : ExceptionFilterAttribute
     {
@@ -15,7 +16,7 @@ namespace Habr.Common.Exceptions
 
         public override void OnException(ExceptionContext context)
         {
-            int statusCode = 500;
+            var statusCode = 500;
 
             switch (context.Exception)
             {
@@ -54,7 +55,7 @@ namespace Habr.Common.Exceptions
             var exception = context.Exception;
 
             if (statusCode != 500)
-            {        
+            {
                 var response = new ClientErrorResponse(statusCode.ToString(), exception.Message);
 
                 context.HttpContext.Response.StatusCode = statusCode;
@@ -63,7 +64,7 @@ namespace Habr.Common.Exceptions
                 _logger.LogWarning($"{statusCode} {exception.Message}");
             }
             else
-            {      
+            {
                 var response = new ServerErrorResponse(statusCode.ToString(), exception.Message, exception.StackTrace);
 
                 context.HttpContext.Response.StatusCode = statusCode;
