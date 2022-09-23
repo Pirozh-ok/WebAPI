@@ -81,8 +81,6 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PostDTO>> GetFullPostsAsync(PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(p => p.User)
-                .Include(p => p.Comments)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
@@ -93,6 +91,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var post = await _context.Posts
                 .Include(p => p.User)
+                .Include(p => p.Images)
                 .SingleOrDefaultAsync(p => p.Id == id);
 
             GuardAgainstPostNotFound(post);
@@ -103,7 +102,6 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PostDTO>> GetPostsAsync(PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
@@ -114,6 +112,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var post = await _context.Posts
                 .Include(p => p.User)
+                .Include(p => p.Images)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
             GuardAgainstPostNotFound(post);
@@ -124,7 +123,6 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var posts = _context.Posts
                 .Where(p => p.UserId == userId)
-                .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
@@ -161,8 +159,8 @@ namespace Habr.BusinessLogic.Services.Implementations
             var posts = _context.Posts
                 .Where(p => !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .OrderByDescending(p => p.Updated);
+                .OrderByDescending(p => p.Updated)
+                .AsNoTracking();
 
             return await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
         }
@@ -170,10 +168,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PublishedPostDTO>> GetPublishedPostsAsync(PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()
                 .Where(p => p.IsPublished)
-                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider);
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
@@ -205,10 +202,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId, PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()
                 .Where(p => p.IsPublished && p.UserId == userId)
-                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider);
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
@@ -226,10 +222,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsAsyncV2(PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()
                 .Where(p => p.IsPublished)
-                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider);
+                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
@@ -261,10 +256,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId, PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()
                 .Where(p => p.IsPublished && p.UserId == userId)
-                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider);
+                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 

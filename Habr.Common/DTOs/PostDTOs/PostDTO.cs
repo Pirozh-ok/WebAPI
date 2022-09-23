@@ -1,4 +1,6 @@
-﻿namespace Habr.Common.DTOs
+﻿using Habr.Common.DTOs.ImageDTOs;
+
+namespace Habr.Common.DTOs
 {
     public class PostDTO
     {
@@ -8,5 +10,6 @@
         public DateTime CreateDate { get; set; }
         public bool IsPublished { get; set; }
         public double Rating { get; set; }
+        public List<ImagePostDTO> Images { get; set; } 
     }
 }

@@ -11,6 +11,10 @@ namespace Habr.Common.Mapping
             CreateMap<AvatarImage, ImageDTO>()
                 .ForMember(d => d.PathImage, c => c.MapFrom(i => i.PathImage))
                 .ForMember(d => d.LoadDate, c => c.MapFrom(i => i.LoadDate));
+
+            CreateMap<PostImage, ImagePostDTO>()
+                .ForMember(d => d.PathImage, c => c.MapFrom(i => i.PathImage))
+                .ForMember(d => d.LoadDate, c => c.MapFrom(i => i.LoadDate));
         }
     }
 }

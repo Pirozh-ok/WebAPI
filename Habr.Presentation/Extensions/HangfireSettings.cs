@@ -1,5 +1,4 @@
-﻿using Habr.BusinessLogic.Services.Implementations;
-using Habr.Presentation.Services.Implementations;
+﻿using Habr.Presentation.Services.Implementations;
 using Hangfire;
 
 namespace Habr.Presentation.Extensions

@@ -26,7 +26,7 @@ builder.Services.AddJwtAuthorization(builder.Configuration);
 builder.Services.AddServices();
 builder.Services.AddAdminService();
 builder.Services.ConfigureServices(builder.Configuration);
-builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile), typeof(AvatarImage));
+builder.Services.AddAutoMapper(typeof(PostProfile), typeof(CommentProfile), typeof(UserProfile), typeof(ImageProfile));
 builder.Services.AddFileManager();
 
 builder.Services.AddVersioning();
