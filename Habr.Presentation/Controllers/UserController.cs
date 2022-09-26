@@ -77,9 +77,9 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpPost("sign-up"), ApiVersionNeutral]
-        public async Task<IActionResult> SignUp([FromQuery] string name, [FromQuery] string email, [FromQuery] string password)
+        public async Task<IActionResult> SignUp([FromBody] CreateUserDTO newUserData)
         {
-            var user = await _userService.SignUpAsync(name, email, password);
+            var user = await _userService.SignUpAsync(newUserData);
             var token = _jwtService.GenerateAccessToken(user);
             var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
             _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
@@ -127,9 +127,9 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet("sign-in"), ApiVersionNeutral]
-        public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
+        public async Task<IActionResult> SignIn([FromBody] UserSignInDTO signInData)
         {
-            var user = await _userService.SignInAsync(email, password);
+            var user = await _userService.SignInAsync(signInData);
             var token = _jwtService.GenerateAccessToken(user);
             var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
             _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);
@@ -147,13 +147,6 @@ namespace Habr.Presentation.Controllers
             };
 
             return Ok(response);
-        }
-
-        [HttpPost("image"), ApiVersionNeutral]
-        public IActionResult Image()
-        {
-            _userService.AddImageAvatar();
-            return Ok(); 
         }
     }
 }

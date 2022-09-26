@@ -120,17 +120,23 @@
   <data name="AccessError" xml:space="preserve">
     <value>Access error</value>
   </data>
+  <data name="ArgumentIsNull" xml:space="preserve">
+    <value>Argument is null!</value>
+  </data>
   <data name="EmailExists" xml:space="preserve">
     <value>A user with this email address already exists!</value>
   </data>
   <data name="ErrorGetAvatar" xml:space="preserve">
     <value>Unable to get the path to the user's profile photo</value>
   </data>
-  <data name="IncorrectPassword" xml:space="preserve">
-    <value>Incorrect password!</value>
-  </data>
   <data name="InvalidEmail" xml:space="preserve">
     <value>Invalid email!</value>
+  </data>
+  <data name="InvalidPassword" xml:space="preserve">
+    <value>Invalid password!</value>
+  </data>
+  <data name="InvalidUserName" xml:space="preserve">
+    <value>User name is invalid!</value>
   </data>
   <data name="UncorrectDataForUpdateUser" xml:space="preserve">
     <value>The data for updating user information came as null</value>

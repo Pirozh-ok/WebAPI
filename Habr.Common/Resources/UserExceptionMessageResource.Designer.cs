@@ -70,6 +70,15 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Argument is null!.
+        /// </summary>
+        public static string ArgumentIsNull {
+            get {
+                return ResourceManager.GetString("ArgumentIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на A user with this email address already exists!.
         /// </summary>
         public static string EmailExists {
@@ -88,20 +97,29 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Incorrect password!.
-        /// </summary>
-        public static string IncorrectPassword {
-            get {
-                return ResourceManager.GetString("IncorrectPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Ищет локализованную строку, похожую на Invalid email!.
         /// </summary>
         public static string InvalidEmail {
             get {
                 return ResourceManager.GetString("InvalidEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Invalid password!.
+        /// </summary>
+        public static string InvalidPassword {
+            get {
+                return ResourceManager.GetString("InvalidPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на User name is invalid!.
+        /// </summary>
+        public static string InvalidUserName {
+            get {
+                return ResourceManager.GetString("InvalidUserName", resourceCulture);
             }
         }
         

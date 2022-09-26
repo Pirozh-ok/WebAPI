@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Habr.BusinessLogic.Guards;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common;
 using Habr.Common.DTOs.ImageDTOs;
 using Habr.Common.DTOs.UserDTOs;
-using Habr.Common.Exceptions;
-using Habr.Common.Extensions;
 using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
@@ -22,15 +21,23 @@ namespace Habr.BusinessLogic.Services.Implementations
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
         private readonly IFileManager _fileManager;
-        private readonly IConfiguration _configuration; 
+        private readonly IConfiguration _configuration;
+        private readonly IUserGuard _guard;  
 
-        public UserService(DataContext context, IMapper mapper, ILogger<UserService> logger, IFileManager fileManager, IConfiguration configuration)
+        public UserService(
+            DataContext context, 
+            IMapper mapper, 
+            ILogger<UserService> logger, 
+            IFileManager fileManager, 
+            IConfiguration configuration,
+            IUserGuard guard)
         {
             _context = context;
             _mapper = mapper;
             _logger = logger;
             _fileManager = fileManager; 
             _configuration = configuration;
+            _guard = guard;
         }
 
         public async Task DeleteAsync(int id)
@@ -38,7 +45,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Id == id);
 
-            GuardAgainstInvalidUser(user);
+            _guard.InvalidUser(user);
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
@@ -49,7 +56,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Id == id);
 
-            GuardAgainstInvalidUser(user);
+            _guard.InvalidUser(user);
             return _mapper.Map<UserDTO>(user); 
         }
 
@@ -60,7 +67,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .ToListAsync();
 
-            GuardAgainstInvalidListUsers(users);
+            _guard.InvalidListUsers(users);
             return users;
         }
 
@@ -71,7 +78,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .ToListAsync();
 
-            GuardAgainstInvalidListUsers(users);
+            _guard.InvalidListUsers(users);
             return users;
         }
 
@@ -82,33 +89,32 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .ToListAsync();
 
-            GuardAgainstInvalidListUsers(users);
+            _guard.InvalidListUsers(users);
             return users;
         }
 
-        public async Task<IdentityDTO> SignInAsync(string email, string password)
+        public async Task<IdentityDTO> SignInAsync(UserSignInDTO userSignInData)
         {
-            var user = await _context.Users
-                .SingleOrDefaultAsync(u => u.Email == email);
+            _guard.NullArgument(userSignInData); 
+            await _guard.InvalidEmail(userSignInData.Email);
 
-            GuardAgainstInvalidUser(user, password);
+            var user = await _context.Users
+                .SingleOrDefaultAsync(u => u.Email == userSignInData.Email);
+
+            _guard.InvalidPassword(user!.Password, userSignInData.Password);
             _logger.LogInformation($"\"{user.Name}\" {LogResources.UserLogIn}");
             return _mapper.Map<IdentityDTO>(user);
         }
 
-        public async Task<IdentityDTO> SignUpAsync(string name, string email, string password)
+        public async Task<IdentityDTO> SignUpAsync(CreateUserDTO newUser)
         {
-            if (await _context.Users
-                .SingleOrDefaultAsync(u => u.Email == email) != null)
-            {
-                throw new BusinessException(UserExceptionMessageResource.EmailExists);
-            }
+            _guard.InvalidNewUser(newUser);
 
             var user = new User
             {
-                Email = email,
-                Name = name,
-                Password = BCrypt.Net.BCrypt.HashPassword(password),
+                Email = newUser.Email,
+                Name = newUser.Name,
+                Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password),
                 Role = Roles.User,
                 RegistrationDate = DateTime.UtcNow,
                 AvatarImage = new AvatarImage()
@@ -117,44 +123,55 @@ namespace Habr.BusinessLogic.Services.Implementations
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation($"\"{name}\" {LogResources.UserRegistered}");
+            _logger.LogInformation($"\"{newUser.Name}\" {LogResources.UserRegistered}");
 
             return _mapper.Map<IdentityDTO>(_context.Users
-                                .SingleOrDefault(u => u.Email == email));
+                                .SingleOrDefault(u => u.Email == user.Email));
         }
 
         public async Task UpdateAsync(int userId, UpdateUserDTO newUserData)
         {
+            _guard.NullArgument(newUserData);
+
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
-            GuardAgainstInvalidUser(user);
-            GuardAgainstInvalidUserUpdateData(newUserData);
-            await GuardAgainstInvalidEmailForUpdate(user.Email, newUserData.Email);
-            GuardAgainstInvalidOldPasswordForUpdate(newUserData.OldPassword, user.Password);
+            _guard.InvalidUser(user);
 
-            user.Name = string.IsNullOrEmpty(newUserData.Name) ? user.Name : newUserData.Name;
-            user.Email = string.IsNullOrEmpty(newUserData.Email) ? user.Email : newUserData.Email;
-            user.Password = string.IsNullOrEmpty(newUserData.NewPassword) ?
-                                        user.Password : BCrypt.Net.BCrypt.HashPassword(newUserData.NewPassword);
+            if(newUserData.Email is not null)
+            {
+                await _guard.InvalidEmail(newUserData.Email);
+                user!.Email = newUserData.Email;
+            }
 
-            _context.Users.Update(user);
+            if (newUserData.NewPassword is not null && newUserData.OldPassword is not null)
+            {
+                _guard.InvalidPassword(newUserData.OldPassword, newUserData.NewPassword);
+                user!.Password = BCrypt.Net.BCrypt.HashPassword(newUserData.NewPassword);
+            }
+
+            if (newUserData.Name is not null)
+            {
+                _guard.InvalidName(newUserData.Email);
+                user!.Email = newUserData.Email;
+            }
+
+            _context.Users.Update(user!);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAvatarAsync(int userId, IFormFile newAvatar)
         {
-            GuardAgainstInvalidImage(newAvatar);
+            _guard.InvalidImage(newAvatar);
 
             var userToUpdate = await _context.Users
-                .Include(u => u.AvatarImage)
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
-            GuardAgainstInvalidUser(userToUpdate);
+            _guard.InvalidUser(userToUpdate);
 
             var newImagePath = await _fileManager.SaveFile(newAvatar, userId);
-            userToUpdate.AvatarImage.PathImage = newImagePath;
-            userToUpdate.AvatarImage.LoadDate = DateTime.Now; 
+            userToUpdate!.AvatarImage.PathImage = newImagePath;
+            userToUpdate!.AvatarImage.LoadDate = DateTime.Now; 
           
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
@@ -166,93 +183,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(u => u.AvatarImage)
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
-            GuardAgainstInvalidUser(user);
-
+            _guard.InvalidUser(user);
             return _mapper.Map<ImageDTO>(user.AvatarImage); 
-        }
-
-        private void GuardAgainstInvalidUser(User user, string password)
-        {
-            if (user == null)
-            {
-                throw new AuthenticationException(UserExceptionMessageResource.InvalidEmail);
-            }
-            else if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
-            {
-                throw new AuthenticationException(UserExceptionMessageResource.IncorrectPassword);
-            }
-        }
-
-        private void GuardAgainstInvalidUser(User user)
-        {
-            if(user is null)
-            {
-                throw new NotFoundException(UserExceptionMessageResource.UserNotFound);
-            }
-        }
-
-        private void GuardAgainstInvalidListUsers<T>(IEnumerable<T> users)
-        {
-            if(users is null || users.Count() == 0)
-            {
-                throw new NotFoundException(UserExceptionMessageResource.UserNotFound);
-            }
-        }
-
-        private void GuardAgainstInvalidImage(IFormFile image)
-        {
-            if (image is null)
-            {
-                throw new BadRequestException(WorkWithContentExceptionMessageResource.ContentIsNull);
-            }
-
-            if(!image.IsImage())
-            {
-                throw new BadImageFormatException(WorkWithContentExceptionMessageResource.FileIsNotImage);
-            }
-
-        }
-
-        private async Task GuardAgainstInvalidEmailForUpdate(string oldEmail, string newEmail)
-        {
-            if(string.IsNullOrEmpty(newEmail))
-            {
-                throw new BusinessException(UserExceptionMessageResource.InvalidEmail);
-            }
-
-            if (await _context.Users
-                                   .SingleOrDefaultAsync(u => u.Email == newEmail) is not null)
-            {
-                throw new BusinessException(UserExceptionMessageResource.EmailExists);
-            }
-        }
-
-        private void GuardAgainstInvalidUserUpdateData(UpdateUserDTO userData)
-        {
-            if (userData is null)
-            {
-                throw new BadRequestException(UserExceptionMessageResource.UncorrectDataForUpdateUser);
-            }
-        }
-
-        private void GuardAgainstInvalidOldPasswordForUpdate(string password, string encryptedPassword)
-        {
-            if (!BCrypt.Net.BCrypt.Verify(password, encryptedPassword))
-            {
-                throw new BusinessException(UserExceptionMessageResource.IncorrectPassword);
-            }
-        }
-
-        public void AddImageAvatar()
-        {
-            var avatar = new AvatarImage()
-            {
-                UserId = 1,
-                LoadDate = DateTime.Now
-            };
-
-            _context.AvatarImages.Add(avatar);
-            _context.SaveChanges();
-        }
+        }        
     }
 }

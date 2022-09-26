@@ -7,8 +7,8 @@ namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IUserService
     {
-        public Task<IdentityDTO> SignInAsync(string email, string password);
-        public Task<IdentityDTO> SignUpAsync(string name, string email, string password);
+        public Task<IdentityDTO> SignInAsync(UserSignInDTO userSignInData);
+        public Task<IdentityDTO> SignUpAsync(CreateUserDTO newUserData);
         public Task<UserDTO> GetUserByIdAsync(int id);
         public Task<IEnumerable<UserDTO>> GetUsersAsync();
         public Task<IEnumerable<UserWithPostsDTO>> GetUsersWithPostsAsync();
@@ -17,6 +17,5 @@ namespace Habr.BusinessLogic.Services.Interfaces
         public Task UpdateAsync(int userId, UpdateUserDTO user);
         public Task UpdateAvatarAsync(int userId, IFormFile newAvatar); 
         public Task<ImageDTO> GetUserAvatar(int userId);
-        public void AddImageAvatar();
     }
 }
