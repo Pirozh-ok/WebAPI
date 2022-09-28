@@ -23,7 +23,7 @@ namespace Habr.BusinessLogic.Services.Interfaces
         Task<PagedList<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId, PostParameters postParameters);
         Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId, PostParameters postParameters);
         Task CreatePostAsync(string title, string text, int userId, bool isPublished, List<IFormFile> images);
-        Task UpdatePostAsync(Post post);
+        Task UpdatePostAsync(int userId, UpdatePostDTO post);
         Task PublishPostAsync(int postId);
         Task DeletePostAsync(int postId);
         Task SendPostToDraftsAsync(int postId);

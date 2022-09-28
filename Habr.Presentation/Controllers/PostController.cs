@@ -137,12 +137,12 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpPut, ApiVersionNeutral]
-        public async Task<IActionResult> UpdatePost([FromBody] Post post)
+        public async Task<IActionResult> UpdatePost([FromBody] UpdatePostDTO post)
         {
             if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId()
                                  || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
             {
-                await _postService.UpdatePostAsync(post);
+                await _postService.UpdatePostAsync(HttpContext.User.Identity.GetAuthorizedUserId(), post);
                 return StatusCode(204);
             }
             else

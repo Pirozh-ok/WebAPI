@@ -313,16 +313,16 @@ namespace Habr.BusinessLogic.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdatePostAsync(Post post)
+        public async Task UpdatePostAsync(int userId, UpdatePostDTO post)
         {
-            var updatePost = await GetFullPostByIdAsync(post.Id);
-            _guard.NotFoundPost(post);
+            var updatePost = await GetFullPostByIdAsync(post.PostId);
+            _guard.NotFoundPost(updatePost);
             GuardEditNotPublishPost(updatePost);
 
-           /* updatePost.User = await _context.Users
-                .SingleOrDefaultAsync(u => u.Id == post.UserId);
-
-            _guard.NotFoundUser(updatePost.User);*/
+            if (updatePost.UserId != userId)
+            {
+                throw new BusinessException(UserExceptionMessageResource.AccessError);
+            }
 
             updatePost.Title = post.Title;
             updatePost.Text = post.Text;
