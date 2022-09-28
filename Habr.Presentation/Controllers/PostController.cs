@@ -169,11 +169,17 @@ namespace Habr.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpPost("Rating"), ApiVersionNeutral]
-        public async Task<IActionResult> RatingPost([FromQuery] int postId, [FromQuery] int rate)
+        [HttpPost("rating"), ApiVersionNeutral]
+        public async Task<IActionResult> AddPostRating([FromQuery] int postId, [FromQuery] int rate)
         {
             await _postService.RatePost(postId, HttpContext.User.Identity.GetAuthorizedUserId(), rate);
             return Ok();
+        }
+
+        [HttpGet("{postId}/ratings"), ApiVersionNeutral]
+        public async Task<IActionResult> GetPostRatingsByPostId(int postId)
+        {      
+            return Ok(await _postService.GetRatingsByPostId(postId));
         }
     }
 }

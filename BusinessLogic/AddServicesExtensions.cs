@@ -13,6 +13,8 @@ namespace Habr.BusinessLogic
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IUserGuard, UserGuard>();
+            services.AddScoped<IPostGuard, PostGuard>();
+            services.AddScoped<ICommentGuard, CommentGuard>();
         }
     }
 }

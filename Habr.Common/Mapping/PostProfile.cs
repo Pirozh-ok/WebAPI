@@ -42,6 +42,13 @@ namespace Habr.Common.AutoMappers
                 .ForMember(p => p.Created, c => c.MapFrom(p => p.Created))
                 .ForMember(p => p.Updated, c => c.MapFrom(p => p.Updated))
                 .ForMember(p => p.Images, c => c.MapFrom(p => p.Images));
+
+            CreateMap<PostRating, PostRatingDTO>()
+                .ForMember(p => p.Value, c => c.MapFrom(p => p.Value))
+                .ForMember(p => p.DateModified, c => c.MapFrom(p => p.DateLastModified))
+                .ForMember(p => p.UserId, c => c.MapFrom(p => p.UserId))
+                .ForMember(p => p.UserName, c => c.MapFrom(p => p.User.Name))
+                .ForMember(p => p.UserEmail, c => c.MapFrom(p => p.User.Email));
         }
     }
 }

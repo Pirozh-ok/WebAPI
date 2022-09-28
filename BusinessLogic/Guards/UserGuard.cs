@@ -23,7 +23,7 @@ namespace Habr.BusinessLogic.Guards
             emailRegex = config["Mail:Regex"]; 
         }
 
-        public async void InvalidNewUser(CreateUserDTO newUser)
+        public async Task InvalidNewUser(CreateUserDTO newUser)
         {
             NullArgument(newUser);
             await InvalidEmail(newUser.Email);

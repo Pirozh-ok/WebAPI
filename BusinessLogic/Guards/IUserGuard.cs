@@ -13,7 +13,7 @@ namespace Habr.BusinessLogic.Guards
         void InvalidPassword(string password);
         Task InvalidEmail(string? email);
         void InvalidName (string? name);
-        void InvalidNewUser(CreateUserDTO newUser);
+        Task InvalidNewUser(CreateUserDTO newUser);
         void InvalidImage(IFormFile image);
     }
 }

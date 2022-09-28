@@ -1,6 +1,6 @@
 ﻿namespace Habr.BusinessLogic.Guards
 {
-    public class UpdateUserDto
+    public interface ICommentGuard
     {
     }
 }

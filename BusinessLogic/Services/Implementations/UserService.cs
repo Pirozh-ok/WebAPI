@@ -96,11 +96,11 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<IdentityDTO> SignInAsync(UserSignInDTO userSignInData)
         {
             _guard.NullArgument(userSignInData); 
-            await _guard.InvalidEmail(userSignInData.Email);
 
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Email == userSignInData.Email);
 
+            _guard.InvalidUser(user);
             _guard.InvalidPassword(user!.Password, userSignInData.Password);
             _logger.LogInformation($"\"{user.Name}\" {LogResources.UserLogIn}");
             return _mapper.Map<IdentityDTO>(user);
@@ -108,7 +108,7 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public async Task<IdentityDTO> SignUpAsync(CreateUserDTO newUser)
         {
-            _guard.InvalidNewUser(newUser);
+             await _guard.InvalidNewUser(newUser);
 
             var user = new User
             {
@@ -184,7 +184,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
             _guard.InvalidUser(user);
-            return _mapper.Map<ImageDTO>(user.AvatarImage); 
-        }        
+            return _mapper.Map<ImageDTO>(user!.AvatarImage); 
+        }
     }
 }

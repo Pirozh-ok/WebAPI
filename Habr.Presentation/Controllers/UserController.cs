@@ -127,9 +127,15 @@ namespace Habr.Presentation.Controllers
         }
 
         [HttpGet("sign-in"), ApiVersionNeutral]
-        public async Task<IActionResult> SignIn([FromBody] UserSignInDTO signInData)
+        public async Task<IActionResult> SignIn([FromQuery] string email, [FromQuery] string password)
         {
-            var user = await _userService.SignInAsync(signInData);
+            var user = await _userService.SignInAsync(
+                new UserSignInDTO 
+                    { 
+                    Email = email,
+                    Password = password
+                });
+
             var token = _jwtService.GenerateAccessToken(user);
             var refreshToken = await _jwtService.UpdateRefreshTokenUserAsync(user.Id);
             _jwtService.SetRefreshTokenInCookie(refreshToken.Token, Response);

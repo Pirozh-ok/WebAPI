@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Habr.BusinessLogic.Guards;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common;
 using Habr.Common.DTOs;
@@ -21,19 +22,26 @@ namespace Habr.BusinessLogic.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
-        private readonly IFileManager _fileManager; 
+        private readonly IFileManager _fileManager;
+        private readonly IPostGuard _guard; 
 
-        public PostService(DataContext context, IMapper mapper, ILogger<PostService> logger, IFileManager fileManager)
+        public PostService(
+            DataContext context, 
+            IMapper mapper, 
+            ILogger<PostService> logger, 
+            IFileManager fileManager,
+            IPostGuard guard)
         {
             _context = context;
             _mapper = mapper;
             _logger = logger;
             _fileManager = fileManager; 
+            _guard = guard;
         }
 
         public async Task CreatePostAsync(string title, string text, int userId, bool isPublished, List<IFormFile> images)
         {
-            GuardAgainstInvalidPost(title, text);
+            _guard.InvalidPost(title, text);
 
             var user = await GetUserByIdAsync(userId);
             var post = new Post()
@@ -68,7 +76,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task DeletePostAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
 
             await _context.Entry(post)
                 .Collection(c => c.Comments)
@@ -94,7 +102,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(p => p.Images)
                 .SingleOrDefaultAsync(p => p.Id == id);
 
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
 
             return post;
         }
@@ -115,7 +123,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(p => p.Images)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
             return _mapper.Map<PostDTO>(post);
         }
 
@@ -143,9 +151,6 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public async Task<PagedList<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId, PostParameters postParameters)
         {
-            var user = await GetUserByIdAsync(userId);
-            GuardAgainstInvalidUser(user); 
-
             var posts = _context.Posts
                 .Where(p => p.UserId == userId && !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
@@ -276,7 +281,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task PublishPostAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
 
             if (post.IsPublished)
             {
@@ -297,9 +302,9 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(p => p.Comments)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
 
-            if (post.Comments.Count > 0)
+            if (post!.Comments.Count > 0)
             {
                 throw new BusinessException(PostExceptionMessageResource.CannotSendDrafts);
             }
@@ -311,16 +316,13 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task UpdatePostAsync(Post post)
         {
             var updatePost = await GetFullPostByIdAsync(post.Id);
+            _guard.NotFoundPost(post);
+            GuardEditNotPublishPost(updatePost);
 
-            if (updatePost.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostCannotBeEdited);
-            }
-
-            updatePost.User = await _context.Users
+           /* updatePost.User = await _context.Users
                 .SingleOrDefaultAsync(u => u.Id == post.UserId);
 
-            GuardAgainstInvalidUser(updatePost.User);
+            _guard.NotFoundUser(updatePost.User);*/
 
             updatePost.Title = post.Title;
             updatePost.Text = post.Text;
@@ -329,19 +331,15 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public async Task RatePost(int postId, int userId, int rate)
         {
-            if (rate < 1 || rate > 5)
-            {
-                throw new BusinessException(PostExceptionMessageResource.RateExceedsLimits);
-            }
+            GuardRateOutRange(rate); 
 
             var post = await GetFullPostByIdAsync(postId);
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
 
             if (!post.IsPublished)
                 return;
 
             var user = await GetUserByIdAsync(userId);
-            GuardAgainstInvalidUser(user);
 
             var postRating = await _context.PostsRatings
                 .SingleOrDefaultAsync(r => r.UserId == userId && r.PostId == postId);
@@ -351,8 +349,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 _context.PostsRatings.Add(
                     new PostRating
                     {
-                        User = user,
-                        Post = post,
+                        UserId = userId,
+                        PostId = postId,
                         Value = rate,
                         DateLastModified = DateTime.UtcNow,
                     });
@@ -363,6 +361,15 @@ namespace Habr.BusinessLogic.Services.Implementations
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<PostRatingDTO>> GetRatingsByPostId(int postId)
+        {
+            return  await _context.PostsRatings
+                .Where(pr => pr.PostId == postId)
+                .ProjectTo<PostRatingDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         private async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
@@ -419,53 +426,30 @@ namespace Habr.BusinessLogic.Services.Implementations
             return subCommentDTOs;
         }
 
-        private void GuardAgainstPostNotFound(Post? post)
-        {
-            if (post == null)
-            {
-                throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
-            }
-        }
-
-        private void GuardAgainstInvalidPost(string title, string text)
-        {
-            if (string.IsNullOrEmpty(title))
-            {
-                throw new ValidationException(PostExceptionMessageResource.PostTitleRequired);
-            }
-
-            if (title.Length > 200)
-            {
-                throw new ValidationException(PostExceptionMessageResource.MaxLengthTitlePostExceeded);
-            }
-
-            if (string.IsNullOrEmpty(text))
-            {
-                throw new ValidationException(PostExceptionMessageResource.EmptyPostText);
-            }
-
-            if (text.Length > 2000)
-            {
-                throw new ValidationException(PostExceptionMessageResource.MaxLengthTextPostExceeded);
-            }
-        }
-
-        private void GuardAgainstInvalidUser (User? user)
-        {
-            if (user == null)
-            {
-                throw new BadRequestException(UserExceptionMessageResource.UserNotFound);
-            }
-        }
-
         private async Task<User> GetUserByIdAsync(int userId)
         {
-            
+
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
-            GuardAgainstInvalidUser(user);
-            return user;
+            _guard.NotFoundUser(user);
+            return user!;
+        }
+
+        private void GuardRateOutRange(int rate)
+        {
+            if (rate < 1 || rate > 5)
+            {
+                throw new BusinessException(PostExceptionMessageResource.RateExceedsLimits);
+            }
+        }
+
+        private void GuardEditNotPublishPost(Post updatePost)
+        {
+            if (updatePost.IsPublished)
+            {
+                throw new BusinessException(PostExceptionMessageResource.PostCannotBeEdited);
+            }
         }
     }
 }
