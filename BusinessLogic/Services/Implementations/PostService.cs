@@ -73,10 +73,11 @@ namespace Habr.BusinessLogic.Services.Implementations
             }
         }
 
-        public async Task DeletePostAsync(int postId)
+        public async Task DeletePostAsync(int postId, int userId)
         {
             var post = await GetFullPostByIdAsync(postId);
             _guard.NotFoundPost(post);
+            _guard.AccessErrorEditPost(post, userId);
 
             await _context.Entry(post)
                 .Collection(c => c.Comments)
@@ -278,38 +279,32 @@ namespace Habr.BusinessLogic.Services.Implementations
             return pagedPosts;
         }
 
-        public async Task PublishPostAsync(int postId)
+        public async Task PublishPostAsync(int postId, int userId)
         {
             var post = await GetFullPostByIdAsync(postId);
             _guard.NotFoundPost(post);
-
-            if (post.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
-            }
-
-            post.User = await GetUserByIdAsync(post.UserId);
+            _guard.AccessErrorEditPost(post, userId); 
+            _guard.PostAlreadePublished(post);
+            
             post.IsPublished = true;
-            var modifiedPost = _context.Entry(post);
-            modifiedPost.State = EntityState.Modified;
+            post.Updated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             _logger.LogInformation($"\"{post.Title}\" {LogResources.PublishPost}");
         }
 
-        public async Task SendPostToDraftsAsync(int postId)
+        public async Task SendPostToDraftsAsync(int userId, int postId)
         { 
             var post = await _context.Posts
+                .Include(p => p.User)
                 .Include(p => p.Comments)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
-            _guard.NotFoundPost(post);
+            _guard.NotFoundPost(post);          
+            _guard.AccessErrorEditPost(post!, userId);
+            _guard.SendToDraftsPostWithComment(post!);
 
-            if (post!.Comments.Count > 0)
-            {
-                throw new BusinessException(PostExceptionMessageResource.CannotSendDrafts);
-            }
-
-            post.IsPublished = false;
+            post!.IsPublished = false;
+            post.Updated = DateTime.UtcNow; 
             await _context.SaveChangesAsync();
         }
 
@@ -317,15 +312,12 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var updatePost = await GetFullPostByIdAsync(post.PostId);
             _guard.NotFoundPost(updatePost);
-            GuardEditNotPublishPost(updatePost);
-
-            if (updatePost.UserId != userId)
-            {
-                throw new BusinessException(UserExceptionMessageResource.AccessError);
-            }
+            _guard.AccessErrorEditPost(updatePost, userId);
+            _guard.EditNotPublishPost(updatePost);          
 
             updatePost.Title = post.Title;
             updatePost.Text = post.Text;
+            updatePost.Updated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
 
@@ -441,14 +433,6 @@ namespace Habr.BusinessLogic.Services.Implementations
             if (rate < 1 || rate > 5)
             {
                 throw new BusinessException(PostExceptionMessageResource.RateExceedsLimits);
-            }
-        }
-
-        private void GuardEditNotPublishPost(Post updatePost)
-        {
-            if (updatePost.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostCannotBeEdited);
             }
         }
     }

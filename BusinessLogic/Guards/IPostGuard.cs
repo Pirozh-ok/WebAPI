@@ -7,5 +7,9 @@ namespace Habr.BusinessLogic.Guards
         void InvalidPost(string title, string text);
         void NotFoundUser(User? user);
         void NotFoundPost(Post? post);
+        void EditNotPublishPost(Post updatePost); 
+        void SendToDraftsPostWithComment(Post post);
+        void AccessErrorEditPost(Post post, int userId);
+        void PostAlreadePublished(Post post);
     }
 }
