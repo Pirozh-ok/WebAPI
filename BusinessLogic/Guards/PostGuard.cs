@@ -77,5 +77,21 @@ namespace Habr.BusinessLogic.Guards
                 throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
             }
         }
+
+        public void RateOutRange(int rate)
+        {
+            if (rate < 1 || rate > 5)
+            {
+                throw new BusinessException(PostExceptionMessageResource.RateExceedsLimits);
+            }
+        }
+
+        public void PostNotPublished(Post post)
+        {
+            if (!post.IsPublished)
+            {
+                throw new BusinessException(PostExceptionMessageResource.PostNotPublished);
+            }
+        }
     }
 }

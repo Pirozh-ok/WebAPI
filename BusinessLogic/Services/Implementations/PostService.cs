@@ -5,7 +5,6 @@ using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common;
 using Habr.Common.DTOs;
 using Habr.Common.DTOs.PostDTOs;
-using Habr.Common.Exceptions;
 using Habr.Common.Extensions;
 using Habr.Common.Parameters;
 using Habr.Common.Resources;
@@ -141,12 +140,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<NotPublishedPostDTO> GetNotPublishedPostByIdAsync(int id)
         {
             var post = await GetFullPostByIdAsync(id);
-
-            if(post.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
-            }
-
+            _guard.PostAlreadePublished(post);
             return _mapper.Map<NotPublishedPostDTO>(post);
         }
 
@@ -194,12 +188,8 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PublishedPostDTO> GetPublishedPostByIdAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
-
-            if (!post.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostNotPublished);
-            }
-
+            _guard.PostNotPublished(post);
+           
             var postDTO = _mapper.Map<PublishedPostDTO>(post);
             postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
             return postDTO;
@@ -248,11 +238,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PublishedPostDTOv2> GetPublishedPostByIdAsyncV2(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
-
-            if (!post.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostNotPublished);
-            }
+            _guard.PostNotPublished(post);
 
             var postDTO = _mapper.Map<PublishedPostDTOv2>(post);
             postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
@@ -323,18 +309,21 @@ namespace Habr.BusinessLogic.Services.Implementations
 
         public async Task RatePost(int postId, int userId, int rate)
         {
-            GuardRateOutRange(rate); 
+            _guard.RateOutRange(rate); 
 
-            var post = await GetFullPostByIdAsync(postId);
+            var post = await _context.Posts
+                .Include(p => p.PostsRatings)
+                .SingleOrDefaultAsync(p => p.Id == postId);
+
             _guard.NotFoundPost(post);
 
-            if (!post.IsPublished)
+            if (!post!.IsPublished)
+            {
                 return;
+            }
 
-            var user = await GetUserByIdAsync(userId);
-
-            var postRating = await _context.PostsRatings
-                .SingleOrDefaultAsync(r => r.UserId == userId && r.PostId == postId);
+            var postRating = post.PostsRatings
+                .SingleOrDefault(r => r.UserId == userId); 
 
             if (postRating is null)
             {
@@ -426,14 +415,6 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             _guard.NotFoundUser(user);
             return user!;
-        }
-
-        private void GuardRateOutRange(int rate)
-        {
-            if (rate < 1 || rate > 5)
-            {
-                throw new BusinessException(PostExceptionMessageResource.RateExceedsLimits);
-            }
         }
     }
 }

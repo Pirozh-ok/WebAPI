@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Habr.BusinessLogic.Guards;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.Common.Exceptions;
@@ -13,11 +14,13 @@ namespace Habr.BusinessLogic.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly ICommentGuard _guard; 
 
-        public CommentService(DataContext context, IMapper mapper)
+        public CommentService(DataContext context, IMapper mapper, ICommentGuard guard)
         {
             _context = context;
             _mapper = mapper;
+            _guard = guard;
         }
 
         public async Task<IEnumerable<Comment>> GetFullCommentsAsync()
@@ -26,7 +29,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .ToListAsync();
 
-            GuardAgainstInvalidListComments(comments);
+            _guard.InvalidListComment(comments);
             return comments;
         }
 
@@ -36,8 +39,8 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(c => c.User)
                 .SingleOrDefaultAsync(c => c.Id == id);
 
-            GuardAgainstInvalidComment(comment);
-            return comment;
+            _guard.NotFoundComment(comment);
+            return comment!;
         }
 
         public async Task<CommentDTO> GetCommentByIdAsync(int commentId)
@@ -46,13 +49,12 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .Include(c => c.User)
                 .SingleOrDefaultAsync(c => c.Id == commentId);
 
-            GuardAgainstInvalidComment(comment);
+            _guard.NotFoundComment(comment);
             return _mapper.Map<CommentDTO>(comment);
         }
 
         public async Task CreateCommentAsync(int userId, int postId, string text)
         {
-            var user = await GetUserByIdAsync(userId);
             var post = await GetPostByIdAsync(postId);
 
             await _context.Comments.AddAsync(
@@ -74,7 +76,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             var parent = await _context.Comments
                 .SingleOrDefaultAsync(c => c.Id == parentId);
 
-            GuardAgainstInvalidComment(parent);
+            _guard.NotFoundComment(parent);
 
             await _context.Comments.AddAsync(new Comment
             {
@@ -87,9 +89,11 @@ namespace Habr.BusinessLogic.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteCommentAsync(int commentId)
+        public async Task DeleteCommentAsync(int commentId, int userId)
         {
             var comment = await GetFullCommentByIdAsync(commentId);
+            _guard.NotFoundComment(comment);
+            _guard.AccessError(userId, comment); 
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
         }
@@ -101,7 +105,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .ProjectTo<CommentDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
-            GuardAgainstInvalidListComments(comments);
+            _guard.InvalidListComment(comments);
             return comments;
         }
 
@@ -115,7 +119,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .ToListAsync();
 
-            GuardAgainstInvalidListComments(comments);
+            _guard.InvalidListComment(comments);
             return comments;
         }
         public async Task<IEnumerable<CommentDTO>> GetCommentsByUserAsync(int userId)
@@ -127,7 +131,7 @@ namespace Habr.BusinessLogic.Services.Implementations
                 .AsNoTracking()
                 .ToListAsync();
 
-            GuardAgainstInvalidListComments(comments);
+            _guard.InvalidListComment(comments);
             return comments;
         }
 
@@ -136,8 +140,8 @@ namespace Habr.BusinessLogic.Services.Implementations
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
-            GuardAgainstInvalidUser(user);
-            return user;
+            _guard.NotFoundUser(user);
+            return user!;
         }
 
         private async Task<Post> GetPostByIdAsync(int postId)
@@ -145,40 +149,8 @@ namespace Habr.BusinessLogic.Services.Implementations
             var post = await _context.Posts
                 .SingleOrDefaultAsync(u => u.Id == postId);
 
-            GuardAgainstInvalidPost(post);
-            return post;
-        }
-
-        private void GuardAgainstInvalidPost(Post post)
-        {
-            if (post == null)
-            {
-                throw new BadRequestException(Common.Resources.PostExceptionMessageResource.PostNotFound);
-            }
-        }
-
-        private void GuardAgainstInvalidUser(User user)
-        {
-            if (user == null)
-            {
-                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.UserNotFound);
-            }
-        }
-
-        private void GuardAgainstInvalidComment(Comment comment)
-        {
-            if (comment == null)
-            {
-                throw new NotFoundException(Common.Resources.CommentExceptionMessageResource.CommentNotFound);
-            }
-        }
-
-        private void GuardAgainstInvalidListComments<T>(IEnumerable<T> comments)
-        {
-            if(comments is null || comments.Count() == 0)
-            {
-                throw new NotFoundException(Common.Resources.UserExceptionMessageResource.UserNotFound);
-            }
+            _guard.NotFoundPost(post); 
+            return post!;
         }
     }
 }

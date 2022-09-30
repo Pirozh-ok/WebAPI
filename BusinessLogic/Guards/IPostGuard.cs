@@ -11,5 +11,7 @@ namespace Habr.BusinessLogic.Guards
         void SendToDraftsPostWithComment(Post post);
         void AccessErrorEditPost(Post post, int userId);
         void PostAlreadePublished(Post post);
+        void RateOutRange(int rate); 
+        void PostNotPublished(Post post);
     }
 }
