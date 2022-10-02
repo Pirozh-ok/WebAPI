@@ -1,11 +1,19 @@
 ﻿using Habr.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Configuration;
 
 namespace Habr.DataAccess.EntitiesConfigurations
 {
     public class UserConfiguration : IEntityTypeConfiguration<User>
     {
+        private readonly IConfiguration _configuration;
+
+        public UserConfiguration(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder
@@ -28,7 +36,8 @@ namespace Habr.DataAccess.EntitiesConfigurations
 
             builder.HasKey(u => u.Id);
 
-            builder.HasIndex(u => u.Email).IsUnique();
+            builder.HasIndex(u => u.Email)
+                .IsUnique();
 
             builder.Property("Id")
                 .IsRequired()
@@ -45,7 +54,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasDefaultValue("");
 
             builder.Property("RegistrationDate")
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
 
             builder.Property("Password")
@@ -54,7 +62,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasMaxLength(150);
 
             builder.Property("Role")
-                .IsRequired()
                 .HasDefaultValue(Roles.User);
 
             builder.Property("RefreshToken")
@@ -62,7 +69,6 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasDefaultValue("");
 
             builder.Property("RefreshTokenExpirationDate")
-                .IsRequired()
                 .HasDefaultValueSql("getdate()");
         }
     }

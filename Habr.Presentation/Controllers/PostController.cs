@@ -1,10 +1,7 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common.DTOs;
 using Habr.Common.DTOs.PostDTOs;
-using Habr.Common.Exceptions;
 using Habr.Common.Parameters;
-using Habr.DataAccess;
-using Habr.DataAccess.Entities;
 using Habr.Presentation.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -128,51 +125,55 @@ namespace Habr.Presentation.Controllers
 
         [Authorize]
         [HttpPost, ApiVersionNeutral]
-        public async Task<IActionResult> CreatePost([FromQuery] string title, [FromQuery] string text, [FromQuery] bool isPublished)
+        public async Task<IActionResult> CreatePost([FromQuery] string title, [FromQuery] string text, [FromQuery] bool isPublished, List<IFormFile> images)
         {
 
-            await _postService.CreatePostAsync(title, text, HttpContext.User.Identity.GetAuthorizedUserId(), isPublished);
+            await _postService.CreatePostAsync(title, text, HttpContext.User.Identity.GetAuthorizedUserId(), isPublished, images);
             return StatusCode(201);
         }
 
         [Authorize]
         [HttpPut, ApiVersionNeutral]
-        public async Task<IActionResult> UpdatePost([FromBody] Post post)
+        public async Task<IActionResult> UpdatePost([FromBody] UpdatePostDTO post)
         {
-            if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId()
-                                 || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
-            {
-                await _postService.UpdatePostAsync(post);
-                return StatusCode(204);
-            }
-            else
-            {
-                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.AccessError);
-            }
+            await _postService.UpdatePostAsync(HttpContext.User.Identity.GetAuthorizedUserId(), post);
+            return StatusCode(204);
         }
 
         [Authorize]
-        [HttpDelete("{id}"), ApiVersionNeutral]
-        public async Task<IActionResult> DeletePost(int id)
+        [HttpDelete("{postId}"), ApiVersionNeutral]
+        public async Task<IActionResult> DeletePost(int postId)
         {
-            var post = await _postService.GetFullPostByIdAsync(id);
-            if (post is not null && (post.UserId == HttpContext.User.Identity.GetAuthorizedUserId()
-                                 || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
-            {
-                await _postService.DeletePostAsync(id);
-                return StatusCode(204);
-            }
-            else
-            {
-                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.AccessError);
-            }
+
+            await _postService.DeletePostAsync(postId, HttpContext.User.Identity.GetAuthorizedUserId());
+            return StatusCode(204);
         }
 
         [Authorize]
-        [HttpPost("Rating"), ApiVersionNeutral]
-        public async Task<IActionResult> RatingPost([FromQuery] int postId, [FromQuery] int rate)
+        [HttpPost("rating"), ApiVersionNeutral]
+        public async Task<IActionResult> AddPostRating([FromQuery] int postId, [FromQuery] int rate)
         {
             await _postService.RatePost(postId, HttpContext.User.Identity.GetAuthorizedUserId(), rate);
+            return Ok();
+        }
+
+        [HttpGet("{postId}/ratings"), ApiVersionNeutral]
+        public async Task<IActionResult> GetPostRatingsByPostId(int postId)
+        {      
+            return Ok(await _postService.GetRatingsByPostId(postId));
+        }
+
+        [HttpPut("{postId}/send-to-drafts"), ApiVersionNeutral]
+        public async Task<IActionResult> SendPostToDrafts(int postId)
+        {
+            await _postService.SendPostToDraftsAsync(HttpContext.User.Identity.GetAuthorizedUserId(), postId); 
+            return Ok();
+        }
+
+        [HttpPut("{postId}/publish"), ApiVersionNeutral]
+        public async Task<IActionResult> PublishPost(int postId)
+        {
+            await _postService.PublishPostAsync(postId, HttpContext.User.Identity.GetAuthorizedUserId());
             return Ok();
         }
     }

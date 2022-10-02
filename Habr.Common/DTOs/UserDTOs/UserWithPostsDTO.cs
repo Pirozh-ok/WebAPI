@@ -1,4 +1,6 @@
-﻿namespace Habr.Common.DTOs.UserDTOs
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Habr.Common.DTOs.UserDTOs
 {
     public class UserWithPostsDTO
     {
@@ -7,5 +9,6 @@
         public string Email { get; set; }
         public DateTime RegistrationDate { get; set; }
         public List<PostDTO> Posts { get; set; }
+        public IFormFile Avatar { get; set; }
     }
 }

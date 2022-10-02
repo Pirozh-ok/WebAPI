@@ -1,6 +1,4 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
-using Habr.Common.Exceptions;
-using Habr.DataAccess;
 using Habr.Presentation.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,20 +48,12 @@ namespace Habr.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{id}"), ApiVersionNeutral]
-        public async Task<IActionResult> DeleteComment(int id)
+        [HttpDelete("{commentId}"), ApiVersionNeutral]
+        public async Task<IActionResult> DeleteComment(int commentId)
         {
-            var comment = await _commentService.GetFullCommentByIdAsync(id);
-            if (comment is not null && (comment.UserId == HttpContext.User.Identity.GetAuthorizedUserId()
-                                    || HttpContext.User.Identity.GetAuthorizedUserRole() == Roles.Admin.ToString()))
-            {
-                await _commentService.DeleteCommentAsync(id);
-                return StatusCode(204);
-            }
-            else
-            {
-                throw new BadRequestException(Common.Resources.UserExceptionMessageResource.AccessError);
-            }
+
+            await _commentService.DeleteCommentAsync(commentId, HttpContext.User.Identity.GetAuthorizedUserId());
+            return StatusCode(204);
         }
     }
 }

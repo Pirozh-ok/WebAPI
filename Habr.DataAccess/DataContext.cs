@@ -1,13 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Habr.DataAccess.EntitiesConfigurations;
 using Habr.DataAccess.Entities;
+using Microsoft.Extensions.Configuration;
 
 namespace Habr.DataAccess
 {
     public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options)
-        { 
+        private readonly IConfiguration _configuration; 
+        public DataContext(DbContextOptions<DataContext> options, IConfiguration configuration) : base(options)
+        {
+            _configuration = configuration;
         }
 
         public DataContext() 
@@ -18,11 +21,18 @@ namespace Habr.DataAccess
         public DbSet<User> Users { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<PostRating> PostsRatings { get; set; }
+        public DbSet<AvatarImage> AvatarImages { get; set; }
+        public DbSet<PostImage> PostImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(PostConfiguration).Assembly);
+            modelBuilder.ApplyConfiguration(new PostConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfiguration(_configuration));
+            modelBuilder.ApplyConfiguration(new CommentConfiguration());
+            modelBuilder.ApplyConfiguration(new AvatarImageConfiguration(_configuration));
+            modelBuilder.ApplyConfiguration(new PostImageConfiguration());
+            modelBuilder.ApplyConfiguration(new RatingConfiguration());
         }
     }
 }

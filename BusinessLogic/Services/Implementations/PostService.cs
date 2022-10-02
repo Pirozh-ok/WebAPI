@@ -1,14 +1,16 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Habr.BusinessLogic.Guards.Interfaces;
 using Habr.BusinessLogic.Services.Interfaces;
+using Habr.Common;
 using Habr.Common.DTOs;
 using Habr.Common.DTOs.PostDTOs;
-using Habr.Common.Exceptions;
 using Habr.Common.Extensions;
 using Habr.Common.Parameters;
 using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -19,39 +21,62 @@ namespace Habr.BusinessLogic.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
+        private readonly IFileManager _fileManager;
+        private readonly IPostGuard _guard; 
 
-        public PostService(DataContext context, IMapper mapper, ILogger<PostService> logger)
+        public PostService(
+            DataContext context, 
+            IMapper mapper, 
+            ILogger<PostService> logger, 
+            IFileManager fileManager,
+            IPostGuard guard)
         {
             _context = context;
             _mapper = mapper;
             _logger = logger;
+            _fileManager = fileManager; 
+            _guard = guard;
         }
 
-        public async Task CreatePostAsync(string title, string text, int userId, bool isPublished)
+        public async Task CreatePostAsync(string title, string text, int userId, bool isPublished, List<IFormFile> images)
         {
-            GuardAgainstInvalidPost(title, text);
-            var user = await GetUserByIdAsync(userId);
+            _guard.InvalidPost(title, text);
 
-            await _context.Posts.AddAsync(
-                new Post()
+            var user = await GetUserByIdAsync(userId);
+            var post = new Post()
+            {
+                Title = title,
+                Text = text,
+                User = user,
+                IsPublished = isPublished
+            };
+
+            if (images?.Count > 0)
+            {
+                foreach (var image in images)
                 {
-                    Title = title,
-                    Text = text,
-                    User = user,
-                    IsPublished = isPublished
-                });
+                    post.Images.Add(
+                        new PostImage
+                        {
+                            PathImage = await _fileManager.SaveFile(image, user.Id)
+                        });
+                }
+            }
+
+            await _context.Posts.AddAsync(post);
             await _context.SaveChangesAsync();
-            
-            if(isPublished)
+
+            if (isPublished)
             {
                 _logger.LogInformation($"\"{title}\" {LogResources.PublishPost}");
             }
         }
 
-        public async Task DeletePostAsync(int postId)
+        public async Task DeletePostAsync(int postId, int userId)
         {
             var post = await GetFullPostByIdAsync(postId);
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
+            _guard.AccessErrorEditPost(post, userId);
 
             await _context.Entry(post)
                 .Collection(c => c.Comments)
@@ -64,8 +89,6 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PostDTO>> GetFullPostsAsync(PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(p => p.User)
-                .Include(p => p.Comments)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
@@ -76,9 +99,10 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var post = await _context.Posts
                 .Include(p => p.User)
+                .Include(p => p.Images)
                 .SingleOrDefaultAsync(p => p.Id == id);
 
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
 
             return post;
         }
@@ -86,7 +110,6 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PostDTO>> GetPostsAsync(PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
@@ -97,9 +120,10 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var post = await _context.Posts
                 .Include(p => p.User)
+                .Include(p => p.Images)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);
             return _mapper.Map<PostDTO>(post);
         }
 
@@ -107,7 +131,6 @@ namespace Habr.BusinessLogic.Services.Implementations
         {
             var posts = _context.Posts
                 .Where(p => p.UserId == userId)
-                .Include(u => u.User)
                 .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
@@ -117,20 +140,12 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<NotPublishedPostDTO> GetNotPublishedPostByIdAsync(int id)
         {
             var post = await GetFullPostByIdAsync(id);
-
-            if(post.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
-            }
-
+            _guard.PostAlreadePublished(post);
             return _mapper.Map<NotPublishedPostDTO>(post);
         }
 
         public async Task<PagedList<NotPublishedPostDTO>> GetNotPublishedPostsByUserAsync(int userId, PostParameters postParameters)
         {
-            var user = await GetUserByIdAsync(userId);
-            GuardAgainstInvalidUser(user); 
-
             var posts = _context.Posts
                 .Where(p => p.UserId == userId && !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
@@ -144,8 +159,8 @@ namespace Habr.BusinessLogic.Services.Implementations
             var posts = _context.Posts
                 .Where(p => !p.IsPublished)
                 .ProjectTo<NotPublishedPostDTO>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .OrderByDescending(p => p.Updated);
+                .OrderByDescending(p => p.Updated)
+                .AsNoTracking();
 
             return await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
         }
@@ -153,10 +168,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PublishedPostDTO>> GetPublishedPostsAsync(PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()
                 .Where(p => p.IsPublished)
-                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider);
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
@@ -174,12 +188,8 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PublishedPostDTO> GetPublishedPostByIdAsync(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
-
-            if (!post.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostNotPublished);
-            }
-
+            _guard.PostNotPublished(post);
+           
             var postDTO = _mapper.Map<PublishedPostDTO>(post);
             postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
             return postDTO;
@@ -188,10 +198,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PublishedPostDTO>> GetPublishedPostsByUserAsync(int userId, PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()
                 .Where(p => p.IsPublished && p.UserId == userId)
-                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider);
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
@@ -209,10 +218,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsAsyncV2(PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()
                 .Where(p => p.IsPublished)
-                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider);
+                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
@@ -230,11 +238,7 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PublishedPostDTOv2> GetPublishedPostByIdAsyncV2(int postId)
         {
             var post = await GetFullPostByIdAsync(postId);
-
-            if (!post.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostNotPublished);
-            }
+            _guard.PostNotPublished(post);
 
             var postDTO = _mapper.Map<PublishedPostDTOv2>(post);
             postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
@@ -244,10 +248,9 @@ namespace Habr.BusinessLogic.Services.Implementations
         public async Task<PagedList<PublishedPostDTOv2>> GetPublishedPostsByUserAsyncV2(int userId, PostParameters postParameters)
         {
             var posts = _context.Posts
-                .Include(u => u.User)
-                .AsNoTracking()
                 .Where(p => p.IsPublished && p.UserId == userId)
-                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider);
+                .ProjectTo<PublishedPostDTOv2>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
@@ -262,86 +265,73 @@ namespace Habr.BusinessLogic.Services.Implementations
             return pagedPosts;
         }
 
-        public async Task PublishPostAsync(int postId)
+        public async Task PublishPostAsync(int postId, int userId)
         {
             var post = await GetFullPostByIdAsync(postId);
-            GuardAgainstPostNotFound(post);
-
-            if (post.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostAlreadyPublished);
-            }
-
-            post.User = await GetUserByIdAsync(post.UserId);
+            _guard.NotFoundPost(post);
+            _guard.AccessErrorEditPost(post, userId); 
+            _guard.PostAlreadePublished(post);
+            
             post.IsPublished = true;
-            var modifiedPost = _context.Entry(post);
-            modifiedPost.State = EntityState.Modified;
+            post.Updated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             _logger.LogInformation($"\"{post.Title}\" {LogResources.PublishPost}");
         }
 
-        public async Task SendPostToDraftsAsync(int postId)
+        public async Task SendPostToDraftsAsync(int userId, int postId)
         { 
             var post = await _context.Posts
+                .Include(p => p.User)
                 .Include(p => p.Comments)
                 .SingleOrDefaultAsync(p => p.Id == postId);
 
-            GuardAgainstPostNotFound(post);
+            _guard.NotFoundPost(post);          
+            _guard.AccessErrorEditPost(post!, userId);
+            _guard.SendToDraftsPostWithComment(post!);
 
-            if (post.Comments.Count > 0)
-            {
-                throw new BusinessException(PostExceptionMessageResource.CannotSendDrafts);
-            }
-
-            post.IsPublished = false;
+            post!.IsPublished = false;
+            post.Updated = DateTime.UtcNow; 
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdatePostAsync(Post post)
+        public async Task UpdatePostAsync(int userId, UpdatePostDTO post)
         {
-            var updatePost = await GetFullPostByIdAsync(post.Id);
-
-            if (updatePost.IsPublished)
-            {
-                throw new BusinessException(PostExceptionMessageResource.PostCannotBeEdited);
-            }
-
-            updatePost.User = await _context.Users
-                .SingleOrDefaultAsync(u => u.Id == post.UserId);
-
-            GuardAgainstInvalidUser(updatePost.User);
+            var updatePost = await GetFullPostByIdAsync(post.PostId);
+            _guard.NotFoundPost(updatePost);
+            _guard.AccessErrorEditPost(updatePost, userId);
+            _guard.EditNotPublishPost(updatePost);          
 
             updatePost.Title = post.Title;
             updatePost.Text = post.Text;
+            updatePost.Updated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
 
         public async Task RatePost(int postId, int userId, int rate)
         {
-            if (rate < 1 || rate > 5)
+            _guard.RateOutRange(rate); 
+
+            var post = await _context.Posts
+                .Include(p => p.PostsRatings)
+                .SingleOrDefaultAsync(p => p.Id == postId);
+
+            _guard.NotFoundPost(post);
+
+            if (!post!.IsPublished)
             {
-                throw new BusinessException(PostExceptionMessageResource.RateExceedsLimits);
+                return;
             }
 
-            var post = await GetFullPostByIdAsync(postId);
-            GuardAgainstPostNotFound(post);
-
-            if (!post.IsPublished)
-                return;
-
-            var user = await GetUserByIdAsync(userId);
-            GuardAgainstInvalidUser(user);
-
-            var postRating = await _context.PostsRatings
-                .SingleOrDefaultAsync(r => r.UserId == userId && r.PostId == postId);
+            var postRating = post.PostsRatings
+                .SingleOrDefault(r => r.UserId == userId); 
 
             if (postRating is null)
             {
                 _context.PostsRatings.Add(
                     new PostRating
                     {
-                        User = user,
-                        Post = post,
+                        UserId = userId,
+                        PostId = postId,
                         Value = rate,
                         DateLastModified = DateTime.UtcNow,
                     });
@@ -352,6 +342,15 @@ namespace Habr.BusinessLogic.Services.Implementations
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<PostRatingDTO>> GetRatingsByPostId(int postId)
+        {
+            return  await _context.PostsRatings
+                .Where(pr => pr.PostId == postId)
+                .ProjectTo<PostRatingDTO>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         private async Task<IEnumerable<CommentDTO>> GetCommentsByPostAsync(int postId)
@@ -408,53 +407,14 @@ namespace Habr.BusinessLogic.Services.Implementations
             return subCommentDTOs;
         }
 
-        private void GuardAgainstPostNotFound(Post? post)
-        {
-            if (post == null)
-            {
-                throw new NotFoundException(PostExceptionMessageResource.PostNotFound);
-            }
-        }
-
-        private void GuardAgainstInvalidPost(string title, string text)
-        {
-            if (string.IsNullOrEmpty(title))
-            {
-                throw new ValidationException(PostExceptionMessageResource.PostTitleRequired);
-            }
-
-            if (title.Length > 200)
-            {
-                throw new ValidationException(PostExceptionMessageResource.MaxLengthTitlePostExceeded);
-            }
-
-            if (string.IsNullOrEmpty(text))
-            {
-                throw new ValidationException(PostExceptionMessageResource.EmptyPostText);
-            }
-
-            if (text.Length > 2000)
-            {
-                throw new ValidationException(PostExceptionMessageResource.MaxLengthTextPostExceeded);
-            }
-        }
-
-        private void GuardAgainstInvalidUser (User? user)
-        {
-            if (user == null)
-            {
-                throw new BadRequestException(UserExceptionMessageResource.UserNotFound);
-            }
-        }
-
         private async Task<User> GetUserByIdAsync(int userId)
         {
-            
+
             var user = await _context.Users
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
-            GuardAgainstInvalidUser(user);
-            return user;
+            _guard.NotFoundUser(user);
+            return user!;
         }
     }
 }

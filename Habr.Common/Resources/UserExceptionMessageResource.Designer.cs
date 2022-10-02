@@ -29,7 +29,7 @@ namespace Habr.Common.Resources {
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        public UserExceptionMessageResource() {
+        internal UserExceptionMessageResource() {
         }
         
         /// <summary>
@@ -70,6 +70,15 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Argument is null!.
+        /// </summary>
+        public static string ArgumentIsNull {
+            get {
+                return ResourceManager.GetString("ArgumentIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на A user with this email address already exists!.
         /// </summary>
         public static string EmailExists {
@@ -79,11 +88,11 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Incorrect password!.
+        ///   Ищет локализованную строку, похожую на Unable to get the path to the user&apos;s profile photo.
         /// </summary>
-        public static string IncorrectPassword {
+        public static string ErrorGetAvatar {
             get {
-                return ResourceManager.GetString("IncorrectPassword", resourceCulture);
+                return ResourceManager.GetString("ErrorGetAvatar", resourceCulture);
             }
         }
         
@@ -93,6 +102,33 @@ namespace Habr.Common.Resources {
         public static string InvalidEmail {
             get {
                 return ResourceManager.GetString("InvalidEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Invalid password!.
+        /// </summary>
+        public static string InvalidPassword {
+            get {
+                return ResourceManager.GetString("InvalidPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на User name is invalid!.
+        /// </summary>
+        public static string InvalidUserName {
+            get {
+                return ResourceManager.GetString("InvalidUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The data for updating user information came as null.
+        /// </summary>
+        public static string UncorrectDataForUpdateUser {
+            get {
+                return ResourceManager.GetString("UncorrectDataForUpdateUser", resourceCulture);
             }
         }
         
