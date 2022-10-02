@@ -1,6 +1,4 @@
 ﻿using Habr.BusinessLogic.Services.Interfaces;
-using Habr.Common.Exceptions;
-using Habr.DataAccess;
 using Habr.Presentation.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

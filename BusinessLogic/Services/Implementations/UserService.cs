@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Habr.BusinessLogic.Guards;
+using Habr.BusinessLogic.Guards.Interfaces;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common;
 using Habr.Common.DTOs.ImageDTOs;

@@ -1,12 +1,12 @@
 ﻿using Habr.DataAccess.Entities;
 
-namespace Habr.BusinessLogic.Guards
+namespace Habr.BusinessLogic.Guards.Interfaces
 {
     public interface ICommentGuard
     {
         void NotFoundComment(Comment? comment);
         void AccessError(int userId, Comment comment);
-        void InvalidListComment<T>(IEnumerable<T> comments); 
+        void InvalidListComment<T>(IEnumerable<T> comments);
         void NotFoundUser(User? user);
         void NotFoundPost(Post? post);
     }

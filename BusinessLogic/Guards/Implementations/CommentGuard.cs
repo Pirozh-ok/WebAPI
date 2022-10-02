@@ -1,25 +1,26 @@
-﻿using Habr.Common.Exceptions;
+﻿using Habr.BusinessLogic.Guards.Interfaces;
+using Habr.Common.Exceptions;
 using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 
-namespace Habr.BusinessLogic.Guards
+namespace Habr.BusinessLogic.Guards.Implementations
 {
     public class CommentGuard : ICommentGuard
     {
         public void NotFoundComment(Comment? comment)
         {
-            if(comment is null)
+            if (comment is null)
             {
-                throw new NotFoundException(CommentExceptionMessageResource.CommentNotFound); 
+                throw new NotFoundException(CommentExceptionMessageResource.CommentNotFound);
             }
         }
 
         public void AccessError(int userId, Comment comment)
         {
-            if(userId != comment.UserId && comment.User.Role != Roles.Admin)
+            if (userId != comment.UserId && comment.User.Role != Roles.Admin)
             {
-                throw new AuthorizationException(CommentExceptionMessageResource.AccessError); 
+                throw new AuthorizationException(CommentExceptionMessageResource.AccessError);
             }
         }
 

@@ -1,9 +1,10 @@
-﻿using Habr.Common.Exceptions;
+﻿using Habr.BusinessLogic.Guards.Interfaces;
+using Habr.Common.Exceptions;
 using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
 
-namespace Habr.BusinessLogic.Guards
+namespace Habr.BusinessLogic.Guards.Implementations
 {
     public class PostGuard : IPostGuard
     {

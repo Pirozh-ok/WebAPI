@@ -1,4 +1,5 @@
-﻿using Habr.BusinessLogic.Guards;
+﻿using Habr.BusinessLogic.Guards.Implementations;
+using Habr.BusinessLogic.Guards.Interfaces;
 using Habr.BusinessLogic.Services.Implementations;
 using Habr.BusinessLogic.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;

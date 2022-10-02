@@ -1,5 +1,6 @@
 ﻿using System.Net.Mail;
 using System.Text.RegularExpressions;
+using Habr.BusinessLogic.Guards.Interfaces;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Exceptions;
 using Habr.Common.Extensions;
@@ -10,17 +11,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace Habr.BusinessLogic.Guards
+namespace Habr.BusinessLogic.Guards.Implementations
 {
     public class UserGuard : IUserGuard
     {
         private DataContext _context;
-        private readonly string emailRegex; 
+        private readonly string emailRegex;
 
         public UserGuard(DataContext context, IConfiguration config)
         {
             _context = context;
-            emailRegex = config["Mail:Regex"]; 
+            emailRegex = config["Mail:Regex"];
         }
 
         public async Task InvalidNewUser(CreateUserDTO newUser)
@@ -33,9 +34,9 @@ namespace Habr.BusinessLogic.Guards
 
         public void NullArgument<T>(T obj)
         {
-            if(obj is null)
+            if (obj is null)
             {
-                throw new BadRequestException(UserExceptionMessageResource.ArgumentIsNull); 
+                throw new BadRequestException(UserExceptionMessageResource.ArgumentIsNull);
             }
         }
 
@@ -56,7 +57,7 @@ namespace Habr.BusinessLogic.Guards
 
             if (await _context.Users.SingleOrDefaultAsync(u => u.Email == email) is not null)
             {
-                 throw new BusinessException(UserExceptionMessageResource.EmailExists);
+                throw new BusinessException(UserExceptionMessageResource.EmailExists);
             }
         }
 
@@ -78,9 +79,9 @@ namespace Habr.BusinessLogic.Guards
 
         public void InvalidName(string? name)
         {
-            if(string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new BusinessException(UserExceptionMessageResource.InvalidUserName); 
+                throw new BusinessException(UserExceptionMessageResource.InvalidUserName);
             }
         }
 

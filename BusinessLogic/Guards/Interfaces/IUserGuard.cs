@@ -2,7 +2,7 @@
 using Habr.DataAccess.Entities;
 using Microsoft.AspNetCore.Http;
 
-namespace Habr.BusinessLogic.Guards
+namespace Habr.BusinessLogic.Guards.Interfaces
 {
     public interface IUserGuard
     {
@@ -12,7 +12,7 @@ namespace Habr.BusinessLogic.Guards
         void InvalidPassword(string encryptedPassword, string password);
         void InvalidPassword(string password);
         Task InvalidEmail(string? email);
-        void InvalidName (string? name);
+        void InvalidName(string? name);
         Task InvalidNewUser(CreateUserDTO newUser);
         void InvalidImage(IFormFile image);
     }
