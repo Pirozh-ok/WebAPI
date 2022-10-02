@@ -34,6 +34,12 @@ namespace Habr.DataAccess.EntitiesConfigurations
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder
+                .HasMany(u => u.Subscriptions)
+                .WithOne(s => s.User)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasKey(u => u.Id);
 
             builder.HasIndex(u => u.Email)

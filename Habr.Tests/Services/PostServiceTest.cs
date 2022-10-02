@@ -1,364 +1,364 @@
-﻿using System.Text;
-using AutoMapper;
-using Habr.BusinessLogic.Services.Implementations;
-using Habr.Common.AutoMappers;
-using Habr.Common.Exceptions;
-using Habr.DataAccess;
-using Habr.DataAccess.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Moq;
+﻿//using System.Text;
+//using AutoMapper;
+//using Habr.BusinessLogic.Services.Implementations;
+//using Habr.Common.AutoMappers;
+//using Habr.Common.Exceptions;
+//using Habr.DataAccess;
+//using Habr.DataAccess.Entities;
+//using Microsoft.EntityFrameworkCore;
+//using Microsoft.Extensions.Configuration;
+//using Microsoft.Extensions.Logging;
+//using Moq;
 
-namespace Habr.BusinessLogic.Tests.Services
-{
-    public class PostServiceTest
-    {
-        private static DbContextOptions<DataContext> _dbContextOptions = new DbContextOptionsBuilder<DataContext>()
-            .UseInMemoryDatabase(databaseName: "HabrDbTest")
-            .Options;
+//namespace Habr.BusinessLogic.Tests.Services
+//{
+//    public class PostServiceTest
+//    {
+//        private static DbContextOptions<DataContext> _dbContextOptions = new DbContextOptionsBuilder<DataContext>()
+//            .UseInMemoryDatabase(databaseName: "HabrDbTest")
+//            .Options;
 
-        private DataContext _context;
-        private IMapper _mapper;
-        private ILogger<PostService> _logger;
-        private IConfiguration _configuration; 
+//        private DataContext _context;
+//        private IMapper _mapper;
+//        private ILogger<PostService> _logger;
+//        private IConfiguration _configuration; 
 
-        public PostServiceTest()
-        {
-            _configuration = new Mock<IConfiguration>().Object; 
+//        public PostServiceTest()
+//        {
+//            _configuration = new Mock<IConfiguration>().Object; 
 
-            _context = new DataContext(_dbContextOptions, _configuration);
-            _context.Database.EnsureCreated();
+//            _context = new DataContext(_dbContextOptions, _configuration);
+//            _context.Database.EnsureCreated();
 
-            _mapper = new Mapper(new MapperConfiguration(
-                options =>
-                {
-                    options.AddProfile(typeof(PostProfile));
-                }));
+//            _mapper = new Mapper(new MapperConfiguration(
+//                options =>
+//                {
+//                    options.AddProfile(typeof(PostProfile));
+//                }));
 
-            var loggerMock = new Mock<ILogger<PostService>>();
-            _logger = loggerMock.Object;
+//            var loggerMock = new Mock<ILogger<PostService>>();
+//            _logger = loggerMock.Object;
 
-            SeedDatabase();
-        }
+//            SeedDatabase();
+//        }
 
-        [Fact]
-        public async void CreatePost_CorrectData_Success()
-        {
-            // Avarage
+//        [Fact]
+//        public async void CreatePost_CorrectData_Success()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            var user = await _context.Users.FirstOrDefaultAsync(); 
-            var title = "Post4";
-            var text = "Text4";
+//            var postService = new PostService(_context, _mapper, _logger);
+//            var user = await _context.Users.FirstOrDefaultAsync(); 
+//            var title = "Post4";
+//            var text = "Text4";
     
-            // Act
+//            // Act
 
-            await postService.CreatePostAsync(title, text, user.Id, false);
+//            await postService.CreatePostAsync(title, text, user.Id, false);
 
-            // Assert
+//            // Assert
 
-            Assert.True(await _context.Posts
-                .SingleOrDefaultAsync(p => p.Title == title) is not null);
-        }
+//            Assert.True(await _context.Posts
+//                .SingleOrDefaultAsync(p => p.Title == title) is not null);
+//        }
 
-        [Fact]
-        public async void CreatePost_NullOrEmptyTitle_ThrowValidationException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void CreatePost_NullOrEmptyTitle_ThrowValidationException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            var user = await _context.Users.FirstOrDefaultAsync();
-            var title = string.Empty;
-            var text = "Text4";
+//            var postService = new PostService(_context, _mapper, _logger);
+//            var user = await _context.Users.FirstOrDefaultAsync();
+//            var title = string.Empty;
+//            var text = "Text4";
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.CreatePostAsync(title, text, user.Id, false);
+//            Func<Task> act = () => postService.CreatePostAsync(title, text, user.Id, false);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<ValidationException>(act);
-        }
+//            await Assert.ThrowsAsync<ValidationException>(act);
+//        }
 
-        [Fact]
-        public async void CreatePost_TitleOfLengthExceedsMax_ThrowValidationException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void CreatePost_TitleOfLengthExceedsMax_ThrowValidationException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            var user = await _context.Users.FirstOrDefaultAsync();
-            var title = new StringBuilder(300);
-            title.Length = 300; 
-            var text = "Text4";
+//            var postService = new PostService(_context, _mapper, _logger);
+//            var user = await _context.Users.FirstOrDefaultAsync();
+//            var title = new StringBuilder(300);
+//            title.Length = 300; 
+//            var text = "Text4";
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.CreatePostAsync(title.ToString(), text, user.Id, false);
+//            Func<Task> act = () => postService.CreatePostAsync(title.ToString(), text, user.Id, false);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<ValidationException>(act);
-        }
+//            await Assert.ThrowsAsync<ValidationException>(act);
+//        }
 
-        [Fact]
-        public async void CreatePost_NullOrEmptyText_ThrowValidationException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void CreatePost_NullOrEmptyText_ThrowValidationException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            var user = await _context.Users.FirstOrDefaultAsync();
-            var title = "Post4";
-            var text = string.Empty;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            var user = await _context.Users.FirstOrDefaultAsync();
+//            var title = "Post4";
+//            var text = string.Empty;
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.CreatePostAsync(title, text, user.Id, false);
+//            Func<Task> act = () => postService.CreatePostAsync(title, text, user.Id, false);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<ValidationException>(act);
-        }
+//            await Assert.ThrowsAsync<ValidationException>(act);
+//        }
 
-        [Fact]
-        public async void CreatePost_TextOfLengthExceedsMax_ThrowValidationException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void CreatePost_TextOfLengthExceedsMax_ThrowValidationException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            var user = await _context.Users.FirstOrDefaultAsync();
-            var title = "Post4";
-            var text = new StringBuilder(2500);
-            text.Length = 2500;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            var user = await _context.Users.FirstOrDefaultAsync();
+//            var title = "Post4";
+//            var text = new StringBuilder(2500);
+//            text.Length = 2500;
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.CreatePostAsync(title, text.ToString(), user.Id, false);
+//            Func<Task> act = () => postService.CreatePostAsync(title, text.ToString(), user.Id, false);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<ValidationException>(act);
-        }
+//            await Assert.ThrowsAsync<ValidationException>(act);
+//        }
 
-        [Fact]
-        public async void CreatePost_InvalidAuthorId_ThrowBadRequestException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void CreatePost_InvalidAuthorId_ThrowBadRequestException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            var userId = -1;
-            var title = "Post4";
-            var text = "Text4";
+//            var postService = new PostService(_context, _mapper, _logger);
+//            var userId = -1;
+//            var title = "Post4";
+//            var text = "Text4";
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.CreatePostAsync(title, text, userId, false);
+//            Func<Task> act = () => postService.CreatePostAsync(title, text, userId, false);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<BadRequestException>(act);
-        }
+//            await Assert.ThrowsAsync<BadRequestException>(act);
+//        }
 
-        [Fact]
-        public async void DeletePost_CorrectId_Success()
-        {
-            // Avarage
+//        [Fact]
+//        public async void DeletePost_CorrectId_Success()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            int postId = 1;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            int postId = 1;
 
-            // Act
+//            // Act
 
-            await postService.DeletePostAsync(postId);
+//            await postService.DeletePostAsync(postId);
 
-            // Assert
+//            // Assert
 
-            Assert.True(await _context.Posts.SingleOrDefaultAsync(p => p.Id == postId) is null);
-        }
+//            Assert.True(await _context.Posts.SingleOrDefaultAsync(p => p.Id == postId) is null);
+//        }
 
-        [Fact]
-        public async void DeletePost_InvalidId_ThrowsNotFoundException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void DeletePost_InvalidId_ThrowsNotFoundException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            int postId = -1;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            int postId = -1;
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.DeletePostAsync(postId);
+//            Func<Task> act = () => postService.DeletePostAsync(postId);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<NotFoundException>(act);
-        }
+//            await Assert.ThrowsAsync<NotFoundException>(act);
+//        }
 
-        [Fact]
-        public async void PublishPost_CorrectId_Success()
-        {
-            // Avarage
+//        [Fact]
+//        public async void PublishPost_CorrectId_Success()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            int postId = 2;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            int postId = 2;
 
-            // Act
+//            // Act
 
-            await postService.PublishPostAsync(postId);
+//            await postService.PublishPostAsync(postId);
 
-            // Assert
+//            // Assert
 
-            Assert.True((await postService.GetPostByIdAsync(postId)).IsPublished);
-        }
+//            Assert.True((await postService.GetPostByIdAsync(postId)).IsPublished);
+//        }
 
-        [Fact]
-        public async void PublishPost_IdAlreadyPublishedPost_BusinessException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void PublishPost_IdAlreadyPublishedPost_BusinessException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            int postId = 1;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            int postId = 1;
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.PublishPostAsync(postId);
+//            Func<Task> act = () => postService.PublishPostAsync(postId);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<BusinessException>(act);
-        }
+//            await Assert.ThrowsAsync<BusinessException>(act);
+//        }
 
-        [Fact] 
-        public async void PublishPost_InvalidId_NotFoundException()
-        {
-            // Avarage
+//        [Fact] 
+//        public async void PublishPost_InvalidId_NotFoundException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            int postId = -1;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            int postId = -1;
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.PublishPostAsync(postId);
+//            Func<Task> act = () => postService.PublishPostAsync(postId);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<NotFoundException>(act);
-        }
+//            await Assert.ThrowsAsync<NotFoundException>(act);
+//        }
 
-        [Fact]
-        public async void SendPostToDrafts_CorrectId_Success()
-        {
-            // Avarage
+//        [Fact]
+//        public async void SendPostToDrafts_CorrectId_Success()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            int postId = 1;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            int postId = 1;
 
-            // Act
+//            // Act
 
-            await postService.SendPostToDraftsAsync(postId);
+//            await postService.SendPostToDraftsAsync(postId);
 
-            // Assert
+//            // Assert
 
-            Assert.True(!(await postService.GetPostByIdAsync(postId)).IsPublished);
-        }
+//            Assert.True(!(await postService.GetPostByIdAsync(postId)).IsPublished);
+//        }
 
-        [Fact]
-        public async void SendPostToDrafts_InvalidId_NotFoundException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void SendPostToDrafts_InvalidId_NotFoundException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            int postId = -1;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            int postId = -1;
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.SendPostToDraftsAsync(postId);
+//            Func<Task> act = () => postService.SendPostToDraftsAsync(postId);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<NotFoundException>(act);
-        }
+//            await Assert.ThrowsAsync<NotFoundException>(act);
+//        }
 
-        [Fact]
-        public async void SendPostToDrafts_PostWithComments_BusinessException()
-        {
-            // Avarage
+//        [Fact]
+//        public async void SendPostToDrafts_PostWithComments_BusinessException()
+//        {
+//            // Avarage
 
-            var postService = new PostService(_context, _mapper, _logger);
-            int postId = 3;
+//            var postService = new PostService(_context, _mapper, _logger);
+//            int postId = 3;
 
-            // Act
+//            // Act
 
-            Func<Task> act = () => postService.SendPostToDraftsAsync(postId);
+//            Func<Task> act = () => postService.SendPostToDraftsAsync(postId);
 
-            // Assert
+//            // Assert
 
-            await Assert.ThrowsAsync<BusinessException>(act);
-        }
+//            await Assert.ThrowsAsync<BusinessException>(act);
+//        }
 
-        ~PostServiceTest()
-        {
-            _context.Database.EnsureDeleted();
-        }
+//        ~PostServiceTest()
+//        {
+//            _context.Database.EnsureDeleted();
+//        }
 
-        private async void SeedDatabase()
-        {
-            var user1 = new User
-            {
-                Name = "User1",
-                Email = "Email1",
-                Password = "Password1",
-                RegistrationDate = DateTime.Now
-            };
+//        private async void SeedDatabase()
+//        {
+//            var user1 = new User
+//            {
+//                Name = "User1",
+//                Email = "Email1",
+//                Password = "Password1",
+//                RegistrationDate = DateTime.Now
+//            };
 
-            var user2 = new User
-            {
-                Name = "User2",
-                Email = "Email2",
-                Password = "Password2",
-                RegistrationDate = DateTime.Now
-            };
+//            var user2 = new User
+//            {
+//                Name = "User2",
+//                Email = "Email2",
+//                Password = "Password2",
+//                RegistrationDate = DateTime.Now
+//            };
 
-            await _context.Users.AddRangeAsync(user1, user2);
+//            await _context.Users.AddRangeAsync(user1, user2);
 
-            await _context.Posts.AddRangeAsync(new List<Post>
-            {
-                new Post()
-                {
-                    Title = "Post1",
-                    Text = "Text1",
-                    UserId = user1.Id,
-                    IsPublished = true,
-                },
+//            await _context.Posts.AddRangeAsync(new List<Post>
+//            {
+//                new Post()
+//                {
+//                    Title = "Post1",
+//                    Text = "Text1",
+//                    UserId = user1.Id,
+//                    IsPublished = true,
+//                },
 
-                new Post()
-                {
-                    Title = "Post2",
-                    Text = "Text2",
-                    UserId = user2.Id,
-                    IsPublished = false,
-                },
+//                new Post()
+//                {
+//                    Title = "Post2",
+//                    Text = "Text2",
+//                    UserId = user2.Id,
+//                    IsPublished = false,
+//                },
 
-                new Post()
-                {
-                    Title = "Post3",
-                    Text = "Text3",
-                    User = user2,
-                    IsPublished = true
-                }
-            });
+//                new Post()
+//                {
+//                    Title = "Post3",
+//                    Text = "Text3",
+//                    User = user2,
+//                    IsPublished = true
+//                }
+//            });
 
-            await _context.SaveChangesAsync();
+//            await _context.SaveChangesAsync();
 
-            var post = await _context.Posts.SingleOrDefaultAsync(p => p.Id == 3);
-            post.Comments
-                .Add(
-                    new Comment()
-                    {
-                        Text = "Comment1",
-                        UserId = user1.Id
-                    });
+//            var post = await _context.Posts.SingleOrDefaultAsync(p => p.Id == 3);
+//            post.Comments
+//                .Add(
+//                    new Comment()
+//                    {
+//                        Text = "Comment1",
+//                        UserId = user1.Id
+//                    });
 
-            await _context.SaveChangesAsync();
-        }
-    }
-}
+//            await _context.SaveChangesAsync();
+//        }
+//    }
+//}

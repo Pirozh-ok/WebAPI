@@ -7,6 +7,7 @@
             Posts = new HashSet<Post>();
             Comments = new HashSet<Comment>();
             PostsRatings = new HashSet<PostRating>();
+            Subscriptions = new HashSet<UserSubscriptions>(); 
         }
 
         public int Id { get; set; }
@@ -27,5 +28,8 @@
 
         // PostRating
         public ICollection<PostRating> PostsRatings { get; set; }
+
+        // Subscriptions
+        public ICollection<UserSubscriptions> Subscriptions { get; set; }
     }
 }
