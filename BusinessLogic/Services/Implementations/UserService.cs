@@ -5,6 +5,7 @@ using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common;
 using Habr.Common.DTOs.ImageDTOs;
 using Habr.Common.DTOs.UserDTOs;
+using Habr.Common.Exceptions;
 using Habr.Common.Resources;
 using Habr.DataAccess;
 using Habr.DataAccess.Entities;
@@ -185,6 +186,49 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             _guard.InvalidUser(user);
             return _mapper.Map<ImageDTO>(user!.AvatarImage); 
+        }
+
+        public async Task SubscribeToUser(int fromUserId, int toUserId)
+        {
+            if(fromUserId == toUserId)
+            {
+                throw new BusinessException(UserExceptionMessageResource.SelfSubscription); 
+            }
+
+            var toUser = await _context.Users
+                .SingleOrDefaultAsync(u => u.Id == toUserId);
+            _guard.InvalidUser(toUser);
+
+            var subscription = await _context.UserSubscriptions
+                .SingleOrDefaultAsync(s => s.UserId == fromUserId && s.SubsUserId == toUserId);
+            _guard.AlreadySubscribe(subscription); 
+
+            _context.UserSubscriptions.Add(
+                new UserSubscriptions
+                {
+                    UserId = fromUserId,
+                    SubsUserId = toUserId
+                });
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UnsubscribeFromUser(int userId, int fromUserId)
+        {
+            var subscription = await _context.UserSubscriptions
+                .SingleOrDefaultAsync(s => s.UserId == userId && s.SubsUserId == fromUserId);
+
+            _guard.NotSubscribe(subscription);
+
+            _context.UserSubscriptions.Remove(subscription!);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<UserSubscriptions>> GetSubscriptions(int userId)
+        {
+            return await _context.UserSubscriptions
+                .Where(s => s.UserId == userId)
+                .AsNoTracking()
+                .ToListAsync(); 
         }
     }
 }

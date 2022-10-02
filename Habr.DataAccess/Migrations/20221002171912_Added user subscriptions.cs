@@ -17,7 +17,7 @@ namespace Habr.DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     SubsUserId = table.Column<int>(type: "int", nullable: false),
-                    DateSubscribe = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DateSubscribe = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "getdate()")
                 },
                 constraints: table =>
                 {

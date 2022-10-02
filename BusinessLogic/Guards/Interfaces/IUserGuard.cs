@@ -15,5 +15,7 @@ namespace Habr.BusinessLogic.Guards.Interfaces
         void InvalidName(string? name);
         Task InvalidNewUser(CreateUserDTO newUser);
         void InvalidImage(IFormFile image);
+        void NotSubscribe(UserSubscriptions? subscriptions); 
+        void AlreadySubscribe(UserSubscriptions? subscriptions);
     }
 }

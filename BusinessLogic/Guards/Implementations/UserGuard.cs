@@ -1,5 +1,4 @@
-﻿using System.Net.Mail;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Habr.BusinessLogic.Guards.Interfaces;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Exceptions;
@@ -104,6 +103,22 @@ namespace Habr.BusinessLogic.Guards.Implementations
             if (users is null || users.Count() == 0)
             {
                 throw new NotFoundException(UserExceptionMessageResource.UserNotFound);
+            }
+        }
+
+        public void NotSubscribe(UserSubscriptions? subscriptions)
+        {
+            if(subscriptions is null)
+            {
+                throw new BusinessException(UserExceptionMessageResource.NoSubscribe);
+            }
+        }
+
+        public void AlreadySubscribe(UserSubscriptions? subscriptions)
+        {
+            if(subscriptions is not null)
+            {
+                throw new BusinessException(UserExceptionMessageResource.AlreadySubscribe); 
             }
         }
     }

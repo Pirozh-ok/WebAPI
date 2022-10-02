@@ -23,6 +23,7 @@ namespace Habr.DataAccess
         public DbSet<PostRating> PostsRatings { get; set; }
         public DbSet<AvatarImage> AvatarImages { get; set; }
         public DbSet<PostImage> PostImages { get; set; }
+        public DbSet<UserSubscriptions> UserSubscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,6 +34,7 @@ namespace Habr.DataAccess
             modelBuilder.ApplyConfiguration(new AvatarImageConfiguration(_configuration));
             modelBuilder.ApplyConfiguration(new PostImageConfiguration());
             modelBuilder.ApplyConfiguration(new RatingConfiguration());
+            modelBuilder.ApplyConfiguration(new UserSubscriptionsConfiguration());
         }
     }
 }

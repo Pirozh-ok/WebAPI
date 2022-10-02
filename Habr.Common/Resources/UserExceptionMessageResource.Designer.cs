@@ -70,6 +70,15 @@ namespace Habr.Common.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на The user is already subscribed.
+        /// </summary>
+        public static string AlreadySubscribe {
+            get {
+                return ResourceManager.GetString("AlreadySubscribe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Argument is null!.
         /// </summary>
         public static string ArgumentIsNull {
@@ -120,6 +129,24 @@ namespace Habr.Common.Resources {
         public static string InvalidUserName {
             get {
                 return ResourceManager.GetString("InvalidUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The user is not subscribed.
+        /// </summary>
+        public static string NoSubscribe {
+            get {
+                return ResourceManager.GetString("NoSubscribe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на You can&apos;t subscribe to yourself.
+        /// </summary>
+        public static string SelfSubscription {
+            get {
+                return ResourceManager.GetString("SelfSubscription", resourceCulture);
             }
         }
         

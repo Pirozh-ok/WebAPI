@@ -7,15 +7,18 @@ namespace Habr.BusinessLogic.Services.Interfaces
 {
     public interface IUserService
     {
-        public Task<IdentityDTO> SignInAsync(UserSignInDTO userSignInData);
-        public Task<IdentityDTO> SignUpAsync(CreateUserDTO newUserData);
-        public Task<UserDTO> GetUserByIdAsync(int id);
-        public Task<IEnumerable<UserDTO>> GetUsersAsync();
-        public Task<IEnumerable<UserWithPostsDTO>> GetUsersWithPostsAsync();
-        public Task<IEnumerable<UserWithCommentsDTO>> GetUsersWithCommentsAsync();
-        public Task DeleteAsync(int id);
-        public Task UpdateAsync(int userId, UpdateUserDTO user);
-        public Task UpdateAvatarAsync(int userId, IFormFile newAvatar); 
-        public Task<ImageDTO> GetUserAvatar(int userId);
+        Task<IdentityDTO> SignInAsync(UserSignInDTO userSignInData);
+        Task<IdentityDTO> SignUpAsync(CreateUserDTO newUserData);
+        Task<UserDTO> GetUserByIdAsync(int id);
+        Task<IEnumerable<UserDTO>> GetUsersAsync();
+        Task<IEnumerable<UserWithPostsDTO>> GetUsersWithPostsAsync();
+        Task<IEnumerable<UserWithCommentsDTO>> GetUsersWithCommentsAsync();
+        Task DeleteAsync(int id);
+        Task UpdateAsync(int userId, UpdateUserDTO user);
+        Task UpdateAvatarAsync(int userId, IFormFile newAvatar); 
+        Task<ImageDTO> GetUserAvatar(int userId);
+        Task SubscribeToUser(int fromUserId, int toUserId);
+        Task UnsubscribeFromUser(int fromUserId, int toUserId);
+        Task<IEnumerable<UserSubscriptions>> GetSubscriptions(int userId);
     }
 }

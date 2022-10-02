@@ -154,5 +154,38 @@ namespace Habr.Presentation.Controllers
 
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpPost("subscribe/{userId}"), ApiVersionNeutral]
+        public async Task<IActionResult> SubcscribeToUser(int userId)
+        {
+            var fromUserId = HttpContext.User.Identity.GetAuthorizedUserId();
+            await _userService.SubscribeToUser(fromUserId, userId);
+            return StatusCode(204); 
+        }
+
+        [Authorize]
+        [HttpDelete("unsubscribe/{userId}"), ApiVersionNeutral]
+        public async Task<IActionResult> UnsubcscribeFromUser(int userId)
+        {
+            var fromUserId = HttpContext.User.Identity.GetAuthorizedUserId();
+            await _userService.UnsubscribeFromUser(fromUserId, userId);
+            return StatusCode(204);
+        }
+
+        [Authorize]
+        [HttpGet("my-subscriptions"), ApiVersionNeutral]
+        public async Task<IActionResult> GetMySubscription()
+        {
+            var userId= HttpContext.User.Identity.GetAuthorizedUserId();
+            return Ok(await _userService.GetSubscriptions(userId)); 
+        }
+
+        [HttpGet("{userId}/subscriptions"), ApiVersionNeutral]
+        public async Task<IActionResult> GetUserSubscription(int userId)
+        {
+            return Ok(await _userService.GetSubscriptions(userId));
+        }
+
     }
 }
