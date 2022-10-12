@@ -174,13 +174,13 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
-            if (posts is not null)
-            {
-                foreach (var post in posts)
-                {
-                    post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
-                }
-            }
+            //if (posts is not null)
+            //{
+            //    foreach (var post in posts)
+            //    {
+            //        post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            //    }
+            //}
 
             return pagedPosts; 
         }
@@ -191,7 +191,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             _guard.PostNotPublished(post);
            
             var postDTO = _mapper.Map<PublishedPostDTO>(post);
-            postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            //postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
             return postDTO;
         }
 
@@ -204,13 +204,13 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
-            if (posts is not null)
-            {
-                foreach (var post in posts)
-                {
-                    post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
-                }
-            }
+            //if (posts is not null)
+            //{
+            //    foreach (var post in posts)
+            //    {
+            //        post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            //    }
+            //}
 
             return pagedPosts;
         }
@@ -224,13 +224,13 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
-            if (posts is not null)
-            {
-                foreach (var post in posts)
-                {
-                    post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
-                }
-            }
+            //if (posts is not null)
+            //{
+            //    foreach (var post in posts)
+            //    {
+            //        post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            //    }
+            //}
 
             return pagedPosts;
         }
@@ -241,7 +241,7 @@ namespace Habr.BusinessLogic.Services.Implementations
             _guard.PostNotPublished(post);
 
             var postDTO = _mapper.Map<PublishedPostDTOv2>(post);
-            postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            //postDTO.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
             return postDTO;
         }
 
@@ -254,13 +254,13 @@ namespace Habr.BusinessLogic.Services.Implementations
 
             var pagedPosts = await posts.ToPagedListAsync(postParameters.PageNumber, postParameters.PageSize);
 
-            if (posts is not null)
-            {
-                foreach (var post in posts)
-                {
-                    post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
-                }
-            }
+            //if (posts is not null)
+            //{
+            //    foreach (var post in posts)
+            //    {
+            //        post.Comments = (await GetCommentsByPostAsync(post.Id)).ToList();
+            //    }
+            //}
 
             return pagedPosts;
         }

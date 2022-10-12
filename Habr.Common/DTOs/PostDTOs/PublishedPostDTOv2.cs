@@ -11,7 +11,6 @@ namespace Habr.Common.DTOs.PostDTOs
         public ShortUserDTO Author { get; set; }
         public double Rating { get; set; }
         public DateTime PublicationDate { get; set; }
-        public List<CommentDTO> Comments { get; set; }
         public List<ImagePostDTO> Images { get; set; }
     }
 }

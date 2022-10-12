@@ -131,7 +131,7 @@ namespace Habr.Presentation.Controllers
         {
             var user = await _userService.SignInAsync(
                 new UserSignInDTO 
-                    { 
+                { 
                     Email = email,
                     Password = password
                 });
@@ -185,6 +185,14 @@ namespace Habr.Presentation.Controllers
         public async Task<IActionResult> GetUserSubscription(int userId)
         {
             return Ok(await _userService.GetSubscriptions(userId));
+        }
+
+        [Authorize]
+        [HttpGet("feed"), ApiVersionNeutral]
+        public async Task<IActionResult> GetNews()
+        {
+            var authUserId = HttpContext.User.Identity.GetAuthorizedUserId(); 
+            return Ok(await _userService.GetNews(authUserId));
         }
 
     }

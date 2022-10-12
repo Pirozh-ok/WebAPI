@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Habr.BusinessLogic.Guards.Interfaces;
 using Habr.BusinessLogic.Services.Interfaces;
 using Habr.Common;
+using Habr.Common.DTOs;
 using Habr.Common.DTOs.ImageDTOs;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.Common.Exceptions;
@@ -223,12 +224,48 @@ namespace Habr.BusinessLogic.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<UserSubscriptions>> GetSubscriptions(int userId)
+        public async Task<IEnumerable<UserSubscriptionDTO>> GetSubscriptions(int userId)
         {
-            return await _context.UserSubscriptions
+            var listSubs =  await _context.UserSubscriptions
                 .Where(s => s.UserId == userId)
                 .AsNoTracking()
+                .ToListAsync();
+
+            var listSubsDTO = new List<UserSubscriptionDTO>();
+
+            foreach(var subs in listSubs)
+            {
+                var subUser = await _context.Users
+                    .Include(u => u.AvatarImage)
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync(u => u.Id == subs.SubsUserId);
+
+                if (subUser is null)
+                    continue; 
+
+                var subsDTO = _mapper.Map<User, UserSubscriptionDTO>(subUser);
+                var dto = _mapper.Map(subs, subsDTO); 
+                listSubsDTO.Add(dto);
+            }
+
+            return listSubsDTO;
+        }
+
+        public async Task<IEnumerable<PublishedPostDTO>> GetNews(int userId)
+        {
+            var listSubsId = await  _context.UserSubscriptions
+                .Where(s => s.UserId == userId)
+                .Select(s => s.SubsUserId)
+                .ToListAsync();
+
+            var posts = await _context.Posts
+                .Where(p => listSubsId.Contains(p.UserId))
+                .ProjectTo<PublishedPostDTO>(_mapper.ConfigurationProvider)
+                .OrderByDescending(p => p.PublicationDate)
+                .AsNoTracking()
                 .ToListAsync(); 
+
+            return posts; 
         }
     }
 }

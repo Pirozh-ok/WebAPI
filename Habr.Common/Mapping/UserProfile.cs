@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Habr.Common.DTOs;
 using Habr.Common.DTOs.UserDTOs;
 using Habr.DataAccess.Entities;
 
@@ -40,6 +41,15 @@ namespace Habr.Common.Mapping
             CreateMap<User, ShortUserDTO>()
                .ForMember(u => u.Name, c => c.MapFrom(u => u.Name))
                .ForMember(u => u.Email, c => c.MapFrom(u => u.Email));
+
+            CreateMap<UserSubscriptions, UserSubscriptionDTO>()
+                .ForMember(s => s.UserId, c => c.MapFrom(u => u.SubsUserId))
+                .ForMember(s => s.DataSubcribe, c => c.MapFrom(u => u.DateSubscribe));
+
+            CreateMap<User, UserSubscriptionDTO>()
+                .ForMember(s => s.UserName, c => c.MapFrom(u => u.Name))
+                .ForMember(s => s.UserMail, c => c.MapFrom(u => u.Email))
+                .ForMember(s => s.AvatarPath, c => c.MapFrom(u => u.AvatarImage.PathImage));
         }
     }
 }

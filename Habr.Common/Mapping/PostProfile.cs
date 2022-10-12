@@ -24,7 +24,6 @@ namespace Habr.Common.AutoMappers
                 .ForMember(p => p.Text, c => c.MapFrom(p => p.Text))
                 .ForMember(p => p.AuthorEmail, c => c.MapFrom(p => p.User.Email))
                 .ForMember(p => p.PublicationDate, c => c.MapFrom(p => p.Updated))
-                .ForMember(p => p.Comments, c => c.MapFrom(p => p.Comments))
                 .ForMember(p => p.Rating, c => c.MapFrom(p => p.TotalRating))
                 .ForMember(p => p.Images, c => c.MapFrom(p => p.Images));
 
@@ -33,7 +32,6 @@ namespace Habr.Common.AutoMappers
                 .ForMember(p => p.Text, c => c.MapFrom(p => p.Text))
                 .ForMember(p => p.Author, c => c.MapFrom(p => p.User))
                 .ForMember(p => p.PublicationDate, c => c.MapFrom(p => p.Updated))
-                .ForMember(p => p.Comments, c => c.MapFrom(p => p.Comments))
                 .ForMember(p => p.Rating, c => c.MapFrom(p => p.TotalRating))
                 .ForMember(p => p.Images, c => c.MapFrom(p => p.Images));
 
